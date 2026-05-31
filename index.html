@@ -28,6 +28,171 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--t1);font-famil
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;}
 #app{position:relative;z-index:1;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);}
 
+/* ── TASK SWITCHER ── */
+#switcher-overlay{
+  position:fixed;inset:0;z-index:500;
+  display:flex;align-items:flex-start;justify-content:center;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  pointer-events:none;
+}
+#switcher-overlay.visible{pointer-events:all;}
+#switcher-bg{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(10,10,10,0);
+  backdrop-filter:blur(0px) saturate(1);
+  -webkit-backdrop-filter:blur(0px) saturate(1);
+  transition:background 0.25s ease, backdrop-filter 0.25s ease;
+  -webkit-transition:background 0.25s ease, -webkit-backdrop-filter 0.25s ease;
+  pointer-events:none;
+}
+#switcher-overlay.visible #switcher-bg{
+  background:rgba(10,10,10,0.55);
+  backdrop-filter:blur(36px) saturate(1.8);
+  -webkit-backdrop-filter:blur(36px) saturate(1.8);
+}
+#switcher-grid{
+  position:relative;z-index:501;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:20px;
+  width:100%;max-width:400px;
+  max-height:100vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+#switcher-grid::-webkit-scrollbar{display:none;}
+.sw-card{
+  position:relative;
+  border-radius:18px;
+  overflow:hidden;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(20,20,20,0.7);
+  aspect-ratio:1/1;
+  transform:scale(0.82) translateY(18px);
+  opacity:0;
+  transition:
+    transform 0.42s cubic-bezier(0.34,1.3,0.64,1),
+    opacity 0.32s ease,
+    border-color 0.2s,
+    box-shadow 0.2s;
+  will-change:transform,opacity;
+}
+#switcher-overlay.visible .sw-card{
+  transform:scale(1) translateY(0);
+  opacity:1;
+}
+/* stagger delays — starts at 0 so cards appear WITH the blur */
+#switcher-overlay.visible .sw-card:nth-child(1){transition-delay:0ms;}
+#switcher-overlay.visible .sw-card:nth-child(2){transition-delay:30ms;}
+#switcher-overlay.visible .sw-card:nth-child(3){transition-delay:60ms;}
+#switcher-overlay.visible .sw-card:nth-child(4){transition-delay:90ms;}
+#switcher-overlay.visible .sw-card:nth-child(5){transition-delay:120ms;}
+/* current tab card */
+.sw-card.sw-current{
+  border-color:rgba(255,255,255,0.28);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.1) inset, 0 8px 32px rgba(0,0,0,0.6);
+}
+.sw-card:active{transform:scale(0.95)!important;}
+/* hover only on non-touch */
+@media(hover:hover){
+  .sw-card:hover{
+    border-color:rgba(255,255,255,0.22);
+    box-shadow:0 8px 28px rgba(0,0,0,0.5);
+    transform:scale(1.03) translateY(-2px);
+  }
+}
+/* card inner */
+.sw-card-preview{
+  width:100%;height:calc(100% - 32px);
+  overflow:hidden;position:relative;
+  padding:10px 10px 2px;
+}
+.sw-card-footer{
+  position:absolute;bottom:0;left:0;right:0;
+  height:32px;
+  display:flex;align-items:center;
+  padding:0 10px;
+  gap:7px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  background:rgba(0,0,0,0.3);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.sw-card-icon{font-size:11px;opacity:0.5;}
+.sw-card.sw-current .sw-card-icon{opacity:0.9;}
+.sw-card-name{
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--t3);
+}
+.sw-card.sw-current .sw-card-name{color:var(--t1);}
+
+/* ── mini preview elements ── */
+.sw-mini-bar{height:3px;border-radius:3px;background:rgba(255,255,255,0.15);margin-bottom:6px;}
+.sw-mini-bar.fill{background:rgba(255,255,255,0.45);}
+.sw-mini-bar.w40{width:40%;}
+.sw-mini-bar.w60{width:60%;}
+.sw-mini-bar.w75{width:75%;}
+.sw-mini-bar.w85{width:85%;}
+.sw-mini-bar.w30{width:30%;}
+.sw-mini-ring{
+  width:34px;height:34px;margin:4px auto 8px;
+  border-radius:50%;
+  border:3px solid rgba(255,255,255,0.12);
+  border-top-color:rgba(255,255,255,0.55);
+  border-right-color:rgba(255,255,255,0.4);
+}
+.sw-mini-label{font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:rgba(255,255,255,0.25);text-transform:uppercase;margin-bottom:5px;}
+.sw-mini-val{font-family:var(--mono);font-size:13px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:7px;letter-spacing:-0.02em;}
+.sw-mini-row{display:flex;gap:5px;margin-bottom:6px;align-items:center;}
+.sw-mini-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.25);flex-shrink:0;}
+.sw-mini-line{flex:1;height:2px;border-radius:2px;background:rgba(255,255,255,0.1);}
+.sw-mini-line.done{background:rgba(255,255,255,0.35);}
+.sw-mini-sq{width:7px;height:7px;border-radius:2px;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;}
+.sw-mini-sq.done{background:rgba(255,255,255,0.35);border-color:transparent;}
+.sw-mini-fin-val{font-family:var(--mono);font-size:16px;font-weight:300;color:rgba(255,255,255,0.55);letter-spacing:-0.03em;margin:6px 0 4px;}
+.sw-mini-chart{display:flex;align-items:flex-end;gap:3px;height:24px;margin-top:6px;}
+.sw-mini-chart-bar{flex:1;background:rgba(255,255,255,0.15);border-radius:2px 2px 0 0;min-height:2px;}
+.sw-mini-split{display:flex;gap:6px;margin-top:5px;}
+.sw-mini-split-item{flex:1;padding:5px 6px;border-radius:8px;background:rgba(255,255,255,0.05);}
+.sw-mini-split-lbl{font-family:var(--mono);font-size:6px;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-bottom:2px;}
+.sw-mini-split-val{font-family:var(--mono);font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);}
+
+/* ── expand animation when picking a card ── */
+.sw-card.sw-expanding{
+  position:fixed!important;
+  z-index:600;
+  border-radius:18px;
+  transition:
+    top 0.45s cubic-bezier(0.4,0,0.2,1),
+    left 0.45s cubic-bezier(0.4,0,0.2,1),
+    width 0.45s cubic-bezier(0.4,0,0.2,1),
+    height 0.45s cubic-bezier(0.4,0,0.2,1),
+    border-radius 0.45s cubic-bezier(0.4,0,0.2,1),
+    opacity 0.45s ease;
+}
+
+/* ── long press ripple on #app ── */
+@keyframes swRipple{
+  0%{transform:scale(0);opacity:0.25;}
+  60%{opacity:0.08;}
+  100%{transform:scale(3);opacity:0;}
+}
+.sw-press-ripple{
+  position:fixed;
+  width:120px;height:120px;
+  margin:-60px 0 0 -60px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  pointer-events:none;
+  animation:swRipple 0.55s ease-out forwards;
+  z-index:499;
+}
+
 /* GLASS */
 .glass{background:var(--g1);border:1px solid var(--b1);border-top-color:rgba(255,255,255,0.13);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);position:relative;overflow:hidden;}
 .glass::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
@@ -71,8 +236,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* GREETING */
 .h-greeting{flex:1;min-width:0;}
-.h-greeting-line{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;color:var(--t4);text-transform:uppercase;}
-.h-name{font-size:clamp(17px,4.5vw,22px);font-weight:600;color:var(--t1);letter-spacing:-0.01em;line-height:1.15;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.h-app-name{font-family:var(--mono);font-size:clamp(13px,3vw,16px);font-weight:700;letter-spacing:0.28em;color:rgba(255,255,255,0.75);text-transform:uppercase;line-height:1;}
+.h-app-sub{font-family:var(--mono);font-size:clamp(7px,1.6vw,9px);letter-spacing:0.16em;color:rgba(255,255,255,0.2);text-transform:lowercase;margin-top:3px;}
 
 /* PROGRESS RING — minimalista, sem caixa */
 .prog-card{flex-shrink:0;text-align:center;background:none;border:none;padding:0;}
@@ -434,17 +599,53 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .dash-row-name{font-size:13px;color:var(--t2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .dash-row-meta{font-family:var(--mono);font-size:10px;color:var(--t4);flex-shrink:0;margin-left:10px;}
 .dash-row-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-right:10px;margin-bottom:1px;}
-.dash-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
+.dash-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 16px;margin-top:16px;}
 .dash-chart-wide{grid-column:1/-1;}
-.dash-chart-cell{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 14px 10px;position:relative;}
-.dc-label{font-family:var(--mono);font-size:8px;letter-spacing:0.18em;color:var(--t4);text-transform:uppercase;margin-bottom:8px;}
-.dc-canvas{display:block;width:100%;}
+.dash-chart-cell{background:none;border:none;padding:0;position:relative;}
+.dc-label{font-family:var(--mono);font-size:7px;letter-spacing:0.18em;color:rgba(255,255,255,0.18);text-transform:uppercase;margin-bottom:6px;}
+.dc-canvas{display:block;width:100%;height:auto;}
+/* square cells capped */
+.dash-chart-cell:not(.dash-chart-wide){max-width:100%;}
+.dash-chart-wide .dc-canvas{height:68px!important;}
 .dash-empty{font-family:var(--mono);font-size:9px;color:var(--t4);letter-spacing:0.1em;}
 .dash-fin-row{display:flex;justify-content:space-between;margin-bottom:8px;}
 .dash-fin-lbl{font-size:13px;color:var(--t2);}
 .dash-fin-val{font-family:var(--mono);font-size:13px;}
 .dash-fin-val.pos{color:rgba(100,210,140,0.9);}
 .dash-fin-val.neg{color:rgba(255,100,90,0.85);}
+
+
+/* ── DASH HABIT BARS ── */
+.dash-hab-wrap{margin-top:32px;padding:0;}
+.dash-hab-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+.dash-hab-title{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+.dash-hab-meta{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.18);letter-spacing:0.05em;}
+.dash-hab-meta span{color:rgba(255,255,255,0.5);}
+.dash-hab-list{display:flex;flex-direction:column;gap:14px;}
+.dash-hab-row{position:relative;}
+.dash-hab-info{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.dash-hab-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;}
+.dash-hab-pct{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.05em;}
+.dash-hab-track{position:relative;height:3px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:visible;}
+.dash-hab-fill{height:100%;border-radius:3px;position:relative;transition:width 0.8s cubic-bezier(0.34,1.1,0.64,1);will-change:width;}
+/* fire emoji at the tip */
+.dash-hab-fire{
+  position:absolute;top:50%;right:-1px;
+  transform:translateY(-50%) translateX(50%);
+  font-size:13px;line-height:1;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.3s ease 0.6s;
+  filter:drop-shadow(0 0 4px rgba(255,160,40,0.8));
+}
+.dash-hab-fire.on{opacity:1;animation:fireWiggle 1.8s ease-in-out infinite;}
+@keyframes fireWiggle{
+  0%,100%{transform:translateY(-50%) translateX(50%) rotate(-8deg) scale(1);}
+  25%{transform:translateY(-50%) translateX(50%) rotate(6deg) scale(1.15);}
+  50%{transform:translateY(-50%) translateX(50%) rotate(-4deg) scale(0.92);}
+  75%{transform:translateY(-50%) translateX(50%) rotate(8deg) scale(1.1);}
+}
+.dash-hab-empty{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.15);letter-spacing:0.1em;margin-top:8px;}
 
 /* ── FINANCE minimal — sem glass nos cards ── */
 .fin-hero-card{border-radius:var(--r);padding:clamp(16px,4vw,24px);margin-bottom:10px;background:none;}
@@ -780,15 +981,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- HEADER -->
   <div id="header">
-    <button class="menu-btn" id="menu-btn" onclick="toggleDrawer()">
-      <span></span><span></span><span></span>
-    </button>
+    <div style="width:36px;flex-shrink:0;"></div>
     <div class="h-greeting">
-      <div class="h-greeting-line" id="h-greeting-line">bom dia</div>
-      <div class="h-name" id="h-name">—</div>
+      <div class="h-app-name">AUREA</div>
+      <div class="h-app-sub">seu sistema de evolução</div>
     </div>
     <div style="width:36px;flex-shrink:0;">
-      <!-- ring hidden but elements kept for JS -->
       <svg style="display:none" viewBox="0 0 36 36"><circle class="pc-ring-bg" cx="18" cy="18" r="15.5"/><circle class="pc-ring-fill" id="ring-fill" cx="18" cy="18" r="15.5" stroke-dasharray="97.4" stroke-dashoffset="97.4"/></svg>
       <span id="ring-pct" style="display:none"></span>
       <span id="pc-sub" style="display:none"></span>
@@ -803,20 +1001,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <canvas id="dash-spiral" width="300" height="200"></canvas>
       <div class="dash-greet" id="dash-greet-line">bom dia</div>
       <div class="dash-name" id="dash-name-big">—</div>
-      <div class="dash-charts-grid">
-        <div class="dash-chart-cell" id="dc-habits">
-          <div class="dc-label">hábitos</div>
-          <canvas class="dc-canvas" id="cv-habits" height="72"></canvas>
-        </div>
-        <div class="dash-chart-cell" id="dc-tasks">
-          <div class="dc-label">tarefas</div>
-          <canvas class="dc-canvas" id="cv-tasks" height="72"></canvas>
-        </div>
-        <div class="dash-chart-cell dash-chart-wide" id="dc-finance">
-          <div class="dc-label">saldo</div>
-          <canvas class="dc-canvas" id="cv-finance" height="72"></canvas>
-        </div>
-      </div>
+
+      <!-- hábitos chart -->
+      <div class="dash-hab-wrap" id="dash-hab-wrap"></div>
+
     </div>
 
     <div id="sec-habitos" class="section">
@@ -920,62 +1108,33 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
 </div>
 
+<!-- TASK SWITCHER -->
+<div id="switcher-overlay">
+  <div id="switcher-bg"></div>
+  <div id="switcher-grid"></div>
+</div>
+
 <!-- FAB FLUTUANTE -->
 <div id="fab-wrap" class="hidden">
   <button id="fab-btn" onclick="onFabClick()">+</button>
 </div>
 
-<!-- DRAWER OVERLAY -->
-<div id="drawer-overlay" onclick="closeDrawer()"></div>
-
-<!-- DRAWER -->
-<div id="drawer">
-  <div class="drawer-top">
-    <div class="drawer-app-name">AUREA</div>
-  </div>
-  <div class="drawer-divider"></div>
-  <div class="drawer-section-lbl">Seções</div>
-  <button class="drawer-item act" id="di-dashboard" onclick="setTab('dashboard')">
-    <span class="d-icon">◎</span><span class="d-label">Dashboard</span>
-  </button>
-  <button class="drawer-item" id="di-habitos" onclick="setTab('habitos')">
-    <span class="d-icon">○</span><span class="d-label">Hábitos</span>
-  </button>
-  <button class="drawer-item" id="di-tarefas" onclick="setTab('tarefas')">
-    <span class="d-icon">□</span><span class="d-label">Tarefas</span>
-  </button>
-  <button class="drawer-item" id="di-financas" onclick="setTab('financas')">
-    <span class="d-icon">◇</span><span class="d-label">Finanças</span>
-  </button>
-  <button class="drawer-item" id="di-stats" onclick="setTab('stats')">
-    <span class="d-icon">∿</span><span class="d-label">Estatísticas</span>
-  </button>
-  <div class="drawer-spacer"></div>
-  <div class="drawer-bottom">
-    <div class="drawer-xp-lbl" id="d-xp-lbl">Nível 1</div>
-    <div class="drawer-xp-track"><div class="drawer-xp-fill" id="d-xp-fill" style="width:0%"></div></div>
-    <div class="drawer-xp-meta">
-      <span class="drawer-xp-txt" id="d-xp-txt">0 / 200 XP</span>
-      <span class="drawer-xp-txt" id="d-xp-total">0 XP</span>
-    </div>
-    <div class="drawer-stats-row">
-      <div class="drawer-stat">
-        <div class="drawer-stat-num" id="d-streak">0</div>
-        <div class="drawer-stat-lbl">Streak</div>
-      </div>
-    </div>
-  </div>
-  <div class="drawer-profile">
-    <div class="drawer-profile-row">
-      <div class="drawer-avatar" id="d-avatar">👤</div>
-      <div class="drawer-profile-info">
-        <div class="drawer-profile-name" id="d-profile-name">Perfil</div>
-        <div class="drawer-profile-sub" id="d-profile-sub">toque para editar</div>
-      </div>
-    </div>
-    <input class="drawer-name-input" id="d-name-input" placeholder="seu nome…" maxlength="32" style="display:none" oninput="updateUserName(this.value)" onblur="hidNameInput()">
-    <button id="btn-logout" style="width:100%;background:none;border:none;border-top:1px solid var(--sep);padding:12px 0 0;font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;cursor:pointer;text-align:left;transition:color 0.15s;" onmouseover="this.style.color='rgba(255,100,90,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">sair da conta</button>
-  </div>
+<!-- hidden elements kept for JS refs -->
+<div style="display:none">
+  <div id="d-avatar"></div>
+  <div id="d-profile-name"></div>
+  <div id="d-profile-sub"></div>
+  <input id="d-name-input">
+  <div id="d-streak"></div>
+  <div id="d-xp-lbl"></div>
+  <div id="d-xp-fill"></div>
+  <div id="d-xp-txt"></div>
+  <div id="d-xp-total"></div>
+  <div id="di-dashboard"></div>
+  <div id="di-habitos"></div>
+  <div id="di-tarefas"></div>
+  <div id="di-financas"></div>
+  <div id="di-stats"></div>
 </div>
 
 <!-- MODAL -->
@@ -1052,9 +1211,7 @@ function load(){
 function updateGreeting(){
   const h=new Date().getHours();
   const greet=h<12?'bom dia':h<18?'boa tarde':'boa noite';
-  document.getElementById('h-greeting-line').textContent=greet;
   const name=S.userName||'—';
-  document.getElementById('h-name').textContent=name;
   // drawer profile
   document.getElementById('d-profile-name').textContent=S.userName||'Perfil';
   document.getElementById('d-avatar').textContent=S.userName?S.userName[0].toUpperCase():'👤';
@@ -1078,29 +1235,11 @@ function hidNameInput(){
   if(inp){inp.style.display='none';}
 }
 // click no avatar/nome abre input
-document.addEventListener('click',e=>{
-  if(e.target.closest('.drawer-profile-row')){
-    const inp=document.getElementById('d-name-input');
-    inp.style.display='block';
-    inp.value=S.userName||'';
-    inp.focus();
-  }
-});
+/* drawer profile removed */
 
-/* DRAWER */
-function toggleDrawer(){
-  const d=document.getElementById('drawer');
-  const o=document.getElementById('drawer-overlay');
-  const b=document.getElementById('menu-btn');
-  const isOpen=d.classList.contains('open');
-  if(isOpen){closeDrawer();}
-  else{d.classList.add('open');o.classList.add('open');b.classList.add('open');}
-}
-function closeDrawer(){
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawer-overlay').classList.remove('open');
-  document.getElementById('menu-btn').classList.remove('open');
-}
+/* DRAWER — removed, kept as no-ops */
+function toggleDrawer(){}
+function closeDrawer(){}
 
 /* TABS */
 const TAB_ORDER=['dashboard','habitos','tarefas','financas','stats'];
@@ -1109,7 +1248,6 @@ function setTab(name,dir){
   curTab=name;
   closeDrawer();
   document.querySelectorAll('.section').forEach(s=>{s.classList.remove('active','anim-up','anim-left','anim-right');});
-  document.querySelectorAll('.drawer-item').forEach(b=>b.classList.remove('act'));
   const sec=document.getElementById('sec-'+name);
   sec.classList.add('active');
   // pick animation direction
@@ -1122,7 +1260,7 @@ function setTab(name,dir){
   }
   sec.classList.add(animClass);
   setTimeout(()=>sec.classList.remove(animClass),350);
-  document.getElementById('di-'+name).classList.add('act');
+  const _di=document.getElementById('di-'+name);if(_di)_di.classList.add('act');
   updateRing();
   if(name==='financas')renderFinance(true);
   else if(name==='habitos'){renderHabits();renderHabitFilters();}
@@ -1793,116 +1931,231 @@ function renderDashboard(){
   const todayDow=new Date().getDay();
 
   // ── chart helpers ──
-  function drawRadialBars(cv,items,doneKey){
+
+  // Habits: radial rings, one per habit, drawn with smooth arcs
+  function drawRadialBars(cv,items){
     if(!cv)return;
-    const W=cv.offsetWidth||cv.parentElement?.clientWidth||120;
-    cv.width=W;const H=cv.height;
-    const ctx=cv.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    const rawW=cv.parentElement?.clientWidth||120;
+    const W=Math.min(rawW,140);
+    const H=W; // square
+    cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+    const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
     ctx.clearRect(0,0,W,H);
     if(!items.length){
-      ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.15)';ctx.textAlign='center';
-      ctx.fillText('—',W/2,H/2+3);return;
+      ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.15)';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('—',W/2,H/2);return;
     }
-    const cx=W/2,cy=H/2+4,maxR=Math.min(cx,cy)-6;
-    const n=Math.min(items.length,8);
-    items.slice(0,n).forEach((item,i)=>{
-      const r=maxR*(0.4+0.6*(i+1)/n);
-      const done=doneKey?item[doneKey]:item.done;
+    const n=Math.min(items.length,7);
+    const cx=W/2,cy=H/2;
+    const maxR=Math.min(cx,cy)-5;
+    const minR=maxR*0.28;
+    const gap=1.5; // gap between rings in px
+    const ringW=Math.max(2,(maxR-minR)/n - gap);
+    for(let i=0;i<n;i++){
+      const item=items[i];
+      const done=item.done;
       const col=item.color||'rgba(255,255,255,0.5)';
+      const r=minR + i*(maxR-minR)/(n-1||1);
+      const start=-Math.PI/2;
       // track
       ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-      ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=2.5;ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=ringW;ctx.lineCap='butt';ctx.stroke();
       if(done){
-        // filled arc
-        ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,Math.PI*1.5);
-        ctx.strokeStyle=col;ctx.globalAlpha=0.7;ctx.lineWidth=2.5;ctx.stroke();ctx.globalAlpha=1;
+        ctx.beginPath();ctx.arc(cx,cy,r,start,start+Math.PI*2*0.999);
+        ctx.strokeStyle=col;ctx.globalAlpha=0.65;ctx.lineWidth=ringW;ctx.lineCap='round';ctx.stroke();
+        ctx.globalAlpha=1;
       }
-    });
-    // center dot
-    ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fill();
+    }
+    // subtle center
+    ctx.beginPath();ctx.arc(cx,cy,2.5,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.12)';ctx.fill();
+    // stat label below chart
+    const done=items.filter(x=>x.done).length;
+    ctx.font=`700 ${Math.round(W*0.11)}px monospace`;
+    ctx.fillStyle='rgba(255,255,255,0.35)';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(`${done}/${n}`,cx,H-2);
   }
 
-  function drawTaskBubbles(cv,tasks){
+  // Tasks: minimal dot-grid showing each task as a dot
+  function drawTaskDots(cv,tasks){
     if(!cv)return;
-    const W=cv.offsetWidth||cv.parentElement?.clientWidth||120;
-    cv.width=W;const H=cv.height;
-    const ctx=cv.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    const rawW=cv.parentElement?.clientWidth||120;
+    const W=Math.min(rawW,140);
+    const H=W;
+    cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+    const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
     ctx.clearRect(0,0,W,H);
     if(!tasks.length){
-      ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.15)';ctx.textAlign='center';
-      ctx.fillText('—',W/2,H/2+3);return;
+      ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.15)';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('—',W/2,H/2);return;
     }
-    const total=tasks.length,done=tasks.filter(t=>t.done).length;
-    // background arc ring
-    const cx=W/2,cy=H/2+4,r=Math.min(cx,cy)-8;
-    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=8;ctx.stroke();
-    // filled portion
-    const frac=total?done/total:0;
-    if(frac>0){
-      ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+frac*Math.PI*2);
-      ctx.strokeStyle='rgba(255,255,255,0.45)';ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
-    }
-    // number in center
-    ctx.font=`bold ${Math.round(H*0.3)}px monospace`;ctx.fillStyle='rgba(255,255,255,0.75)';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(`${done}/${total}`,cx,cy);
+    const today=new Date().toDateString();
+    const items=tasks.slice(0,36);
+    const cols=Math.ceil(Math.sqrt(items.length*1.1));
+    const rows=Math.ceil(items.length/cols);
+    const padX=W*0.12, padY=H*0.12;
+    const stepX=(W-padX*2)/(cols-1||1);
+    const stepY=(H-padY*2-H*0.18)/(rows-1||1);
+    const r=Math.min(stepX,stepY)*0.22;
+    items.forEach((t,i)=>{
+      const col=i%cols, row=Math.floor(i/cols);
+      const x=padX+col*stepX;
+      const y=padY+row*stepY;
+      const done=t.done&&t.done[today]||t.doneToday||false;
+      ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      if(done){
+        ctx.fillStyle=t.color||'rgba(255,255,255,0.6)';
+        ctx.globalAlpha=0.65;ctx.fill();ctx.globalAlpha=1;
+      } else {
+        ctx.fillStyle='rgba(255,255,255,0)';
+        ctx.strokeStyle='rgba(255,255,255,0.22)';
+        ctx.lineWidth=1.2;ctx.stroke();
+      }
+    });
+    const done=items.filter(t=>{const d=new Date().toDateString();return t.done&&t.done[d]||t.doneToday;}).length;
+    ctx.font=`700 ${Math.round(W*0.11)}px monospace`;
+    ctx.fillStyle='rgba(255,255,255,0.35)';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(`${done}/${items.length}`,W/2,H-2);
   }
 
+  // Finance: smooth bezier line with gradient fill, no frame
   function drawFinanceLine(cv,transactions){
     if(!cv)return;
-    const W=cv.offsetWidth||cv.parentElement?.clientWidth||260;
-    cv.width=W;const H=cv.height;
-    const ctx=cv.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    const W=cv.parentElement?.clientWidth||260;
+    const H=68;
+    cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
+    const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
     ctx.clearRect(0,0,W,H);
-    // build running balance over last 8 transactions (or all)
     const sorted=[...transactions].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
-    const last=sorted.slice(-12);
+    const last=sorted.slice(-14);
     if(!last.length){
-      ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.15)';ctx.textAlign='center';
-      ctx.fillText('sem movimentações',W/2,H/2+3);return;
+      ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.12)';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('sem movimentações',W/2,H/2);return;
     }
     let running=0;
     const pts=last.map(t=>{running+=t.type==='in'?t.amount:-t.amount;return running;});
-    const minV=Math.min(...pts),maxV=Math.max(...pts);
-    const pad={l:10,r:10,t:8,b:8};
+    const pad={l:4,r:4,t:10,b:18};
+    const minV=Math.min(0,...pts),maxV=Math.max(0,...pts);
     const range=maxV-minV||1;
     const toY=v=>pad.t+(1-(v-minV)/range)*(H-pad.t-pad.b);
     const toX=i=>pad.l+i*(W-pad.l-pad.r)/(pts.length-1||1);
-    // zero line
+    // zero baseline dashed
     const zy=toY(0);
-    ctx.beginPath();ctx.moveTo(pad.l,zy);ctx.lineTo(W-pad.r,zy);
-    ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.setLineDash([3,5]);ctx.stroke();ctx.setLineDash([]);
-    // fill under curve
-    ctx.beginPath();ctx.moveTo(toX(0),toY(pts[0]));
-    pts.forEach((_,i)=>{if(i>0)ctx.lineTo(toX(i),toY(pts[i]));});
-    ctx.lineTo(toX(pts.length-1),H-pad.b);ctx.lineTo(toX(0),H-pad.b);ctx.closePath();
+    ctx.save();ctx.setLineDash([2,6]);
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,zy);ctx.lineTo(W-pad.r,zy);ctx.stroke();
+    ctx.restore();
+    // build smooth path via bezier
+    function smoothPath(){
+      ctx.beginPath();ctx.moveTo(toX(0),toY(pts[0]));
+      for(let i=1;i<pts.length;i++){
+        const x0=toX(i-1),y0=toY(pts[i-1]);
+        const x1=toX(i),y1=toY(pts[i]);
+        const cpx=(x0+x1)/2;
+        ctx.bezierCurveTo(cpx,y0,cpx,y1,x1,y1);
+      }
+    }
+    // fill
+    smoothPath();
+    ctx.lineTo(toX(pts.length-1),H-pad.b);
+    ctx.lineTo(toX(0),H-pad.b);ctx.closePath();
+    const lastVal=pts[pts.length-1];
+    const isPos=lastVal>=0;
     const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);
-    grad.addColorStop(0,'rgba(255,255,255,0.12)');grad.addColorStop(1,'rgba(255,255,255,0)');
+    if(isPos){grad.addColorStop(0,'rgba(130,220,160,0.18)');grad.addColorStop(1,'rgba(130,220,160,0)');}
+    else{grad.addColorStop(0,'rgba(255,100,90,0.15)');grad.addColorStop(1,'rgba(255,100,90,0)');}
     ctx.fillStyle=grad;ctx.fill();
     // line
-    ctx.beginPath();ctx.moveTo(toX(0),toY(pts[0]));
-    pts.forEach((_,i)=>{if(i>0)ctx.lineTo(toX(i),toY(pts[i]));});
-    const lastVal=pts[pts.length-1];
-    ctx.strokeStyle=lastVal>=0?'rgba(150,255,180,0.7)':'rgba(255,110,100,0.7)';
+    smoothPath();
+    ctx.strokeStyle=isPos?'rgba(140,230,170,0.6)':'rgba(255,110,100,0.6)';
     ctx.lineWidth=1.5;ctx.lineJoin='round';ctx.stroke();
-    // dots
-    pts.forEach((v,i)=>{
-      ctx.beginPath();ctx.arc(toX(i),toY(v),2.2,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,255,255,0.55)';ctx.fill();
-    });
+    // end dot
+    const lx=toX(pts.length-1),ly=toY(lastVal);
+    ctx.beginPath();ctx.arc(lx,ly,3,0,Math.PI*2);
+    ctx.fillStyle=isPos?'rgba(160,255,190,0.8)':'rgba(255,130,120,0.8)';ctx.fill();
+    // value label
+    const fmt=v=>v>=1000?'R$'+(v/1000).toFixed(1)+'k':v<=-1000?'-R$'+(Math.abs(v)/1000).toFixed(1)+'k':'R$'+Math.round(v);
+    ctx.font=`600 ${Math.round(W*0.042)}px monospace`;
+    ctx.fillStyle='rgba(255,255,255,0.3)';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(fmt(lastVal),W/2,H-1);
   }
 
-  // ── hábitos chart ──
-  const todayH=S.habits.filter(h=>!h.days||h.days.includes(todayDow));
-  const habItems=todayH.map(h=>({...h,_done:!!(h.done&&h.done[today]),color:h.color}));
-  const cvH=document.getElementById('cv-habits');
-  if(cvH) requestAnimationFrame(()=>drawRadialBars(cvH,habItems.map(h=>({...h,done:h._done})),null));
+  // ── hábitos bar chart ──
+  (function renderHabitBars(){
+    const wrap=document.getElementById('dash-hab-wrap');
+    if(!wrap)return;
+    const todayH=S.habits.filter(h=>!h.days||h.days.includes(todayDow));
+    const doneCount=todayH.filter(h=>!!(h.done&&h.done[today])).length;
+    const total=todayH.length;
+
+    if(!total){
+      wrap.innerHTML=`<div class="dash-hab-wrap"><div class="dash-hab-header"><span class="dash-hab-title">hábitos</span></div><div class="dash-hab-empty">nenhum hábito para hoje</div></div>`;
+      return;
+    }
+
+    // streak calc
+    let streak=0;
+    const d=new Date();
+    for(let i=0;i<60;i++){
+      const key=new Date(d.getTime()-i*86400000).toDateString();
+      const dayHabits=S.habits.filter(h=>!h.days||h.days.includes(new Date(d.getTime()-i*86400000).getDay()));
+      if(!dayHabits.length)continue;
+      const allDone=dayHabits.every(h=>h.done&&h.done[key]);
+      if(allDone)streak++;else if(i>0)break;
+    }
+
+    const pct=total?Math.round(doneCount/total*100):0;
+
+    let html=`<div class="dash-hab-header">
+      <span class="dash-hab-title">hábitos</span>
+      <span class="dash-hab-meta"><span>${doneCount}/${total}</span> hoje${streak>1?' · 🔥'+streak+'d':''}</span>
+    </div><div class="dash-hab-list">`;
+
+    todayH.forEach(h=>{
+      const done=!!(h.done&&h.done[today]);
+      const col=h.color||'rgba(255,255,255,0.5)';
+      // weekly completion rate
+      let weekDone=0,weekTotal=0;
+      for(let i=0;i<7;i++){
+        const k=new Date(Date.now()-i*86400000).toDateString();
+        const dow=new Date(Date.now()-i*86400000).getDay();
+        if(!h.days||h.days.includes(dow)){weekTotal++;if(h.done&&h.done[k])weekDone++;}
+      }
+      const weekPct=weekTotal?Math.round(weekDone/weekTotal*100):0;
+      const fireId='fire-'+h.id;
+      html+=`<div class="dash-hab-row">
+        <div class="dash-hab-info">
+          <span class="dash-hab-name" style="${done?'color:rgba(255,255,255,0.85)':''}">${h.name||'—'}</span>
+          <span class="dash-hab-pct">${weekPct}% semana</span>
+        </div>
+        <div class="dash-hab-track">
+          <div class="dash-hab-fill" id="hf-${h.id}" style="width:0%;background:${col};opacity:${done?0.75:0.2}"></div>
+          <span class="dash-hab-fire${done?' on':''}" id="${fireId}">🔥</span>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+    wrap.innerHTML=html;
+
+    // animate bars after paint
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      todayH.forEach(h=>{
+        const done=!!(h.done&&h.done[today]);
+        const weeklyEl=document.getElementById('hf-'+h.id);
+        if(weeklyEl) weeklyEl.style.width=(done?100:0)+'%';
+      });
+    }));
+  })();
 
   // ── tarefas chart ──
   const cvT=document.getElementById('cv-tasks');
-  if(cvT) requestAnimationFrame(()=>drawTaskBubbles(cvT,S.tasks));
+  if(cvT) requestAnimationFrame(()=>drawTaskDots(cvT,S.tasks));
 
   // ── finanças chart ──
   const cvF=document.getElementById('cv-finance');
@@ -2404,6 +2657,193 @@ function bootApp(){
   },100); // delay mobile safe
 }
 
+
+/* ── TASK SWITCHER ── */
+const TABS_META=[
+  {id:'dashboard', icon:'◎', name:'Dashboard'},
+  {id:'habitos',   icon:'○', name:'Hábitos'},
+  {id:'tarefas',   icon:'□', name:'Tarefas'},
+  {id:'financas',  icon:'◇', name:'Finanças'},
+  {id:'stats',     icon:'∿', name:'Stats'},
+];
+
+function buildSwitcherPreview(id){
+  const d=document.createElement('div');
+  d.className='sw-card-preview';
+  if(id==='dashboard'){
+    d.innerHTML=`
+      <div class="sw-mini-label">hoje</div>
+      <div class="sw-mini-ring"></div>
+      <div class="sw-mini-bar w85 fill"></div>
+      <div style="height:4px"></div>
+      <div class="sw-mini-bar w60"></div>
+      <div style="height:3px"></div>
+      <div class="sw-mini-bar w40"></div>
+      <div style="height:6px"></div>
+      <div class="sw-mini-chart">
+        ${[55,72,40,88,60,75,50].map(h=>`<div class="sw-mini-chart-bar" style="height:${h}%"></div>`).join('')}
+      </div>`;
+  } else if(id==='habitos'){
+    const habits=S.habits.slice(0,5);
+    const rows=habits.length?habits.map(h=>{
+      const done=h.doneToday;
+      return `<div class="sw-mini-row">
+        <div class="sw-mini-dot" style="${done?'background:rgba(255,255,255,0.6)':''}"></div>
+        <div class="sw-mini-line ${done?'done':''}"></div>
+      </div>`;
+    }).join(''):Array(4).fill(`<div class="sw-mini-row"><div class="sw-mini-dot"></div><div class="sw-mini-line"></div></div>`).join('');
+    const total=habits.length||4;
+    const done=habits.filter(h=>h.doneToday).length;
+    d.innerHTML=`
+      <div class="sw-mini-label">hábitos</div>
+      <div class="sw-mini-val">${done}/${total}</div>
+      ${rows}`;
+  } else if(id==='tarefas'){
+    const tasks=S.tasks.filter(t=>t.repeat==='once'||t.doneToday).slice(0,5);
+    const rows=tasks.length?tasks.map(t=>`<div class="sw-mini-row">
+      <div class="sw-mini-sq ${t.doneToday?'done':''}"></div>
+      <div class="sw-mini-line ${t.doneToday?'done':''}"></div>
+    </div>`).join(''):Array(4).fill(`<div class="sw-mini-row"><div class="sw-mini-sq"></div><div class="sw-mini-line"></div></div>`).join('');
+    const pending=S.tasks.filter(t=>!t.doneToday).length;
+    d.innerHTML=`
+      <div class="sw-mini-label">tarefas</div>
+      <div class="sw-mini-val">${pending} pend.</div>
+      ${rows}`;
+  } else if(id==='financas'){
+    const ins=S.transactions.filter(t=>t.type==='in').reduce((a,t)=>a+t.amount,0);
+    const outs=S.transactions.filter(t=>t.type==='out').reduce((a,t)=>a+t.amount,0);
+    const saldo=ins-outs;
+    const fmt=v=>{if(v>=1000)return'R$'+(v/1000).toFixed(1)+'k';return'R$'+Math.round(v);};
+    d.innerHTML=`
+      <div class="sw-mini-label">saldo</div>
+      <div class="sw-mini-fin-val">${fmt(saldo)}</div>
+      <div class="sw-mini-split">
+        <div class="sw-mini-split-item">
+          <div class="sw-mini-split-lbl">↑ receita</div>
+          <div class="sw-mini-split-val">${fmt(ins)}</div>
+        </div>
+        <div class="sw-mini-split-item">
+          <div class="sw-mini-split-lbl">↓ saída</div>
+          <div class="sw-mini-split-val">${fmt(outs)}</div>
+        </div>
+      </div>
+      <div style="height:5px"></div>
+      <div class="sw-mini-bar w75 fill"></div>
+      <div style="height:4px"></div>
+      <div class="sw-mini-bar w40"></div>`;
+  } else if(id==='stats'){
+    const ht=S.habits.length?Math.round(S.habits.filter(h=>h.doneToday).length/S.habits.length*100):0;
+    d.innerHTML=`
+      <div class="sw-mini-label">stats</div>
+      <div class="sw-mini-val">${ht}%</div>
+      <div class="sw-mini-chart">
+        ${(S.history.slice(-7).length?S.history.slice(-7):Array(7).fill({habitPct:0}))
+          .map(d=>d.habitPct||0)
+          .map(h=>`<div class="sw-mini-chart-bar" style="height:${Math.max(8,h)}%"></div>`).join('')}
+      </div>
+      <div style="height:5px"></div>
+      <div class="sw-mini-bar w60 fill"></div>
+      <div style="height:4px"></div>
+      <div class="sw-mini-bar w30"></div>`;
+  }
+  return d;
+}
+
+function openSwitcher(){
+  const overlay=document.getElementById('switcher-overlay');
+  const grid=document.getElementById('switcher-grid');
+  grid.innerHTML='';
+  TABS_META.forEach(tab=>{
+    const card=document.createElement('div');
+    card.className='sw-card'+(tab.id===curTab?' sw-current':'');
+    card.dataset.tab=tab.id;
+    card.appendChild(buildSwitcherPreview(tab.id));
+    const footer=document.createElement('div');
+    footer.className='sw-card-footer';
+    footer.innerHTML=`<span class="sw-card-icon">${tab.icon}</span><span class="sw-card-name">${tab.name}</span>`;
+    card.appendChild(footer);
+    card.addEventListener('click',()=>pickFromSwitcher(card,tab.id));
+    grid.appendChild(card);
+  });
+  overlay.classList.add('visible');
+}
+
+function closeSwitcher(){
+  const overlay=document.getElementById('switcher-overlay');
+  overlay.classList.remove('visible');
+}
+
+function pickFromSwitcher(card,tabId){
+  closeSwitcher();
+  if(tabId!==curTab) setTab(tabId);
+}
+
+/* ── LONG PRESS DETECTION ── */
+(function(){
+  let pressTimer=null,pressX=0,pressY=0,didMove=false;
+  const HOLD_MS=480;
+
+  function spawnRipple(x,y){
+    const el=document.createElement('div');
+    el.className='sw-press-ripple';
+    el.style.left=x+'px';
+    el.style.top=y+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),600);
+  }
+
+  function startPress(x,y){
+    didMove=false;
+    pressX=x;pressY=y;
+    pressTimer=setTimeout(()=>{
+      if(!didMove){
+        spawnRipple(pressX,pressY);
+        setTimeout(openSwitcher,80);
+      }
+    },HOLD_MS);
+  }
+
+  function cancelPress(){
+    clearTimeout(pressTimer);
+    pressTimer=null;
+  }
+
+  // touch
+  document.addEventListener('touchstart',e=>{
+    // ignore if on interactive elements
+    if(e.target.closest('button,input,textarea,select,.drawer-item,.modal,.fab-btn,#modal-overlay'))return;
+    if(e.touches.length!==1)return;
+    startPress(e.touches[0].clientX,e.touches[0].clientY);
+  },{passive:true});
+
+  document.addEventListener('touchmove',e=>{
+    if(!pressTimer)return;
+    const dx=e.touches[0].clientX-pressX;
+    const dy=e.touches[0].clientY-pressY;
+    if(Math.sqrt(dx*dx+dy*dy)>10){didMove=true;cancelPress();}
+  },{passive:true});
+
+  document.addEventListener('touchend',cancelPress,{passive:true});
+  document.addEventListener('touchcancel',cancelPress,{passive:true});
+
+  // mouse (desktop)
+  document.addEventListener('mousedown',e=>{
+    if(e.button!==0)return;
+    if(e.target.closest('button,input,textarea,select,.drawer-item,.modal,#modal-overlay'))return;
+    startPress(e.clientX,e.clientY);
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!pressTimer)return;
+    const dx=e.clientX-pressX,dy=e.clientY-pressY;
+    if(dx*dx+dy*dy>100){didMove=true;cancelPress();}
+  });
+  document.addEventListener('mouseup',cancelPress);
+  document.addEventListener('mouseleave',cancelPress);
+
+  // ESC fecha o switcher
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSwitcher();});
+})();
+
 /* ── EXPOSE GLOBALS (required for type=module) ── */
 Object.assign(window,{
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
@@ -2412,6 +2852,7 @@ Object.assign(window,{
   selectPill,setPeriod,updateAvail,
   updateUserName,hidNameInput,
   renderHabitFilters,renderTaskFilters,
+  openSwitcher,closeSwitcher,
 });
 </script>
 </body>
