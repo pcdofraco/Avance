@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0d0d0d">
 <title>AVANCE</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -40,6 +40,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   pointer-events:none;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
 }
 #switcher-overlay.visible{pointer-events:all;}
 #switcher-bg{
@@ -77,6 +78,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   border:1px solid rgba(255,255,255,0.08);
   background:rgba(20,20,20,0.7);
   aspect-ratio:1/1;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
   transform:scale(0.82) translateY(18px);
   opacity:0;
   transition:
@@ -1237,7 +1239,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 <!-- TASK SWITCHER -->
 <div id="switcher-overlay">
-  <div id="switcher-bg"></div>
+  <div id="switcher-bg" onclick="closeSwitcher()"></div>
   <div id="switcher-grid"></div>
 </div>
 
@@ -1331,7 +1333,16 @@ function load(){
   if(!Array.isArray(S.history))S.history=[];
   if(!S.userName)S.userName='';
   const today=new Date().toDateString();
-  if(S.lastDate!==today){S.lastDate=today;save();}
+  if(S.lastDate!==today){
+    // new day — reset recurring tasks
+    S.tasks.forEach(t=>{
+      if(t.repeat&&t.repeat!=='once') t.done=false;
+    });
+    // reset doneToday on habits (just in case it's used anywhere)
+    S.habits.forEach(h=>{h.doneToday=false;if(h.done)delete h.done[new Date(Date.now()-86400000).toDateString()];});
+    S.lastDate=today;
+    save();
+  }
 }
 
 /* GREETING */
@@ -1570,7 +1581,7 @@ function toggleHabit(id,row){
     chk.classList.remove('done');nm.classList.remove('done');
     chk.style.background='';chk.style.borderColor=dot;
   }else{
-    h.done[today]=1;h.streak=(h.streak||0)+1;
+    h.done[today]=1;h.streak=(h.streak||0)+1;h.doneToday=true;
     chk.classList.add('done');nm.classList.add('done');
     chk.style.background=dot;chk.style.borderColor=dot;
     addXP(XP_H,chk);showToast('+'+XP_H+' XP');
@@ -3077,6 +3088,10 @@ function openSwitcher(){
     grid.appendChild(card);
   });
   overlay.classList.add('visible');
+  // one-time click handler — close if clicking outside any card
+  overlay.onclick = e => {
+    if(!e.target.closest('.sw-card')) closeSwitcher();
+  };
 }
 
 function closeSwitcher(){
