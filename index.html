@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0d0d">
-<title>AUREA</title>
+<title>AVANCE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -192,6 +192,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   animation:swRipple 0.55s ease-out forwards;
   z-index:499;
 }
+
+
+/* ── INACTIVE ITEMS (not scheduled today) ── */
+.item-inactive{opacity:0.28;pointer-events:none;}
+.item-inactive .edit-btn{pointer-events:all;}
 
 /* GLASS */
 .glass{background:var(--g1);border:1px solid var(--b1);border-top-color:rgba(255,255,255,0.13);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);position:relative;overflow:hidden;}
@@ -626,7 +631,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 #btn-profile:active{color:rgba(255,255,255,0.7);}
 #btn-profile svg{width:18px;height:18px;}
-/* hide AUREA header on non-dashboard */
+/* hide AVANCE header on non-dashboard */
 #h-greeting{transition:opacity 0.25s,transform 0.25s;}
 #h-greeting.hidden-header{opacity:0;pointer-events:none;transform:translateY(-4px);}
 
@@ -1031,7 +1036,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-inner">
-    <div class="login-logo">aurea</div>
+    <div class="login-logo">avance</div>
     <div class="login-title">Bem-vindo</div>
     <div class="login-sub">seu assistente pessoal<br>inteligente</div>
 
@@ -1060,7 +1065,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div id="intro-inner">
     <div id="intro-greeting"></div>
     <div id="intro-name"></div>
-    <div id="intro-logo">aurea</div>
+    <div id="intro-logo">avance</div>
   </div>
 </div>
 
@@ -1074,7 +1079,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </svg>
     </button>
     <div class="h-greeting" id="h-greeting">
-      <div class="h-app-name">AUREA</div>
+      <div class="h-app-name">AVANCE</div>
       <div class="h-app-sub">seu sistema de evolução</div>
     </div>
     <div style="width:36px;flex-shrink:0;">
@@ -1315,9 +1320,9 @@ let S={habits:[],tasks:[],transactions:[],investments:[],xp:0,streak:0,available
 let mDays=[0,1,2,3,4,5,6],mType='',mEditId=null,mColor=TAG_COLORS[0],mRepeat='daily',curTab='dashboard',curPd='week';
 let habitFilter='all',taskFilter='all';
 
-function saveLocal(){try{localStorage.setItem('aurea_v5',JSON.stringify(S));}catch(e){}}
+function saveLocal(){try{localStorage.setItem('avance_v1',JSON.stringify(S));}catch(e){}}
 function load(){
-  try{const d=localStorage.getItem('aurea_v5');if(d)S=JSON.parse(d);}catch(e){}
+  try{const d=localStorage.getItem('avance_v1')||localStorage.getItem('aurea_v5');if(d)S=JSON.parse(d);}catch(e){}
   if(!Array.isArray(S.history))S.history=[];
   if(!S.userName)S.userName='';
   const today=new Date().toDateString();
@@ -1526,16 +1531,17 @@ function renderHabits(){
   if(!list.length){el.innerHTML='<div class="empty">'+(S.habits.length?'Nenhum hábito com essa tag':'Nenhum hábito ainda')+'</div>';return;}
   const today=new Date().toDateString();
   el.innerHTML='';
+  const todayDow=new Date().getDay();
   list.forEach(h=>{
     const done=h.done&&h.done[today];
+    const activeToday=!h.days||h.days.includes(todayDow);
     const repeatLabel=REPEAT_TYPES.find(r=>r.id===h.repeat)?.label||'Todo dia';
     const dot=h.color||TAG_COLORS[0];
-    // cor só na bolinha
     const chkStyle=done
       ?`background:${dot};border-color:${dot};`
       :`border-color:${dot};`;
     const row=document.createElement('div');
-    row.className='list-item';
+    row.className='list-item'+(activeToday?'':' item-inactive');
     row.innerHTML=`
       <div class="chk-c${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
@@ -1543,7 +1549,7 @@ function renderHabits(){
         <div class="item-meta">🔥 ${h.streak||0} · ${h.tag?'#'+h.tag+' · ':''}${repeatLabel}</div>
       </div>
       <button class="edit-btn" title="Editar">✎</button>`;
-    row.querySelector('.chk-c').addEventListener('click',e=>{e.stopPropagation();toggleHabit(h.id,row);});
+    row.querySelector('.chk-c').addEventListener('click',e=>{e.stopPropagation();if(activeToday)toggleHabit(h.id,row);});
     row.querySelector('.edit-btn').addEventListener('click',e=>{e.stopPropagation();openModal('habit',h.id);});
     el.appendChild(row);
   });
@@ -1579,6 +1585,8 @@ function renderTasks(){
   const pending=list.filter(t=>!t.done),done=list.filter(t=>t.done);
   [...pending,...done].forEach(t=>{
     const dot=t.color||TAG_COLORS[0];
+    // a task is active today if: no days set, OR days includes today
+    const activeToday=!t.days||t.days.length===0||t.days.includes(new Date().getDay());
     let dueBadge='';
     if(t.due){
       const d=new Date(t.due+'T00:00:00');
@@ -1588,7 +1596,7 @@ function renderTasks(){
       dueBadge=`<span class="item-due ${cls}">${label}</span>`;
     }
     const row=document.createElement('div');
-    row.className='list-item';
+    row.className='list-item'+(activeToday?'':' item-inactive');
     row.dataset.id=t.id;
     const chkStyle=t.done
       ?`background:${dot};border-color:${dot};`
@@ -3108,8 +3116,9 @@ function pickFromSwitcher(card,tabId){
 
   // touch
   document.addEventListener('touchstart',e=>{
-    // ignore if on interactive elements
+    // ignore if on interactive elements or task/habit list items (they have their own long press for drag)
     if(e.target.closest('button,input,textarea,select,.drawer-item,.modal,.fab-btn,#modal-overlay'))return;
+    if(e.target.closest('.list-item[data-id]'))return;
     if(e.touches.length!==1)return;
     startPress(e.touches[0].clientX,e.touches[0].clientY);
   },{passive:true});
@@ -3128,6 +3137,7 @@ function pickFromSwitcher(card,tabId){
   document.addEventListener('mousedown',e=>{
     if(e.button!==0)return;
     if(e.target.closest('button,input,textarea,select,.drawer-item,.modal,#modal-overlay'))return;
+    if(e.target.closest('.list-item[data-id]'))return;
     startPress(e.clientX,e.clientY);
   });
   document.addEventListener('mousemove',e=>{
