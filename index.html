@@ -307,6 +307,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   box-shadow:none!important;
 }
 
+
+/* ── HABIT ADD BTN ── */
+.hab-add-btn{
+  display:block;width:100%;background:none;border:none;
+  font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
+  color:rgba(255,255,255,0.18);text-transform:uppercase;
+  cursor:pointer;padding:20px 0 8px;text-align:left;
+  transition:color 0.2s;
+}
+.hab-add-btn:active{color:rgba(255,255,255,0.55);}
+
 /* ── INACTIVE ITEMS (not scheduled today) ── */
 .item-inactive{opacity:0.28;pointer-events:none;}
 .item-inactive .edit-btn{pointer-events:all;}
@@ -1246,11 +1257,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
 
     <div id="sec-habitos" class="section">
-      <div class="sec-hdr">
-        <div class="sec-title">Hábitos diários</div>
-      </div>
       <div class="filter-bar" id="habit-filters"></div>
       <div id="habits-list"></div>
+      <button class="hab-add-btn" onclick="openModal('habit',null)">+ adicionar hábito</button>
     </div>
 
     <div id="sec-tarefas" class="section">
@@ -1663,7 +1672,7 @@ function renderHabits(){
       :`border-color:${dot};`;
     const row=document.createElement('div');
     row.className='list-item'+(activeToday?'':' item-inactive');
-    row.dataset.tag=t.tag||'';
+    row.dataset.tag=h.tag||'';
     row.innerHTML=`
       <div class="chk-c${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
@@ -1867,7 +1876,7 @@ function renderFinance(animate){
       <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4)">${icon}</div>
       <div class="item-body">
         <div class="item-name">${t.name}${isInvest?'<span class="trans-invest-badge">invest</span>':''}</div>
-        <div class="item-meta">${t.date||''}${cat?' · '+cat.name:''}${bank?' · <span style="color:'+bank.color+'">'+bank.name+'</span>':''}${t.recur&&t.recur!=='once'?' · <span style="opacity:.4">'+recurLabel(t.recur)+'</span>':''}</div>
+        <div class="item-meta">${t.date||''}${cat?' · '+cat.name:''}${t.recur&&t.recur!=='once'?' · <span style="opacity:.4">'+recurLabel(t.recur)+'</span>':''}</div>
       </div>
       <div class="${valClass}" style="${isInvest?'font-family:var(--mono);font-size:13px;color:rgba(180,160,255,0.7)':''}">${valSign}R$ ${fmt(t.amount)}</div>
       <button class="trans-del" title="Remover" onclick="deleteTransaction(${t.id},${isInvest})">×</button>`;
@@ -1953,35 +1962,56 @@ function openModal(type,editId){
   if(type==='habit'){
     const h=isEdit?S.habits.find(x=>x.id===editId):null;
     if(h){mDays=[...(h.days||[0,1,2,3,4,5,6])];mColor=h.color||TAG_COLORS[0];mRepeat=h.repeat||'daily';}
+    else{mDays=[0,1,2,3,4,5,6];mColor=TAG_COLORS[0];mRepeat='daily';}
     title.textContent=isEdit?'Editar hábito':'Novo hábito';
+    const HAB_TAGS=['saúde','treino','mente','foco','estudo','sono','nutrição','outro'];
+    const curTag=h&&h.tag?h.tag:'';
+    const recurLabel={once:'uma vez',daily:'todo dia',weekly:'semanal',monthly:'mensal',custom:'personalizado'};
+    const curRecurLbl=recurLabel[mRepeat]||'todo dia';
     body.innerHTML=`
-      <div class="m-field">
-        <input class="m-flat" id="m-name" placeholder="Nome do hábito" autocomplete="off" value="${h?h.name:''}">
-      </div>
-      <div class="m-field">
-        <div class="m-field-label">Tag</div>
-        <div class="m-tag-row">
-          <input class="m-flat" id="m-tag" placeholder="ex: saúde, foco…" value="${h&&h.tag?h.tag:''}">
-          <div class="m-colors" id="m-colors"></div>
+      <input class="m-flat" id="m-name" placeholder="Nome do hábito" autocomplete="off" value="${h?h.name:''}">
+      <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5;margin-top:10px;border-bottom:none">${h&&h.desc?h.desc:''}</textarea>
+      <div class="m-divider"></div>
+      <div class="m-chips-row">
+        <div class="m-chip${curTag?' has-val':''}" id="chip-tag" onclick="toggleChipPanel('tag')">
+          <span class="m-chip-lbl">tag</span>${curTag||'—'}
+        </div>
+        <div class="m-chip has-val" id="chip-recur" onclick="toggleChipPanel('recur')">
+          <span class="m-chip-lbl">rep</span>${curRecurLbl}
+        </div>
+        <div class="m-chip has-val" id="chip-color" onclick="toggleChipPanel('color')">
+          <div class="m-chip-dot" style="background:${mColor}"></div>cor
         </div>
       </div>
-      <div class="m-field">
-        <div class="m-field-label">Prioridade</div>
-        <div class="m-pills">
-          <div class="m-pill${!h||h.priority!=='alta'?' sel':''}" onclick="selectPill(this)">Normal</div>
-          <div class="m-pill${h&&h.priority==='alta'?' sel':''}" onclick="selectPill(this)">Alta</div>
+      <div class="m-chip-panel" id="panel-tag">
+        <input class="m-flat" id="m-tag" placeholder="digitar tag…" value="${curTag}" style="margin-bottom:8px">
+        <div class="m-tag-presets" id="m-tag-presets"></div>
+      </div>
+      <div class="m-chip-panel" id="panel-recur">
+        <div class="m-recur-chips" id="m-repeat-row"></div>
+        <div id="m-days-section" style="display:none;margin-top:12px">
+          <div class="m-days" id="m-days-row"></div>
         </div>
       </div>
-      <div class="m-field">
-        <div class="m-field-label">Repetição</div>
-        <div class="m-pills" id="m-repeat-row"></div>
-      </div>
-      <div class="m-field" id="m-days-section" style="display:none">
-        <div class="m-field-label">Dias</div>
-        <div class="m-days" id="m-days-row"></div>
+      <div class="m-chip-panel" id="panel-color">
+        <div class="m-chip-colors" id="m-colors"></div>
       </div>
       ${isEdit?`<button class="m-delete" onclick="deleteItem('habit')">excluir hábito</button>`:''}
       <button class="m-save" onclick="saveHabit()">${isEdit?'salvar':'criar hábito'}</button>`;
+    // tag presets
+    const presetsEl=document.getElementById('m-tag-presets');
+    HAB_TAGS.forEach(tag=>{
+      const b=document.createElement('button');
+      b.className='m-tag-preset'+(curTag===tag?' sel':'');
+      b.textContent=tag;
+      b.onclick=()=>{
+        document.getElementById('m-tag').value=tag;
+        presetsEl.querySelectorAll('.m-tag-preset').forEach(x=>x.classList.remove('sel'));
+        b.classList.add('sel');
+        _updateChip('tag',tag,true);
+      };
+      presetsEl.appendChild(b);
+    });
     renderMColors();renderMRepeat();renderMDays();
 
   }else if(type==='task'){
@@ -2121,8 +2151,8 @@ function renderMRepeat(){
   const wrap=document.getElementById('m-repeat-row');if(!wrap)return;
   wrap.innerHTML='';
   REPEAT_TYPES.forEach(r=>{
-    const p=document.createElement('div');
-    p.className='m-pill'+(mRepeat===r.id?' sel':'');
+    const p=document.createElement('button');
+    p.className='m-recur-chip'+(mRepeat===r.id?' sel':'');
     p.textContent=r.label;
     p.addEventListener('click',()=>{
       mRepeat=r.id;
@@ -2131,6 +2161,7 @@ function renderMRepeat(){
       renderMRepeat();
       const ds=document.getElementById('m-days-section');
       if(ds)ds.style.display=(r.id==='custom')?'block':'none';
+      _updateChip('recur',r.label,r.id!=='once'&&r.id!=='daily'||r.id==='daily');
     });
     wrap.appendChild(p);
   });
@@ -2164,12 +2195,11 @@ function deleteItem(type){
 }
 function saveHabit(){
   const name=(document.getElementById('m-name').value||'').trim();if(!name)return;
-  const tag=(document.getElementById('m-tag').value||'').trim().toLowerCase();
-  const prioEl=document.querySelector('#m-body .m-pills .m-pill.sel');
-  const priority=prioEl&&prioEl.textContent.trim()==='Alta'?'alta':'normal';
+  const tag=(document.getElementById('m-tag')?.value||'').trim().toLowerCase();
+  const desc=(document.getElementById('m-desc')?.value||'').trim();
   const days=mRepeat==='daily'?[0,1,2,3,4,5,6]:mRepeat==='once'?[]:mDays;
-  if(mEditId){const h=S.habits.find(x=>x.id===mEditId);if(h){h.name=name;h.tag=tag;h.color=mColor;h.repeat=mRepeat;h.priority=priority;h.days=[...days];}}
-  else S.habits.push({id:Date.now(),name,tag,color:mColor,repeat:mRepeat,priority,days:[...days],streak:0,done:{}});
+  if(mEditId){const h=S.habits.find(x=>x.id===mEditId);if(h){h.name=name;h.desc=desc;h.tag=tag;h.color=mColor;h.repeat=mRepeat;h.days=[...days];}}
+  else S.habits.push({id:Date.now(),name,desc,tag,color:mColor,repeat:mRepeat,days:[...days],streak:0,done:{}});
   save();closeModal();renderHabits();renderHabitFilters();updateRing();
 }
 function saveTask(){
@@ -2188,18 +2218,20 @@ function saveTask(){
 }
 function toggleInvest(row){const sw=row.querySelector('.fin-invest-switch');sw.classList.toggle('on');}
 function selectRecur(el){
-  el.closest('.m-recur-row').querySelectorAll('.m-recur-pill').forEach(p=>p.classList.remove('sel'));
+  const parent=el.closest('.m-recur-chips,.m-recur-row');
+  if(parent)parent.querySelectorAll('.m-recur-chip,.m-recur-pill').forEach(p=>p.classList.remove('sel'));
   el.classList.add('sel');
+  mRepeat=el.dataset.r;
+  _updateChip('recur-fin',el.textContent,el.dataset.r!=='once');
 }
 function saveFinance(type){
   const name=(document.getElementById('m-name').value||'').trim();
   const amount=parseFloat(document.getElementById('m-amount').value)||0;
   if(!name||!amount)return;
-  const bank=(document.getElementById('m-bank')?.value)||'outro';
   const cat=document.getElementById('m-cat')?.value||'outros';
   const recurEl=document.querySelector('.m-recur-pill.sel');
   const recur=recurEl?recurEl.dataset.r:'once';
-  S.transactions.push({id:Date.now(),name,amount,type,bank,cat,recur,date:new Date().toLocaleDateString('pt-BR')});
+  S.transactions.push({id:Date.now(),name,amount,type,cat,recur,date:new Date().toLocaleDateString('pt-BR')});
   save();closeModal();renderFinance(true);addXP(XP_F,null);showToast('+'+XP_F+' XP');updateRing();
 }
 document.addEventListener('keydown',e=>{
@@ -2216,6 +2248,7 @@ function onFabClick(){
 function updateFab(){
   const fab=document.getElementById('fab-wrap');
   if(!fab)return;
+  if(curTab==='habitos'){fab.classList.add('hidden');return;}
   if(curTab==='habitos'){fab.classList.remove('hidden');}
   else{fab.classList.add('hidden');}
   const lbl=document.getElementById('fab-label');
