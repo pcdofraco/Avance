@@ -201,6 +201,112 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 
 
+
+/* ── MODAL CHIPS ── */
+.m-chips-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
+.m-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:20px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
+  color:rgba(255,255,255,0.4);text-transform:uppercase;
+  cursor:pointer;transition:border-color 0.18s,color 0.18s,background 0.18s;
+  white-space:nowrap;user-select:none;
+}
+.m-chip:active{background:rgba(255,255,255,0.08);}
+.m-chip.has-val{border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.75);}
+.m-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.m-chip-lbl{opacity:0.45;margin-right:2px;}
+/* chip sub-panel */
+.m-chip-panel{
+  display:none;margin-top:10px;padding:14px;
+  border-radius:14px;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+}
+.m-chip-panel.open{display:block;}
+/* tag presets */
+.m-tag-presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.m-tag-preset{
+  padding:5px 11px;border-radius:16px;
+  border:1px solid rgba(255,255,255,0.08);background:none;
+  font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);
+  cursor:pointer;transition:all 0.15s;
+}
+.m-tag-preset.sel{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);}
+/* color dots in chip panel */
+.m-chip-colors{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.m-chip-color-dot{
+  width:22px;height:22px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform 0.15s,border-color 0.15s;
+}
+.m-chip-color-dot.sel{border-color:rgba(255,255,255,0.7);transform:scale(1.2);}
+/* date input */
+.m-chip-date{
+  width:100%;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.7);font-family:var(--mono);font-size:12px;
+  padding:6px 0;outline:none;
+}
+/* recur chips inside panel */
+.m-recur-chips{display:flex;gap:7px;flex-wrap:wrap;}
+.m-recur-chip{
+  padding:6px 14px;border-radius:16px;
+  border:1px solid rgba(255,255,255,0.08);background:none;
+  font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);
+  cursor:pointer;transition:all 0.15s;
+}
+.m-recur-chip.sel{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.22);color:rgba(255,255,255,0.8);}
+/* divider */
+.m-divider{width:100%;height:1px;background:rgba(255,255,255,0.06);margin:16px 0 0;}
+
+
+/* ── TASKS HEADER ── */
+.sec-tarefas-hdr{display:flex;align-items:flex-start;justify-content:space-between;min-height:32px;margin-bottom:4px;}
+.task-filter-wrap{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;position:relative;z-index:10;}
+.task-filter-btn{
+  background:none;border:none;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.18em;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;cursor:pointer;
+  padding:4px 0;transition:color 0.2s;
+}
+.task-filter-btn.active{color:rgba(255,255,255,0.55);}
+.task-filter-active-tag{
+  font-family:var(--mono);font-size:7px;letter-spacing:0.1em;
+  color:rgba(255,255,255,0.45);font-weight:600;text-transform:uppercase;
+  margin-top:2px;text-align:right;
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height 0.2s,opacity 0.2s;
+}
+.task-filter-active-tag.visible{max-height:20px;opacity:1;}
+/* vertical dropdown */
+#task-tag-panel{
+  position:absolute;top:100%;right:0;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  overflow:hidden;max-height:0;
+  transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.25s;
+  opacity:0;padding:0;
+  background:none;
+  min-width:80px;
+  z-index:10;
+}
+#task-tag-panel.open{max-height:300px;opacity:1;padding:10px 0 4px;}
+.task-tag-opt{
+  padding:4px 12px;border-radius:16px;
+  border:1px solid rgba(255,255,255,0.08);background:none;
+  font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);
+  cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+.task-tag-opt.sel{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.75);}
+/* dim non-matching */
+.list-item.tag-dimmed{pointer-events:none;}
+.list-item.tag-dimmed .item-body,
+.list-item.tag-dimmed .edit-btn{opacity:0.12;}
+.list-item.tag-dimmed .chk-c{
+  border-color:rgba(255,255,255,0.06)!important;
+  background:var(--bg)!important;
+  box-shadow:none!important;
+}
+
 /* ── INACTIVE ITEMS (not scheduled today) ── */
 .item-inactive{opacity:0.28;pointer-events:none;}
 .item-inactive .edit-btn{pointer-events:all;}
@@ -348,19 +454,22 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .task-list-wrap::before{
   content:'';position:absolute;
   left:10px;top:0;bottom:0;
-  width:1px;background:rgba(255,255,255,0.08);
+  width:1px;
+  background:rgba(255,255,255,0.18);
+  width:1px;
   pointer-events:none;z-index:0;
 }
 .list-item{display:flex;align-items:center;gap:14px;padding:clamp(11px,2.2vw,14px) 0;border-bottom:none;position:relative;}
 .list-item:last-child{border-bottom:none;}
 
-/* circle — empty by default, filled when done */
+/* circle — has background so it masks the line behind it */
 .chk-c{
   width:20px;height:20px;border-radius:50%;
   border:1.5px solid rgba(255,255,255,0.22);
   flex-shrink:0;cursor:pointer;
   transition:all 0.22s;
-  background:transparent;
+  background:var(--bg);
+  position:relative;z-index:1;
 }
 .chk-c.done{
   /* cor vem via style inline */
@@ -782,7 +891,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   background:transparent;
   transition:border-color 0.3s;
   position:relative;z-index:1;
-}
+;position:relative;z-index:1;background:var(--bg);}
 @keyframes qa-blink{
   0%,100%{opacity:1;}
   50%{opacity:0.2;}
@@ -1145,13 +1254,22 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
 
     <div id="sec-tarefas" class="section">
-      <div class="filter-bar" id="task-filters"></div>
-      <div class="task-list-wrap">
+      <div class="sec-tarefas-hdr">
+        <div class="filter-bar" id="task-filters"></div>
+        <div class="task-filter-wrap">
+          <button class="task-filter-btn" id="task-filter-toggle" onclick="toggleTaskFilterPanel()">filtrar</button>
+          <div class="task-filter-active-tag" id="task-filter-active-tag"></div>
+          <div id="task-tag-panel"></div>
+        </div>
+      </div>
+      <div class="task-timeline">
         <div id="task-quick-add" onclick="openModal('task',null)">
           <div class="qa-circle"></div>
           <div class="qa-label">Adicionar tarefa…</div>
         </div>
-        <div id="tasks-list"></div>
+        <div class="task-list-wrap">
+          <div id="tasks-list"></div>
+        </div>
       </div>
     </div>
 
@@ -1334,7 +1452,8 @@ function load(){
   if(!S.userName)S.userName='';
   const today=new Date().toDateString();
   if(S.lastDate!==today){
-    // new day — reset recurring tasks
+    // new day — reset recurring tasks, remove completed one-time tasks
+    S.tasks=S.tasks.filter(t=>!(t.repeat==='once'&&t.done));
     S.tasks.forEach(t=>{
       if(t.repeat&&t.repeat!=='once') t.done=false;
     });
@@ -1521,23 +1640,9 @@ function renderHabitFilters(){
   });
 }
 function renderTaskFilters(){
-  const wrap=document.getElementById('task-filters');if(!wrap)return;
-  const tags=[...new Set(S.tasks.map(t=>t.tag).filter(Boolean))];
-  wrap.innerHTML='';
-  if(!tags.length)return;
-  const all=document.createElement('div');
-  all.className='filter-chip'+(taskFilter==='all'?' act':'');
-  all.textContent='Todos';
-  all.addEventListener('click',()=>{taskFilter='all';renderTasks();renderTaskFilters();});
-  wrap.appendChild(all);
-  tags.forEach(tag=>{
-    const chip=document.createElement('div');
-    chip.className='filter-chip'+(taskFilter===tag?' act':'');
-    const col=S.tasks.find(t=>t.tag===tag)?.color||'#fff';
-    chip.innerHTML=`<span class="filter-dot" style="background:${col}"></span>${tag}`;
-    chip.addEventListener('click',()=>{taskFilter=tag;renderTasks();renderTaskFilters();});
-    wrap.appendChild(chip);
-  });
+  // old filter-bar hidden — using new tag panel instead
+  const wrap=document.getElementById('task-filters');
+  if(wrap)wrap.innerHTML='';
 }
 
 /* HABITS */
@@ -1558,6 +1663,7 @@ function renderHabits(){
       :`border-color:${dot};`;
     const row=document.createElement('div');
     row.className='list-item'+(activeToday?'':' item-inactive');
+    row.dataset.tag=t.tag||'';
     row.innerHTML=`
       <div class="chk-c${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
@@ -1614,6 +1720,7 @@ function renderTasks(){
     const row=document.createElement('div');
     row.className='list-item'+(activeToday?'':' item-inactive');
     row.dataset.id=t.id;
+    row.dataset.tag=t.tag||'';
     const chkStyle=t.done
       ?`background:${dot};border-color:${dot};`
       :`border-color:${dot};`;
@@ -1880,71 +1987,120 @@ function openModal(type,editId){
   }else if(type==='task'){
     const t=isEdit?S.tasks.find(x=>x.id===editId):null;
     if(t){mColor=t.color||TAG_COLORS[0];mRepeat=t.repeat||'once';mDays=[...(t.days||[])];}
-    else{mRepeat='once';mDays=[];}
+    else{mRepeat='once';mDays=[];mColor=TAG_COLORS[0];}
     title.textContent=isEdit?'Editar tarefa':'Nova tarefa';
+    const TASK_TAGS=['trabalho','pessoal','saúde','estudos','casa','financeiro','treino','outro'];
+    const curTag=t&&t.tag?t.tag:'';
+    const curDue=t&&t.due?t.due:'';
+    const recurLabel={once:'uma vez',daily:'todo dia',weekly:'semanal',monthly:'mensal',custom:'personalizado'};
+    const curRecurLbl=recurLabel[mRepeat]||'uma vez';
+    const dueLbl=curDue?new Date(curDue+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
+    const curPrio=t&&t.priority?t.priority:'normal';
+    const prioLabel={normal:'normal',baixa:'baixa',media:'média',alta:'alta'};
     body.innerHTML=`
-      <div class="m-field">
-        <input class="m-flat" id="m-name" placeholder="Nome da tarefa" autocomplete="off" value="${t?t.name:''}">
-      </div>
-      <div class="m-field">
-        <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5">${t&&t.desc?t.desc:''}</textarea>
-      </div>
-      <div class="m-field">
-        <div class="m-field-label">Tag</div>
-        <div class="m-tag-row">
-          <input class="m-flat" id="m-tag" placeholder="ex: trabalho, pessoal…" value="${t&&t.tag?t.tag:''}">
-          <div class="m-colors" id="m-colors"></div>
+      <input class="m-flat" id="m-name" placeholder="Nome da tarefa" autocomplete="off" value="${t?t.name:''}">
+      <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5;margin-top:10px;border-bottom:none">${t&&t.desc?t.desc:''}</textarea>
+      <div class="m-divider"></div>
+      <div class="m-chips-row">
+        <div class="m-chip${curTag?' has-val':''}" id="chip-tag" onclick="toggleChipPanel('tag')">
+          <span class="m-chip-lbl">tag</span>${curTag||'—'}
+        </div>
+        <div class="m-chip${mRepeat!=='once'?' has-val':''}" id="chip-recur" onclick="toggleChipPanel('recur')">
+          <span class="m-chip-lbl">rep</span>${curRecurLbl}
+        </div>
+        <div class="m-chip${curDue?' has-val':''}" id="chip-due" onclick="toggleChipPanel('due')">
+          <span class="m-chip-lbl">data</span>${dueLbl}
+        </div>
+        <div class="m-chip${curPrio!=='normal'?' has-val':''}" id="chip-prio" onclick="toggleChipPanel('prio')">
+          <span class="m-chip-lbl">prio</span>${prioLabel[curPrio]||'normal'}
+        </div>
+        <div class="m-chip has-val" id="chip-color" onclick="toggleChipPanel('color')">
+          <div class="m-chip-dot" style="background:${mColor}"></div>cor
         </div>
       </div>
-      <div class="m-field">
-        <div class="m-field-label">Prioridade</div>
-        <div class="m-pills">
-          <div class="m-pill${!t||t.priority!=='alta'?' sel':''}" onclick="selectPill(this)">Normal</div>
-          <div class="m-pill${t&&t.priority==='alta'?' sel':''}" onclick="selectPill(this)">Alta</div>
+      <div class="m-chip-panel" id="panel-tag">
+        <input class="m-flat" id="m-tag" placeholder="digitar tag…" value="${curTag}" style="margin-bottom:8px">
+        <div class="m-tag-presets" id="m-tag-presets"></div>
+      </div>
+      <div class="m-chip-panel" id="panel-recur">
+        <div class="m-recur-chips" id="m-repeat-row"></div>
+        <div id="m-days-section" style="display:none;margin-top:12px">
+          <div class="m-days" id="m-days-row"></div>
         </div>
       </div>
-      <div class="m-field">
-        <div class="m-field-label">Repetição</div>
-        <div class="m-pills" id="m-repeat-row"></div>
+      <div class="m-chip-panel" id="panel-due">
+        <input class="m-chip-date" id="m-due" type="date" value="${curDue}">
       </div>
-      <div class="m-field" id="m-days-section" style="display:none">
-        <div class="m-field-label">Dias</div>
-        <div class="m-days" id="m-days-row"></div>
+      <div class="m-chip-panel" id="panel-color">
+        <div class="m-chip-colors" id="m-colors"></div>
       </div>
-      <div class="m-field">
-        <div class="m-field-label">Data limite <span style="font-size:7px;color:var(--t4)">opcional</span></div>
-        <input class="m-flat" id="m-due" type="date" value="${t&&t.due?t.due:''}">
+      <div class="m-chip-panel" id="panel-prio">
+        <div class="m-recur-chips">
+          <button class="m-recur-chip${curPrio==='normal'?' sel':''}" onclick="selectPriority(this,'normal')">normal</button>
+          <button class="m-recur-chip${curPrio==='baixa'?' sel':''}" onclick="selectPriority(this,'baixa')">baixa</button>
+          <button class="m-recur-chip${curPrio==='media'?' sel':''}" onclick="selectPriority(this,'média')">média</button>
+          <button class="m-recur-chip${curPrio==='alta'?' sel':''}" onclick="selectPriority(this,'alta')">alta</button>
+        </div>
       </div>
       ${isEdit?`<button class="m-delete" onclick="deleteItem('task')">excluir tarefa</button>`:''}
       <button class="m-save" onclick="saveTask()">${isEdit?'salvar':'criar tarefa'}</button>`;
+    // tag presets
+    const presetsEl=document.getElementById('m-tag-presets');
+    TASK_TAGS.forEach(tag=>{
+      const b=document.createElement('button');
+      b.className='m-tag-preset'+(curTag===tag?' sel':'');
+      b.textContent=tag;
+      b.onclick=()=>{
+        document.getElementById('m-tag').value=tag;
+        presetsEl.querySelectorAll('.m-tag-preset').forEach(x=>x.classList.remove('sel'));
+        b.classList.add('sel');
+        _updateChip('tag',tag,true);
+      };
+      presetsEl.appendChild(b);
+    });
+    // date live update
+    const dueEl=document.getElementById('m-due');
+    if(dueEl) dueEl.addEventListener('change',()=>{
+      const v=dueEl.value;
+      const lbl=v?new Date(v+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
+      _updateChip('due',lbl,!!v);
+    });
     renderMColors();renderMRepeat();renderMDays();
 
   }else{
     const isIn=type==='fin-in';
     title.textContent=isIn?'nova entrada':'nova saída';
-    const bankOpts=BANKS.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
     const catOpts=CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
     body.innerHTML=`
-      <div class="m-field">
-        <input class="m-flat" id="m-name" placeholder="${isIn?'Ex: Salário, Freelance':'Ex: Mercado, Aluguel'}" autocomplete="off">
+      <input class="m-flat" id="m-name" placeholder="${isIn?'Ex: Salário, Freelance':'Ex: Mercado, Aluguel'}" autocomplete="off">
+      <input class="m-flat" id="m-amount" type="number" placeholder="Valor (R$)" min="0" step="0.01" style="margin-top:10px">
+      <div class="m-divider"></div>
+      <div class="m-chips-row">
+        ${!isIn?`<div class="m-chip" id="chip-cat" onclick="toggleChipPanel('cat')"><span class="m-chip-lbl">cat</span>—</div>`:''}
+        <div class="m-chip" id="chip-recur-fin" onclick="toggleChipPanel('recur-fin')"><span class="m-chip-lbl">rep</span>uma vez</div>
       </div>
-      <div class="m-field">
-        <input class="m-flat" id="m-amount" type="number" placeholder="Valor (R$)" min="0" step="0.01">
-      </div>
-      <div class="m-field">
-        <div class="m-field-label">Banco / Corretora</div>
-        <select class="m-flat" id="m-bank" style="appearance:none;cursor:pointer"><option value="">Selecionar…</option>${bankOpts}</select>
-      </div>
-      ${!isIn?`<div class="m-field"><div class="m-field-label">Categoria</div><select class="m-flat" id="m-cat" style="appearance:none;cursor:pointer"><option value="">Selecionar…</option>${catOpts}</select></div>`:''}
-      <div class="m-field">
-        <div class="m-field-label">Recorrência</div>
-        <div class="m-recur-row">
-          <button class="m-recur-pill sel" data-r="once" onclick="selectRecur(this)">uma vez</button>
-          <button class="m-recur-pill" data-r="weekly" onclick="selectRecur(this)">semanal</button>
-          <button class="m-recur-pill" data-r="monthly" onclick="selectRecur(this)">mensal</button>
+      ${!isIn?`<div class="m-chip-panel" id="panel-cat">
+        <select class="m-flat" id="m-cat" style="appearance:none;cursor:pointer;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);font-family:var(--mono);font-size:11px;padding:6px 0;width:100%;outline:none">
+          <option value="">selecionar…</option>${catOpts}
+        </select>
+      </div>`:''}
+      <div class="m-chip-panel" id="panel-recur-fin">
+        <div class="m-recur-chips">
+          <button class="m-recur-chip sel" data-r="once" onclick="selectRecur(this)">uma vez</button>
+          <button class="m-recur-chip" data-r="weekly" onclick="selectRecur(this)">semanal</button>
+          <button class="m-recur-chip" data-r="monthly" onclick="selectRecur(this)">mensal</button>
         </div>
       </div>
-      <button class="m-save" onclick="saveFinance('${isIn?'in':'out'}')">${isIn?'adicionar entrada':'registrar saída'}</button>`;
+      <button class="m-save" id="m-fin-save-btn" data-t="${isIn?'in':'out'}">${isIn?'adicionar entrada':'registrar saída'}</button>`;
+    document.getElementById('m-fin-save-btn').onclick=function(){saveFinance(this.dataset.t);};
+    if(!isIn){
+      const catSel=document.getElementById('m-cat');
+      if(catSel) catSel.addEventListener('change',()=>{
+        const v=catSel.value;
+        const lbl=CATS.find(c=>c.id===v)?.name||'—';
+        _updateChip('cat',lbl,!!v);
+      });
+    }
   }
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(()=>{const i=document.getElementById('m-name');if(i)i.focus();},350);
@@ -1955,9 +2111,9 @@ function renderMColors(){
   wrap.innerHTML='';
   TAG_COLORS.forEach(c=>{
     const d=document.createElement('div');
-    d.className='m-color-dot'+(mColor===c?' sel':'');
+    d.className='m-chip-color-dot'+(mColor===c?' sel':'');
     d.style.background=c;
-    d.addEventListener('click',()=>{mColor=c;renderMColors();});
+    d.addEventListener('click',()=>{mColor=c;renderMColors();_updateChip('color','cor',true);});
     wrap.appendChild(d);
   });
 }
@@ -2019,8 +2175,10 @@ function saveHabit(){
 function saveTask(){
   const name=(document.getElementById('m-name').value||'').trim();if(!name)return;
   const tag=(document.getElementById('m-tag').value||'').trim().toLowerCase();
-  const prioEl=document.querySelector('#m-body .m-pills .m-pill.sel');
-  const prio=prioEl&&prioEl.textContent.trim()==='Alta'?'alta':'normal';
+  const prioChip=document.getElementById('chip-prio');
+  const prioText=prioChip?prioChip.textContent.replace(/prio/i,'').trim():'normal';
+  const prioMap={'normal':'normal','baixa':'baixa','média':'media','alta':'alta'};
+  const prio=prioMap[prioText]||'normal';
   const due=document.getElementById('m-due')?document.getElementById('m-due').value||null:null;
   const desc=(document.getElementById('m-desc')?.value||'').trim();
   const days=mRepeat==='daily'?[0,1,2,3,4,5,6]:mRepeat==='once'?[]:mDays;
@@ -3204,6 +3362,101 @@ function openProfile(){
 function closeProfile(){
   document.getElementById('profile-sheet').classList.remove('open');
 }
+
+/* ── CHIP PANEL HELPERS ── */
+function toggleChipPanel(id){
+  const panel=document.getElementById('panel-'+id);
+  if(!panel)return;
+  const isOpen=panel.classList.contains('open');
+  // close all panels first
+  document.querySelectorAll('.m-chip-panel').forEach(p=>p.classList.remove('open'));
+  if(!isOpen) panel.classList.add('open');
+}
+function _updateChip(id,label,hasVal){
+  const chip=document.getElementById('chip-'+id);
+  if(!chip)return;
+  chip.classList.toggle('has-val',hasVal);
+  const lbl=chip.querySelector('.m-chip-lbl');
+  const prefix={'tag':'tag ','due':'data ','color':'','cat':'cat ','recur':'rep ','recur-fin':'rep '};
+  chip.innerHTML=(lbl?lbl.outerHTML:'')+label;
+  // restore dot for color chip
+  if(id==='color'){
+    chip.innerHTML=`<div class="m-chip-dot" style="background:${mColor}"></div>cor`;
+  }
+}
+
+
+/* ── SECTIONS / PREFS ── */
+const SECTION_LABELS={dashboard:'Dashboard',habitos:'Hábitos',tarefas:'Tarefas',financas:'Finanças',stats:'Estatísticas'};
+
+function applyPrefs(){
+  if(!S.prefs)return;
+  const all=['dashboard','habitos','tarefas','financas','stats'];
+  const active=all.filter(t=>S.prefs.sections[t]!==false);
+  if(!active.includes('dashboard'))active.unshift('dashboard');
+  TAB_ORDER.length=0;active.forEach(t=>TAB_ORDER.push(t));
+  if(typeof curTab!=='undefined'&&!TAB_ORDER.includes(curTab))setTab('dashboard');
+}
+
+function toggleSection(id,on){
+  if(!S.prefs)S.prefs={sections:{}};
+  if(!S.prefs.sections)S.prefs.sections={};
+  S.prefs.sections[id]=on;
+  save();
+  applyPrefs();
+}
+
+
+/* ── TASK TAG FILTER PANEL ── */
+let taskTagFilter = 'all';
+
+function toggleTaskFilterPanel(){
+  const panel = document.getElementById('task-tag-panel');
+  const btn = document.getElementById('task-filter-toggle');
+  if(!panel) return;
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+  if(!isOpen) _renderTaskTagPanel();
+}
+
+function _renderTaskTagPanel(){
+  const panel = document.getElementById('task-tag-panel');
+  if(!panel) return;
+  const tags = [...new Set(S.tasks.map(t=>t.tag).filter(Boolean))];
+  panel.innerHTML = ['all',...tags].map(tag=>`
+    <button class="task-tag-opt${taskTagFilter===tag?' sel':''}"
+      onclick="_setTaskTagFilter('${tag}')">${tag==='all'?'todos':tag}</button>
+  `).join('');
+}
+
+function _setTaskTagFilter(tag){
+  taskTagFilter = tag;
+  // dim non-matching items
+  document.querySelectorAll('#tasks-list .list-item').forEach(row=>{
+    if(tag==='all'){row.classList.remove('tag-dimmed');return;}
+    const rowTag = row.dataset.tag||'';
+    row.classList.toggle('tag-dimmed', rowTag !== tag);
+  });
+  // update active tag indicator
+  const indicator = document.getElementById('task-filter-active-tag');
+  if(indicator){
+    indicator.textContent = tag==='all'?'':tag;
+    indicator.classList.toggle('visible', tag!=='all');
+  }
+  // close panel after selection
+  const panel = document.getElementById('task-tag-panel');
+  const btn = document.getElementById('task-filter-toggle');
+  if(panel){panel.classList.remove('open');}
+  if(btn){btn.classList.toggle('active', tag!=='all');}
+}
+
+
+function selectPriority(btn, val){
+  btn.closest('.m-recur-chips').querySelectorAll('.m-recur-chip').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  _updateChip('prio', val, val!=='normal');
+}
 /* ── EXPOSE GLOBALS (required for type=module) ── */
 Object.assign(window,{
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
@@ -3213,6 +3466,7 @@ Object.assign(window,{
   updateUserName,hidNameInput,
   renderHabitFilters,renderTaskFilters,
   openSwitcher,closeSwitcher,openProfile,closeProfile,doLogout,
+  toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
 });
 </script>
 </body>
