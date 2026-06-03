@@ -318,6 +318,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 .hab-add-btn:active{color:rgba(255,255,255,0.55);}
 
+
 /* ── INACTIVE ITEMS (not scheduled today) ── */
 .item-inactive{opacity:0.28;pointer-events:none;}
 .item-inactive .edit-btn{pointer-events:all;}
@@ -1337,7 +1338,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="trans-lbl">transações</div>
       <div id="trans-list"></div>
     </div>
-
     <div id="sec-stats" class="section">
       <div class="period-row">
         <button class="period-btn btn-3d act" onclick="setPeriod('week',this)">Semana</button>
@@ -1464,7 +1464,11 @@ function load(){
     // new day — reset recurring tasks, remove completed one-time tasks
     S.tasks=S.tasks.filter(t=>!(t.repeat==='once'&&t.done));
     S.tasks.forEach(t=>{
-      if(t.repeat&&t.repeat!=='once') t.done=false;
+      if(t.repeat&&t.repeat!=='once'){
+        t.done=false;
+        // doneByDate keeps history, just reset today's status
+        if(t.doneByDate) delete t.doneByDate[today];
+      }
     });
     // reset doneToday on habits (just in case it's used anywhere)
     S.habits.forEach(h=>{h.doneToday=false;if(h.done)delete h.done[new Date(Date.now()-86400000).toDateString()];});
@@ -2038,14 +2042,14 @@ function openModal(type,editId){
         <div class="m-chip${mRepeat!=='once'?' has-val':''}" id="chip-recur" onclick="toggleChipPanel('recur')">
           <span class="m-chip-lbl">rep</span>${curRecurLbl}
         </div>
-        <div class="m-chip${curDue?' has-val':''}" id="chip-due" onclick="toggleChipPanel('due')">
-          <span class="m-chip-lbl">data</span>${dueLbl}
+        <div class="m-chip has-val" id="chip-color" onclick="toggleChipPanel('color')">
+          <div class="m-chip-dot" style="background:${mColor}"></div>cor
         </div>
         <div class="m-chip${curPrio!=='normal'?' has-val':''}" id="chip-prio" onclick="toggleChipPanel('prio')">
           <span class="m-chip-lbl">prio</span>${prioLabel[curPrio]||'normal'}
         </div>
-        <div class="m-chip has-val" id="chip-color" onclick="toggleChipPanel('color')">
-          <div class="m-chip-dot" style="background:${mColor}"></div>cor
+        <div class="m-chip${curDue?' has-val':''}" id="chip-due" onclick="toggleChipPanel('due')">
+          <span class="m-chip-lbl">data</span>${dueLbl}
         </div>
       </div>
       <div class="m-chip-panel" id="panel-tag">
@@ -2066,10 +2070,10 @@ function openModal(type,editId){
       </div>
       <div class="m-chip-panel" id="panel-prio">
         <div class="m-recur-chips">
-          <button class="m-recur-chip${curPrio==='normal'?' sel':''}" onclick="selectPriority(this,'normal')">normal</button>
           <button class="m-recur-chip${curPrio==='baixa'?' sel':''}" onclick="selectPriority(this,'baixa')">baixa</button>
-          <button class="m-recur-chip${curPrio==='media'?' sel':''}" onclick="selectPriority(this,'média')">média</button>
+          <button class="m-recur-chip${curPrio==='normal'?' sel':''}" onclick="selectPriority(this,'normal')">normal</button>
           <button class="m-recur-chip${curPrio==='alta'?' sel':''}" onclick="selectPriority(this,'alta')">alta</button>
+          <button class="m-recur-chip${curPrio==='urgente'?' sel':''}" onclick="selectPriority(this,'urgente')">urgente</button>
         </div>
       </div>
       ${isEdit?`<button class="m-delete" onclick="deleteItem('task')">excluir tarefa</button>`:''}
@@ -2207,7 +2211,7 @@ function saveTask(){
   const tag=(document.getElementById('m-tag').value||'').trim().toLowerCase();
   const prioChip=document.getElementById('chip-prio');
   const prioText=prioChip?prioChip.textContent.replace(/prio/i,'').trim():'normal';
-  const prioMap={'normal':'normal','baixa':'baixa','média':'media','alta':'alta'};
+  const prioMap={'normal':'normal','baixa':'baixa','média':'media','media':'media','alta':'alta','urgente':'urgente'};
   const prio=prioMap[prioText]||'normal';
   const due=document.getElementById('m-due')?document.getElementById('m-due').value||null:null;
   const desc=(document.getElementById('m-desc')?.value||'').trim();
@@ -3490,6 +3494,7 @@ function selectPriority(btn, val){
   btn.classList.add('sel');
   _updateChip('prio', val, val!=='normal');
 }
+
 /* ── EXPOSE GLOBALS (required for type=module) ── */
 Object.assign(window,{
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
