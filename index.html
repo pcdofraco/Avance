@@ -2205,11 +2205,9 @@ function openModal(type,editId){
     const curCat=t&&t.cat?t.cat:'';
     const curTag=t&&t.tag?t.tag:'';
     const curDue=t&&t.due?t.due:'';
-    const curNotifyTime=t&&t.notifyTime?t.notifyTime:'';
     const dueLbl=curDue?new Date(curDue+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
     const curPrio=t&&t.priority?t.priority:'normal';
     const prioLabel={normal:'normal',baixa:'baixa',media:'média',alta:'alta',urgente:'urgente'};
-    const notifyLbl=curNotifyTime||'—';
     body.innerHTML=`
       <input class="m-flat" id="m-name" placeholder="Nome da tarefa" autocomplete="off" value="${t?t.name:''}">
       <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5;margin-top:10px;border-bottom:none">${t&&t.desc?t.desc:''}</textarea>
@@ -2230,9 +2228,6 @@ function openModal(type,editId){
         <div class="m-chip${curDue?' has-val':''}" id="chip-due" onclick="toggleChipPanel('due')">
           <span class="m-chip-lbl">data</span>${dueLbl}
         </div>
-        <div class="m-chip${curNotifyTime?' has-val':''}" id="chip-notify" onclick="toggleChipPanel('notify')">
-          <span class="m-chip-lbl">notificar</span>${notifyLbl}
-        </div>
       </div>
       <div class="m-chip-panel" id="panel-cat-t">
         <div class="m-tag-presets" id="m-cat-t-presets"></div>
@@ -2243,13 +2238,7 @@ function openModal(type,editId){
       <div class="m-chip-panel" id="panel-due">
         <input class="m-chip-date" id="m-due" type="date" value="${curDue}">
       </div>
-      <div class="m-chip-panel" id="panel-notify">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <input class="m-chip-date" id="m-notify-time" type="time" value="${curNotifyTime}" style="flex:1">
-          <button class="m-recur-chip" onclick="document.getElementById('m-notify-time').value='';_updateChip('notify','—',false);" style="flex-shrink:0">limpar</button>
-        </div>
-        <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.25);margin-top:8px;letter-spacing:0.08em;">notificação diária no horário escolhido</div>
-      </div>
+
       <div class="m-chip-panel" id="panel-color">
         <div class="m-chip-colors" id="m-colors"></div>
       </div>
@@ -2287,11 +2276,6 @@ function openModal(type,editId){
       const v=dueEl.value;
       const lbl=v?new Date(v+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
       _updateChip('due',lbl,!!v);
-    });
-    // notify time live update
-    const ntEl=document.getElementById('m-notify-time');
-    if(ntEl) ntEl.addEventListener('change',()=>{
-      _updateChip('notify',ntEl.value||'—',!!ntEl.value);
     });
     renderMColors();
 
@@ -2426,16 +2410,14 @@ function saveTask(){
   const prio=prioMap[prioText]||'normal';
   const due=document.getElementById('m-due')?document.getElementById('m-due').value||null:null;
   const desc=(document.getElementById('m-desc')?.value||'').trim();
-  const notifyTime=document.getElementById('m-notify-time')?.value||'';
   const cat=window._mTaskCat||'';
   if(mEditId){
     const t=S.tasks.find(x=>x.id===mEditId);
-    if(t){t.name=name;t.desc=desc;t.tag=tag;t.cat=cat;t.color=mColor;t.priority=prio;t.due=due;t.notifyTime=notifyTime;}
+    if(t){t.name=name;t.desc=desc;t.tag=tag;t.cat=cat;t.color=mColor;t.priority=prio;t.due=due;}
   }else{
-    S.tasks.push({id:Date.now(),name,desc,tag,cat,color:mColor,priority:prio,due,notifyTime,done:false});
+    S.tasks.push({id:Date.now(),name,desc,tag,cat,color:mColor,priority:prio,due,done:false});
   }
   save();closeModal();renderTasks();renderTaskFilters();updateRing();
-  if(notifyTime) scheduleTaskNotifications();
 }
 function toggleInvest(row){const sw=row.querySelector('.fin-invest-switch');sw.classList.toggle('on');}
 function selectRecur(el){
@@ -3339,7 +3321,6 @@ function bootApp(){
     try{
       updateGreeting();updateXPBar();updateRing();
       renderDashboard();renderHabitFilters();renderTaskFilters();snapshotHistory();
-      initNotifications();
     }catch(e){console.warn('bootApp render error',e);}
 
     const scr=document.getElementById('intro-screen');
@@ -3769,61 +3750,6 @@ function _setFinPeriod(p,btn){
   renderFinance(true);
 }
 
-/* ── NOTIFICATIONS ── */
-let _swReg=null;
-async function initNotifications(){
-  if(!('Notification' in window)||!('serviceWorker' in navigator))return;
-  // register from /sw.js — required for iOS PWA
-  try{
-    _swReg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
-    await navigator.serviceWorker.ready;
-  }catch(e){console.warn('SW registration failed:',e);}
-
-  if(Notification.permission==='default'){
-    // ask subtly after short delay
-    setTimeout(async()=>{
-      const p=await Notification.requestPermission();
-      if(p==='granted') scheduleTaskNotifications();
-    },3000);
-  }else if(Notification.permission==='granted'){
-    scheduleTaskNotifications();
-  }
-}
-
-function scheduleTaskNotifications(){
-  if(Notification.permission!=='granted')return;
-  if(window._notifTimers){window._notifTimers.forEach(clearTimeout);}
-  window._notifTimers=[];
-  const now=new Date();
-  S.tasks.filter(t=>t.notifyTime&&!t.done).forEach(t=>{
-    const [hh,mm]=t.notifyTime.split(':').map(Number);
-    const fireAt=new Date();
-    fireAt.setHours(hh,mm,0,0);
-    if(fireAt<=now) fireAt.setDate(fireAt.getDate()+1);
-    const delay=fireAt-now;
-    const tid=setTimeout(async()=>{
-      // prefer SW showNotification (works with screen locked on Android)
-      if(_swReg && _swReg.active){
-        try{
-          await _swReg.showNotification('📋 '+t.name,{
-            body:t.desc||'Hora de fazer sua tarefa!',
-            icon:'/icon-192.png',
-            badge:'/icon-192.png',
-            vibrate:[100,50,100,50,100],
-            tag:'task-'+t.id,
-            requireInteraction:false
-          });
-          return;
-        }catch(e){}
-      }
-      // fallback
-      if(Notification.permission==='granted'){
-        new Notification('📋 '+t.name,{body:t.desc||'Hora de fazer sua tarefa!',icon:'/icon-192.png'});
-      }
-    },delay);
-    window._notifTimers.push(tid);
-  });
-}
 
 /* ── EXPOSE GLOBALS (required for type=module) ── */
 Object.assign(window,{
@@ -3838,7 +3764,7 @@ Object.assign(window,{
   selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,
   _setTransFilter,_renderTransList,
   _setFinPeriod,
-  initNotifications,scheduleTaskNotifications,
+  initNotifications:()=>{},scheduleTaskNotifications:()=>{},
 });
 </script>
 </body>
