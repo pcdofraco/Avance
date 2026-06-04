@@ -244,10 +244,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .m-chip-color-dot.sel{border-color:rgba(255,255,255,0.7);transform:scale(1.2);}
 /* date input */
 .m-chip-date{
-  width:100%;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);
-  color:rgba(255,255,255,0.7);font-family:var(--mono);font-size:12px;
-  padding:6px 0;outline:none;
+  width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;
+  color:rgba(255,255,255,0.75);font-family:var(--mono);font-size:13px;
+  padding:10px 12px;outline:none;
+  color-scheme:dark;
 }
+.m-chip-date:focus{border-color:rgba(255,255,255,0.22);background:rgba(255,255,255,0.06);}
 /* recur chips inside panel */
 .m-recur-chips{display:flex;gap:7px;flex-wrap:wrap;}
 .m-recur-chip{
@@ -487,7 +489,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   position:relative;z-index:1;
 }
 .chk-c.done{
-  /* cor vem via style inline */
+  display:flex;align-items:center;justify-content:center;
+}
+.chk-c.done::after{
+  content:'✓';
+  font-size:10px;font-weight:700;
+  color:#0d0d0d;
+  pointer-events:none;
+  line-height:1;
 }
 
 /* square — empty by default */
@@ -542,29 +551,32 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .fin-pill-btn{
   display:inline-flex;align-items:center;gap:7px;
   padding:9px 20px;border-radius:100px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.1);
-  color:rgba(255,255,255,0.7);
+  background:rgba(74,222,128,0.06);
+  border:1px solid rgba(74,222,128,0.18);
+  color:rgba(134,239,172,0.8);
   font-family:var(--mono);font-size:10px;letter-spacing:0.14em;
   text-transform:uppercase;cursor:pointer;
   transition:background 0.15s,border-color 0.15s,transform 0.1s,color 0.15s;
 }
 .fin-pill-btn:active{transform:scale(0.96);}
-.fin-pill-btn:hover{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.9);}
-.fin-pill-out{background:none;border-color:rgba(255,255,255,0.07);color:rgba(255,255,255,0.35);}
-.fin-pill-out:hover{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.6);}
+.fin-pill-btn:hover{background:rgba(74,222,128,0.1);color:rgba(134,239,172,1);}
+.fin-pill-out{
+  background:rgba(248,113,113,0.06);
+  border-color:rgba(248,113,113,0.18);
+  color:rgba(252,165,165,0.7);
+}
+.fin-pill-out:hover{background:rgba(248,113,113,0.1);color:rgba(252,165,165,0.95);}
 
 /* ── PATRIMÔNIO CARDS ── */
-.fin-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.fin-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:20px;}
 .fin-pcard{
-  padding:14px 16px;border-radius:14px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.06);
+  padding:12px 4px;
 }
 .fin-pcard-total{
   grid-column:1/-1;
-  background:rgba(255,255,255,0.04);
-  border-color:rgba(255,255,255,0.09);
+  padding-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  margin-bottom:4px;
 }
 .fin-pcard-lbl{font-family:var(--mono);font-size:8px;letter-spacing:0.16em;color:var(--t4);text-transform:uppercase;margin-bottom:7px;}
 .fin-pcard-val{font-size:clamp(16px,4vw,20px);font-weight:300;color:var(--t1);letter-spacing:-0.02em;}
@@ -618,6 +630,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cat-pct{font-family:var(--mono);font-size:clamp(9px,2vw,10px);color:var(--t3);flex:0 0 32px;text-align:right;}
 /* trans */
 .fin-period-lbl{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-bottom:10px;}
+.fin-period-row{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.fin-period-btn{
+  padding:7px 14px;background:none;border:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(255,255,255,0.22);cursor:pointer;transition:color 0.2s,border-color 0.2s;
+}
+.fin-period-btn.act{color:rgba(255,255,255,0.8);border-bottom-color:rgba(255,255,255,0.55);}
+.fin-period-btn:active{opacity:0.6;}
 .trans-lbl{font-family:var(--mono);font-size:clamp(8px,1.5vw,9px);letter-spacing:0.18em;color:var(--t3);text-transform:uppercase;margin:clamp(14px,3vw,18px) 0 clamp(6px,1.2vw,8px);}
 .trans-filter-row{display:flex;gap:8px;margin-bottom:12px;}
 .trans-filter-btn{
@@ -892,8 +913,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── FINANCE minimal — sem glass nos cards ── */
 .fin-hero-card{border-radius:var(--r);padding:clamp(16px,4vw,24px);margin-bottom:10px;background:none;}
-.fin-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.fin-split-card{border-radius:var(--r);padding:clamp(14px,3vw,20px);background:none;}
+.fin-split{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:10px;}
+.fin-split-card{padding:clamp(12px,2.5vw,16px) 4px;background:none;border:none;border-right:1px solid rgba(255,255,255,0.06);}
+.fin-split-card:last-child{border-right:none;padding-left:16px;}
+.val-in{color:rgba(255,255,255,0.85);}
+.val-out{color:rgba(255,255,255,0.85);}
 .fin-btns-top{display:flex;gap:8px;margin-bottom:18px;}
 .fin-btn{flex:1;padding:12px;border-radius:var(--r2);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;border:none;font-family:var(--mono);}
 
@@ -1328,7 +1352,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
 
       <!-- CARDS -->
-      <div class="fin-period-lbl">último mês</div>
+      <div class="fin-period-row">
+        <button class="fin-period-btn act" onclick="_setFinPeriod('week',this)">semana</button>
+        <button class="fin-period-btn" onclick="_setFinPeriod('month',this)">mês</button>
+        <button class="fin-period-btn" onclick="_setFinPeriod('year',this)">ano</button>
+      </div>
       <div class="fin-cards-grid">
         <div class="fin-pcard fin-pcard-total">
           <div class="fin-pcard-lbl">total</div>
@@ -1348,11 +1376,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
       <!-- RECEITA / DESPESA -->
       <div class="fin-split">
-        <div class="fin-split-card">
+        <div class="fin-split-card card-in">
           <div class="fin-split-lbl">↑ entradas</div>
           <div class="fin-split-val val-in" id="fin-in">R$ 0</div>
         </div>
-        <div class="fin-split-card">
+        <div class="fin-split-card card-out">
           <div class="fin-split-lbl">↓ saídas</div>
           <div class="fin-split-val val-out" id="fin-out">R$ 0</div>
         </div>
@@ -1512,16 +1540,9 @@ function load(){
   if(!S.userName)S.userName='';
   const today=new Date().toDateString();
   if(S.lastDate!==today){
-    // new day — reset recurring tasks, remove completed one-time tasks
-    S.tasks=S.tasks.filter(t=>!(t.repeat==='once'&&t.done));
-    S.tasks.forEach(t=>{
-      if(t.repeat&&t.repeat!=='once'){
-        t.done=false;
-        // doneByDate keeps history, just reset today's status
-        if(t.doneByDate) delete t.doneByDate[today];
-      }
-    });
-    // reset doneToday on habits (just in case it's used anywhere)
+    // remove tasks that were completed on a previous day
+    S.tasks=S.tasks.filter(t=>!t.done);
+    // reset habits
     S.habits.forEach(h=>{h.doneToday=false;});
     S.lastDate=today;
     save();
@@ -1718,26 +1739,38 @@ function renderHabits(){
   el.innerHTML='';
   const todayDow=new Date().getDay();
   list.forEach(h=>{
-    const done=h.done&&h.done[today];
     const activeToday=!h.days||h.days.includes(todayDow);
-    const repeatLabel=h.repeat==='custom'?('↻ '+h.days.map(i=>DAY_FULL[i]).slice(0,2).join(', ')+(h.days.length>2?'…':'')):REPEAT_TYPES.find(r=>r.id===h.repeat)?.label||'↻';
     const dot=h.color||TAG_COLORS[0];
+
+    // for bad habits: done = NOT marked (resisted). For others: done = marked.
+    const isBad=h.style==='count';
+    const todayCount=h.done&&h.done[today]?h.done[today]:0;
+    const target=h.style==='streak'?(h.streakTarget||1):1;
+    const markedToday=todayCount>=target;
+    const done=isBad?false:markedToday; // bad habits never show as "done" via check
+    const resisted=isBad&&!markedToday; // bad habit: not fallen today = good
+
     const chkStyle=done
       ?`background:${dot};border-color:${dot};`
-      :`border-color:${dot};`;
+      :resisted
+        ?`background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.4);`
+        :`border-color:${dot};`;
+
+    // meta: always show streak, plus progress for streak/bad
+    const streakPart=`🔥 ${h.streak||0}d`;
+    const progressPart=h.style==='streak'?` · ${todayCount}/${target}`:isBad?` · ✗ ${todayCount||0}`:'';
+    const tagPart=h.tag?`#${h.tag} · `:'';
+    const metaText=`${tagPart}${streakPart}${progressPart}`;
+
     const row=document.createElement('div');
     row.className='list-item'+(activeToday?'':' item-inactive');
+    row.dataset.id=h.id;
     row.dataset.tag=h.tag||'';
-    const styleIcon={check:'✓',streak:'🔥',count:'×'}[h.style||'check']||'✓';
-    const metaExtra=h.style==='count'?` · ×${h.count||0}`:h.style==='streak'?` · 🔥${h.streak||0}d`:'';
-    const iconColor=h.style==='check'?'#0d0d0d':'rgba(0,0,0,0.8)';
     row.innerHTML=`
-      <div class="chk-c${done?' done':''}" style="${chkStyle}${done?';display:flex;align-items:center;justify-content:center':''}">
-        ${done?'<span style="font-size:9px;color:'+iconColor+';font-weight:700;pointer-events:none">'+styleIcon+'</span>':''}
-      </div>
+      <div class="chk-c${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
         <div class="item-name">${h.name}</div>
-        <div class="item-meta">${h.tag?'#'+h.tag+' · ':''}${repeatLabel}${metaExtra}</div>
+        <div class="item-meta">${metaText}</div>
       </div>
       <button class="edit-btn" title="Editar">✎</button>`;
     row.querySelector('.chk-c').addEventListener('click',e=>{e.stopPropagation();if(activeToday)toggleHabit(h.id,row);});
@@ -1745,25 +1778,55 @@ function renderHabits(){
     el.appendChild(row);
   });
 }
+function getRepeatLabel(h){
+  return h.repeat==='custom'
+    ?('↻ '+h.days.map(i=>DAY_FULL[i]).slice(0,2).join(', ')+(h.days.length>2?'…':''))
+    :REPEAT_TYPES.find(r=>r.id===h.repeat)?.label||'↻';
+}
+
 function toggleHabit(id,row){
   const h=S.habits.find(x=>x.id===id);if(!h)return;
   const today=new Date().toDateString();
   if(!h.done)h.done={};
-  const chk=row.querySelector('.chk-c'),nm=row.querySelector('.item-name');
+  const chk=row.querySelector('.chk-c');
   const dot=h.color||TAG_COLORS[0];
-  if(h.done[today]){
-    delete h.done[today];h.streak=Math.max(0,(h.streak||1)-1);
+  const isBad=h.style==='count';
+  const target=h.style==='streak'?(h.streakTarget||1):1;
+  const cur=h.done[today]||0;
+
+  if(isBad){
+    // bad habit: each tap = +1 failure. Long tap could reset, but for now tap = log failure
+    h.done[today]=(cur+1);
+    // streak counts days with ZERO failures
+    chk.style.background=dot+'44';chk.style.borderColor=dot;
+    showToast('✗ registrado');
+  } else if(cur>=target){
+    // already done — untoggle
+    delete h.done[today];
+    h.streak=Math.max(0,(h.streak||1)-1);
     chk.classList.remove('done');
     chk.style.background='var(--bg)';chk.style.borderColor=dot;
   }else{
-    h.done[today]=1;h.streak=(h.streak||0)+1;h.doneToday=true;
-    chk.classList.add('done');
-    chk.style.background=dot;chk.style.borderColor='transparent';
-    addXP(XP_H,chk);showToast('+'+XP_H+' XP');
-    if(S.habits.filter(hh=>hh.done&&hh.done[today]).length===1)S.streak=(S.streak||0)+1;
+    h.done[today]=(cur+1);
+    const newCount=h.done[today];
+    if(newCount>=target){
+      h.streak=(h.streak||0)+1;h.doneToday=true;
+      chk.classList.add('done');
+      chk.style.background=dot;chk.style.borderColor='transparent';
+      addXP(XP_H,chk);showToast('+'+XP_H+' XP');
+    }else{
+      chk.style.background=dot+'55';chk.style.borderColor=dot;
+    }
   }
+
+  // update meta live
+  const newCount=h.done[today]||0;
+  const streakPart=`🔥 ${h.streak||0}d`;
+  const progressPart=h.style==='streak'?` · ${newCount}/${target}`:isBad?` · ✗ ${newCount}`:'';
+  const tagPart=h.tag?`#${h.tag} · `:'';
+  row.querySelector('.item-meta').textContent=`${tagPart}${streakPart}${progressPart}`;
+
   save();updateRing();updateXPBar();snapshotHistory();
-  row.querySelector('.item-meta').textContent=(h.tag?'#'+h.tag+' · ':'')+repeatLabel+(h.style==='streak'?' · 🔥'+(h.streak||0)+'d':h.style==='count'?' · ×'+(h.count||0):'');
 }
 
 /* TASKS */
@@ -1818,10 +1881,12 @@ function toggleTask(id,row){
   if(t.done){
     chk.classList.add('done');
     chk.style.background=dot;chk.style.borderColor='transparent';
+    if(nm){nm.classList.add('done');}
     addXP(XP_T,chk);showToast('+'+XP_T+' XP');
   }else{
     chk.classList.remove('done');
     chk.style.background='var(--bg)';chk.style.borderColor=dot;
+    if(nm){nm.classList.remove('done');}
   }
   save();updateRing();snapshotHistory();
 }
@@ -1866,7 +1931,8 @@ function animateCount(el,target,prefix,suffix,duration){
 }
 function renderFinance(animate){
   const now=Date.now();
-  const cutoff=now-30*24*60*60*1000;
+  const days={week:7,month:30,year:365}[_finPeriod]||30;
+  const cutoff=now-days*24*60*60*1000;
   function txDate(t){
     if(!t.date)return now;
     // date stored as pt-BR string dd/mm/yyyy or ISO yyyy-mm-dd
@@ -1878,30 +1944,44 @@ function renderFinance(animate){
   const outs=recent.filter(t=>t.type==='out').reduce((a,t)=>a+t.amount,0);
   const saldo=ins-outs;
 
-  const setCard=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent='R$ '+fmt(val);};
-  setCard('fp-total',saldo);
-  // economia = % da receita que não foi gasta
-  const econEl=document.getElementById('fp-save');
-  if(econEl){
-    const pct=ins>0?Math.round(Math.max(0,saldo)/ins*100):0;
-    econEl.textContent=pct+'%';
-  }
-  // card receita com formato curto
-  const recEl=document.getElementById('fp-receita');
-  if(recEl)recEl.textContent=fmtShort(ins);
+  const pct=ins>0?Math.round(Math.max(0,saldo)/ins*100):0;
 
-  // receita/despesa
-  const inEl=document.getElementById('fin-in'),outEl=document.getElementById('fin-out');
-  if(animate&&inEl&&outEl){
-    inEl.classList.add('animating');outEl.classList.add('animating');
-    let p=0;const dur=600,t0=Date.now();
-    const tick=()=>{p=Math.min(1,(Date.now()-t0)/dur);const e=1-Math.pow(1-p,3);
-      inEl.textContent=fmtShort(ins*e);outEl.textContent=fmtShort(outs*e);
-      if(p<1)requestAnimationFrame(tick);
-      else{inEl.textContent=fmtShort(ins);outEl.textContent=fmtShort(outs);inEl.classList.remove('animating');outEl.classList.remove('animating');}
-    };requestAnimationFrame(tick);
-  }else if(inEl&&outEl){
-    inEl.textContent=fmtShort(ins);outEl.textContent=fmtShort(outs);
+  if(animate){
+    const dur=700,t0=Date.now();
+    const totalEl=document.getElementById('fp-total');
+    const recEl=document.getElementById('fp-receita');
+    const econEl=document.getElementById('fp-save');
+    const inEl=document.getElementById('fin-in');
+    const outEl=document.getElementById('fin-out');
+    const tick=()=>{
+      const p=Math.min(1,(Date.now()-t0)/dur);
+      const e=1-Math.pow(1-p,3);
+      if(totalEl) totalEl.textContent='R$ '+fmt(saldo*e);
+      if(recEl)   recEl.textContent=fmtShort(ins*e);
+      if(econEl)  econEl.textContent=Math.round(pct*e)+'%';
+      if(inEl)    inEl.textContent=fmtShort(ins*e);
+      if(outEl)   outEl.textContent=fmtShort(outs*e);
+      if(p<1){requestAnimationFrame(tick);}
+      else{
+        if(totalEl) totalEl.textContent='R$ '+fmt(saldo);
+        if(recEl)   recEl.textContent=fmtShort(ins);
+        if(econEl)  econEl.textContent=pct+'%';
+        if(inEl)    inEl.textContent=fmtShort(ins);
+        if(outEl)   outEl.textContent=fmtShort(outs);
+      }
+    };
+    requestAnimationFrame(tick);
+  }else{
+    const totalEl=document.getElementById('fp-total');
+    const recEl=document.getElementById('fp-receita');
+    const econEl=document.getElementById('fp-save');
+    const inEl=document.getElementById('fin-in');
+    const outEl=document.getElementById('fin-out');
+    if(totalEl) totalEl.textContent='R$ '+fmt(saldo);
+    if(recEl)   recEl.textContent=fmtShort(ins);
+    if(econEl)  econEl.textContent=pct+'%';
+    if(inEl)    inEl.textContent=fmtShort(ins);
+    if(outEl)   outEl.textContent=fmtShort(outs);
   }
 
   // categories
@@ -2047,7 +2127,7 @@ function openModal(type,editId){
     const recurLabel={once:'uma vez',daily:'todo dia',weekly:'semanal',monthly:'mensal',custom:'personalizado'};
     const curCat=h&&h.cat?h.cat:'';
     const curRecurLbl=recurLabel[mRepeat]||'todo dia';
-    const styleLabel={check:'marcar',streak:'sequência',count:'contagem'};
+    const styleLabel={check:'marcar',streak:'sequência',count:'mau hábito'};
     body.innerHTML=`
       <input class="m-flat" id="m-name" placeholder="Nome do hábito" autocomplete="off" value="${h?h.name:''}">
       <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5;margin-top:10px;border-bottom:none">${h&&h.desc?h.desc:''}</textarea>
@@ -2088,7 +2168,12 @@ function openModal(type,editId){
         <div class="m-recur-chips">
           <button class="m-recur-chip${!h||!h.style||h.style==='check'?' sel':''}" onclick="selectHabitStyle(this,'check')">marcar ✓</button>
           <button class="m-recur-chip${h&&h.style==='streak'?' sel':''}" onclick="selectHabitStyle(this,'streak')">sequência 🔥</button>
-          <button class="m-recur-chip${h&&h.style==='count'?' sel':''}" onclick="selectHabitStyle(this,'count')">contagem ×</button>
+          <button class="m-recur-chip${h&&h.style==='count'?' sel':''}" onclick="selectHabitStyle(this,'count')">mau hábito ✗</button>
+        </div>
+        <div id="streak-target-wrap" style="display:${h&&h.style==='streak'?'flex':'none'};align-items:center;gap:10px;margin-top:12px;">
+          <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.1em;">vezes por dia</span>
+          <input id="m-streak-target" type="number" min="1" max="99" value="${h&&h.streakTarget||2}"
+            style="width:52px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.8);font-family:var(--mono);font-size:14px;text-align:center;padding:4px 0;outline:none;">
         </div>
       </div>
       ${isEdit?`<button class="m-delete" onclick="deleteItem('habit')">excluir hábito</button>`:''}
@@ -2120,11 +2205,11 @@ function openModal(type,editId){
     const curCat=t&&t.cat?t.cat:'';
     const curTag=t&&t.tag?t.tag:'';
     const curDue=t&&t.due?t.due:'';
-    const recurLabel={once:'uma vez',daily:'todo dia',weekly:'semanal',monthly:'mensal',custom:'personalizado'};
-    const curRecurLbl=recurLabel[mRepeat]||'uma vez';
+    const curNotifyTime=t&&t.notifyTime?t.notifyTime:'';
     const dueLbl=curDue?new Date(curDue+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
     const curPrio=t&&t.priority?t.priority:'normal';
-    const prioLabel={normal:'normal',baixa:'baixa',media:'média',alta:'alta'};
+    const prioLabel={normal:'normal',baixa:'baixa',media:'média',alta:'alta',urgente:'urgente'};
+    const notifyLbl=curNotifyTime||'—';
     body.innerHTML=`
       <input class="m-flat" id="m-name" placeholder="Nome da tarefa" autocomplete="off" value="${t?t.name:''}">
       <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5;margin-top:10px;border-bottom:none">${t&&t.desc?t.desc:''}</textarea>
@@ -2136,9 +2221,6 @@ function openModal(type,editId){
         <div class="m-chip${curTag?' has-val':''}" id="chip-tag" onclick="toggleChipPanel('tag')">
           <span class="m-chip-lbl">tag</span>${curTag||'—'}
         </div>
-        <div class="m-chip${mRepeat!=='once'?' has-val':''}" id="chip-recur" onclick="toggleChipPanel('recur')">
-          <span class="m-chip-lbl">rep</span>${curRecurLbl}
-        </div>
         <div class="m-chip has-val" id="chip-color" onclick="toggleChipPanel('color')">
           <div class="m-chip-dot" style="background:${mColor}"></div>cor
         </div>
@@ -2148,6 +2230,9 @@ function openModal(type,editId){
         <div class="m-chip${curDue?' has-val':''}" id="chip-due" onclick="toggleChipPanel('due')">
           <span class="m-chip-lbl">data</span>${dueLbl}
         </div>
+        <div class="m-chip${curNotifyTime?' has-val':''}" id="chip-notify" onclick="toggleChipPanel('notify')">
+          <span class="m-chip-lbl">notificar</span>${notifyLbl}
+        </div>
       </div>
       <div class="m-chip-panel" id="panel-cat-t">
         <div class="m-tag-presets" id="m-cat-t-presets"></div>
@@ -2155,14 +2240,15 @@ function openModal(type,editId){
       <div class="m-chip-panel" id="panel-tag">
         <input class="m-flat" id="m-tag" placeholder="sua tag…" value="${curTag}">
       </div>
-      <div class="m-chip-panel" id="panel-recur">
-        <div class="m-recur-chips" id="m-repeat-row"></div>
-        <div id="m-days-section" style="display:none;margin-top:12px">
-          <div class="m-days" id="m-days-row"></div>
-        </div>
-      </div>
       <div class="m-chip-panel" id="panel-due">
         <input class="m-chip-date" id="m-due" type="date" value="${curDue}">
+      </div>
+      <div class="m-chip-panel" id="panel-notify">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input class="m-chip-date" id="m-notify-time" type="time" value="${curNotifyTime}" style="flex:1">
+          <button class="m-recur-chip" onclick="document.getElementById('m-notify-time').value='';_updateChip('notify','—',false);" style="flex-shrink:0">limpar</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.25);margin-top:8px;letter-spacing:0.08em;">notificação diária no horário escolhido</div>
       </div>
       <div class="m-chip-panel" id="panel-color">
         <div class="m-chip-colors" id="m-colors"></div>
@@ -2202,7 +2288,12 @@ function openModal(type,editId){
       const lbl=v?new Date(v+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
       _updateChip('due',lbl,!!v);
     });
-    renderMColors();renderMRepeat();renderMDays();
+    // notify time live update
+    const ntEl=document.getElementById('m-notify-time');
+    if(ntEl) ntEl.addEventListener('change',()=>{
+      _updateChip('notify',ntEl.value||'—',!!ntEl.value);
+    });
+    renderMColors();
 
   }else{
     const isIn=type==='fin-in';
@@ -2210,16 +2301,18 @@ function openModal(type,editId){
     const catOpts=CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
     body.innerHTML=`
       <input class="m-flat" id="m-name" placeholder="${isIn?'Ex: Salário, Freelance':'Ex: Mercado, Aluguel'}" autocomplete="off">
-      <input class="m-flat" id="m-amount" type="number" placeholder="Valor (R$)" min="0" step="0.01" style="margin-top:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3);">R$</span>
+        <input class="m-flat" id="m-amount" type="number" placeholder="0,00" min="0" step="0.01" style="flex:1;margin-top:0">
+      </div>
       <div class="m-divider"></div>
       <div class="m-chips-row">
         ${!isIn?`<div class="m-chip" id="chip-cat" onclick="toggleChipPanel('cat')"><span class="m-chip-lbl">cat</span>—</div>`:''}
         <div class="m-chip" id="chip-recur-fin" onclick="toggleChipPanel('recur-fin')"><span class="m-chip-lbl">rep</span>uma vez</div>
       </div>
       ${!isIn?`<div class="m-chip-panel" id="panel-cat">
-        <select class="m-flat" id="m-cat" style="appearance:none;cursor:pointer;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);font-family:var(--mono);font-size:11px;padding:6px 0;width:100%;outline:none">
-          <option value="">selecionar…</option>${catOpts}
-        </select>
+        <div class="m-tag-presets" id="fin-cat-presets"></div>
+        <input type="hidden" id="m-cat" value="">
       </div>`:''}
       <div class="m-chip-panel" id="panel-recur-fin">
         <div class="m-recur-chips">
@@ -2231,11 +2324,19 @@ function openModal(type,editId){
       <button class="m-save" id="m-fin-save-btn" data-t="${isIn?'in':'out'}">${isIn?'adicionar entrada':'registrar saída'}</button>`;
     document.getElementById('m-fin-save-btn').onclick=function(){saveFinance(this.dataset.t);};
     if(!isIn){
-      const catSel=document.getElementById('m-cat');
-      if(catSel) catSel.addEventListener('change',()=>{
-        const v=catSel.value;
-        const lbl=CATS.find(c=>c.id===v)?.name||'—';
-        _updateChip('cat',lbl,!!v);
+      const presetsEl=document.getElementById('fin-cat-presets');
+      const catInput=document.getElementById('m-cat');
+      CATS.forEach(cat=>{
+        const b=document.createElement('button');
+        b.className='m-tag-preset';
+        b.textContent=cat.name;
+        b.onclick=()=>{
+          presetsEl.querySelectorAll('.m-tag-preset').forEach(x=>x.classList.remove('sel'));
+          b.classList.add('sel');
+          catInput.value=cat.id;
+          _updateChip('cat',cat.name,true);
+        };
+        presetsEl.appendChild(b);
       });
     }
   }
@@ -2303,12 +2404,17 @@ function deleteItem(type){
 function saveHabit(){
   const name=(document.getElementById('m-name').value||'').trim();if(!name)return;
   const tag=(document.getElementById('m-tag')?.value||'').trim().toLowerCase();
-  const cat=window._mTaskCat||'';
+  const cat=window._mHabitCat||window._mTaskCat||'';
   const desc=(document.getElementById('m-desc')?.value||'').trim();
   const days=mRepeat==='daily'?[0,1,2,3,4,5,6]:mRepeat==='once'?[]:mDays;
   const habStyle=window._mHabitStyle||document.querySelector('#panel-hstyle .m-recur-chip.sel')?.dataset?.val||'check';
-  if(mEditId){const h=S.habits.find(x=>x.id===mEditId);if(h){h.name=name;h.desc=desc;h.tag=tag;h.cat=cat;h.color=mColor;h.repeat=mRepeat;h.days=[...days];h.style=habStyle;}}
-  else S.habits.push({id:Date.now(),name,desc,tag,cat,color:mColor,repeat:mRepeat,style:habStyle||'check',days:[...days],streak:0,done:{}});
+  const streakTarget=habStyle==='streak'?Math.max(1,parseInt(document.getElementById('m-streak-target')?.value)||2):1;
+  if(mEditId){
+    const h=S.habits.find(x=>x.id===mEditId);
+    if(h){h.name=name;h.desc=desc;h.tag=tag;h.cat=cat;h.color=mColor;h.repeat=mRepeat;h.days=[...days];h.style=habStyle;h.streakTarget=streakTarget;}
+  }else{
+    S.habits.push({id:Date.now(),name,desc,tag,cat,color:mColor,repeat:mRepeat,style:habStyle||'check',streakTarget,days:[...days],streak:0,done:{}});
+  }
   save();closeModal();renderHabits();renderHabitFilters();updateRing();
 }
 function saveTask(){
@@ -2320,10 +2426,16 @@ function saveTask(){
   const prio=prioMap[prioText]||'normal';
   const due=document.getElementById('m-due')?document.getElementById('m-due').value||null:null;
   const desc=(document.getElementById('m-desc')?.value||'').trim();
-  const days=mRepeat==='daily'?[0,1,2,3,4,5,6]:mRepeat==='once'?[]:mDays;
-  if(mEditId){const t=S.tasks.find(x=>x.id===mEditId);if(t){t.name=name;t.desc=desc;t.tag=tag;t.cat=cat;t.color=mColor;t.priority=prio;t.due=due;t.repeat=mRepeat;t.days=[...days];}}
-  else S.tasks.push({id:Date.now(),name,desc,tag,color:mColor,priority:prio,due,repeat:mRepeat,days:[...days],done:false});
+  const notifyTime=document.getElementById('m-notify-time')?.value||'';
+  const cat=window._mTaskCat||'';
+  if(mEditId){
+    const t=S.tasks.find(x=>x.id===mEditId);
+    if(t){t.name=name;t.desc=desc;t.tag=tag;t.cat=cat;t.color=mColor;t.priority=prio;t.due=due;t.notifyTime=notifyTime;}
+  }else{
+    S.tasks.push({id:Date.now(),name,desc,tag,cat,color:mColor,priority:prio,due,notifyTime,done:false});
+  }
   save();closeModal();renderTasks();renderTaskFilters();updateRing();
+  if(notifyTime) scheduleTaskNotifications();
 }
 function toggleInvest(row){const sw=row.querySelector('.fin-invest-switch');sw.classList.toggle('on');}
 function selectRecur(el){
@@ -3227,6 +3339,7 @@ function bootApp(){
     try{
       updateGreeting();updateXPBar();updateRing();
       renderDashboard();renderHabitFilters();renderTaskFilters();snapshotHistory();
+      initNotifications();
     }catch(e){console.warn('bootApp render error',e);}
 
     const scr=document.getElementById('intro-screen');
@@ -3606,12 +3719,12 @@ function selectPriority(btn, val){
 function selectHabitStyle(btn, val){
   btn.closest('.m-recur-chips').querySelectorAll('.m-recur-chip').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
-  const styleLabel={check:'marcar',streak:'sequência',count:'contagem'};
+  const styleLabel={check:'marcar',streak:'sequência',count:'mau hábito'};
   _updateChip('style',styleLabel[val]||val, val!=='check');
-  // store on current editing habit
+  const wrap=document.getElementById('streak-target-wrap');
+  if(wrap) wrap.style.display=val==='streak'?'flex':'none';
   const h=mEditId?S.habits.find(x=>x.id===mEditId):null;
   if(h) h.style=val;
-  // also store in a temp var for new habits
   window._mHabitStyle=val;
 }
 
@@ -3648,6 +3761,72 @@ function _setHabitTagFilter(tag){
   if(panel)panel.classList.remove('open');
   if(btn)btn.classList.toggle('active',tag!=='all');
 }
+let _finPeriod='month';
+function _setFinPeriod(p,btn){
+  _finPeriod=p;
+  document.querySelectorAll('.fin-period-btn').forEach(b=>b.classList.remove('act'));
+  if(btn)btn.classList.add('act');
+  renderFinance(true);
+}
+
+/* ── NOTIFICATIONS ── */
+const SW_SCRIPT=`
+self.addEventListener('push',e=>{
+  const d=e.data?e.data.json():{title:'Avance',body:'Lembrete'};
+  self.registration.showNotification(d.title,{body:d.body,icon:'/icon.png',badge:'/icon.png',vibrate:[100,50,100]});
+});
+self.addEventListener('notificationclick',e=>{e.notification.close();});
+self.addEventListener('message',e=>{
+  if(e.data&&e.data.type==='SCHEDULE'){
+    const tasks=e.data.tasks||[];
+    // store tasks for alarm check
+    self._pendingTasks=tasks;
+  }
+});
+`;
+
+let _swReg=null;
+async function initNotifications(){
+  if(!('Notification' in window))return;
+  // register SW from blob
+  try{
+    const blob=new Blob([SW_SCRIPT],{type:'application/javascript'});
+    const swUrl=URL.createObjectURL(blob);
+    _swReg=await navigator.serviceWorker.register(swUrl,{scope:'/'});
+  }catch(e){/* SW registration failed silently */}
+
+  if(Notification.permission==='default'){
+    // ask subtly after short delay
+    setTimeout(async()=>{
+      const p=await Notification.requestPermission();
+      if(p==='granted') scheduleTaskNotifications();
+    },3000);
+  }else if(Notification.permission==='granted'){
+    scheduleTaskNotifications();
+  }
+}
+
+function scheduleTaskNotifications(){
+  if(Notification.permission!=='granted')return;
+  // cancel existing alarms
+  if(window._notifTimers){window._notifTimers.forEach(clearTimeout);}
+  window._notifTimers=[];
+
+  const now=new Date();
+  S.tasks.filter(t=>t.notifyTime&&!t.done).forEach(t=>{
+    const [hh,mm]=t.notifyTime.split(':').map(Number);
+    const fireAt=new Date();
+    fireAt.setHours(hh,mm,0,0);
+    // if time already passed today, schedule for tomorrow
+    if(fireAt<=now) fireAt.setDate(fireAt.getDate()+1);
+    const delay=fireAt-now;
+    const tid=setTimeout(()=>{
+      new Notification('📋 '+t.name,{body:t.desc||'Hora de fazer sua tarefa!',icon:'/favicon.ico'});
+    },delay);
+    window._notifTimers.push(tid);
+  });
+}
+
 /* ── EXPOSE GLOBALS (required for type=module) ── */
 Object.assign(window,{
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
@@ -3660,6 +3839,8 @@ Object.assign(window,{
   toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
   selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,
   _setTransFilter,_renderTransList,
+  _setFinPeriod,
+  initNotifications,scheduleTaskNotifications,
 });
 </script>
 </body>
