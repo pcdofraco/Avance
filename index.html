@@ -3770,30 +3770,14 @@ function _setFinPeriod(p,btn){
 }
 
 /* ── NOTIFICATIONS ── */
-const SW_SCRIPT=`
-self.addEventListener('push',e=>{
-  const d=e.data?e.data.json():{title:'Avance',body:'Lembrete'};
-  self.registration.showNotification(d.title,{body:d.body,icon:'/icon.png',badge:'/icon.png',vibrate:[100,50,100]});
-});
-self.addEventListener('notificationclick',e=>{e.notification.close();});
-self.addEventListener('message',e=>{
-  if(e.data&&e.data.type==='SCHEDULE'){
-    const tasks=e.data.tasks||[];
-    // store tasks for alarm check
-    self._pendingTasks=tasks;
-  }
-});
-`;
-
 let _swReg=null;
 async function initNotifications(){
-  if(!('Notification' in window))return;
-  // register SW from blob
+  if(!('Notification' in window)||!('serviceWorker' in navigator))return;
+  // register from /sw.js — required for iOS PWA
   try{
-    const blob=new Blob([SW_SCRIPT],{type:'application/javascript'});
-    const swUrl=URL.createObjectURL(blob);
-    _swReg=await navigator.serviceWorker.register(swUrl,{scope:'/'});
-  }catch(e){/* SW registration failed silently */}
+    _swReg=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
+    await navigator.serviceWorker.ready;
+  }catch(e){console.warn('SW registration failed:',e);}
 
   if(Notification.permission==='default'){
     // ask subtly after short delay
@@ -3808,20 +3792,34 @@ async function initNotifications(){
 
 function scheduleTaskNotifications(){
   if(Notification.permission!=='granted')return;
-  // cancel existing alarms
   if(window._notifTimers){window._notifTimers.forEach(clearTimeout);}
   window._notifTimers=[];
-
   const now=new Date();
   S.tasks.filter(t=>t.notifyTime&&!t.done).forEach(t=>{
     const [hh,mm]=t.notifyTime.split(':').map(Number);
     const fireAt=new Date();
     fireAt.setHours(hh,mm,0,0);
-    // if time already passed today, schedule for tomorrow
     if(fireAt<=now) fireAt.setDate(fireAt.getDate()+1);
     const delay=fireAt-now;
-    const tid=setTimeout(()=>{
-      new Notification('📋 '+t.name,{body:t.desc||'Hora de fazer sua tarefa!',icon:'/favicon.ico'});
+    const tid=setTimeout(async()=>{
+      // prefer SW showNotification (works with screen locked on Android)
+      if(_swReg && _swReg.active){
+        try{
+          await _swReg.showNotification('📋 '+t.name,{
+            body:t.desc||'Hora de fazer sua tarefa!',
+            icon:'/icon-192.png',
+            badge:'/icon-192.png',
+            vibrate:[100,50,100,50,100],
+            tag:'task-'+t.id,
+            requireInteraction:false
+          });
+          return;
+        }catch(e){}
+      }
+      // fallback
+      if(Notification.permission==='granted'){
+        new Notification('📋 '+t.name,{body:t.desc||'Hora de fazer sua tarefa!',icon:'/icon-192.png'});
+      }
     },delay);
     window._notifTimers.push(tid);
   });
