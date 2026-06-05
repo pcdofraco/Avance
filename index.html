@@ -770,10 +770,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #sec-dashboard{
   flex-direction:column;
   align-items:center;
+  position:relative;
   height:calc(100vh - var(--st) - 80px);
   padding-top:0!important;
   overflow:hidden;
 }
+
+/* centro absoluto para o 3D + ícones */
+#dash-center-block{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%, -54%);
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;
+}
+
 #dash-spiral{
   display:block;
   margin:0 auto;
@@ -819,9 +830,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* greeting pinned to bottom */
 #dash-footer-greet{
-  margin-top:auto;
-  padding-bottom:32px;
+  position:absolute;
+  bottom:28px;
+  left:0;
+  padding:0 clamp(16px,5vw,48px);
   width:100%;
+  box-sizing:border-box;
 }
 .dash-greet{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;color:var(--t4);text-transform:uppercase;margin-bottom:6px;}
 .dash-name{font-size:clamp(22px,6vw,30px);font-weight:600;color:var(--t1);letter-spacing:-0.02em;margin-bottom:0;}
@@ -1738,14 +1752,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
     <div id="sec-dashboard" class="section active">
 
-      <!-- spacer absorbs top space pushing 3D to center -->
-      <div style="flex:1;min-height:0;"></div>
+      <!-- bloco central: 3D + ícones -->
+      <div id="dash-center-block">
+        <canvas id="dash-spiral" width="300" height="200"></canvas>
 
-      <!-- 3D centrado -->
-      <canvas id="dash-spiral" width="300" height="200"></canvas>
-
-      <!-- SESSION ICONS -->
-      <div id="dash-sessions">
+        <!-- SESSION ICONS -->
+        <div id="dash-sessions">
         <button class="dash-sess-btn" data-sess="habitos" onclick="_selectSess(this,'habitos')">
           <div class="dash-sess-icon">
             <svg viewBox="0 0 24 24"><path d="M12 20.84a1 1 0 0 1-.71-.29l-7.4-7.4a5 5 0 0 1 7.07-7.07l1.04 1.04 1.04-1.04a5 5 0 0 1 7.07 7.07l-7.4 7.4a1 1 0 0 1-.71.29z"/></svg>
@@ -1776,9 +1788,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           </div>
           <span class="dash-sess-lbl">estudos</span>
         </button>
-      </div>
+      </div><!-- /dash-sessions -->
+      </div><!-- /dash-center-block -->
 
-      <!-- saudação no canto inferior esquerdo -->
+      <!-- saudação fixada no canto inferior esquerdo -->
       <div id="dash-footer-greet">
         <div class="dash-greet" id="dash-greet-line">bom dia</div>
         <div class="dash-name" id="dash-name-big">—</div>
