@@ -10,14 +10,29 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0d0d0d">
 <title>AVANCE</title>
+<script>
+// libera visibilidade assim que fontes carregam (ou após 800ms no máximo)
+(function(){
+  function show(){document.body&&document.body.classList.add('fonts-ready');}
+  if(document.fonts&&document.fonts.ready){
+    document.fonts.ready.then(show);
+  }
+  setTimeout(show,800);
+})();
+</script>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Avance">
   <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=block" rel="stylesheet">
 <style>
+/* bloqueia qualquer flash — tudo preto até JS liberar */
+html{background:#0d0d0d;}
+body{visibility:hidden;background:#0d0d0d;}
+body.fonts-ready{visibility:visible;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0d0d0d;
@@ -30,6 +45,8 @@
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
 html,body{height:100%;width:100%;background:var(--bg);color:var(--t1);font-family:var(--sans);overflow:hidden;position:fixed;}
+#app{opacity:0;transition:opacity 0.35s ease;}
+#app.ready{opacity:1;}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;}
 #app{position:relative;z-index:1;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);}
 
@@ -578,7 +595,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   border-bottom:1px solid rgba(255,255,255,0.06);
   margin-bottom:4px;
 }
-.fin-pcard-lbl{font-family:var(--mono);font-size:8px;letter-spacing:0.16em;color:var(--t4);text-transform:uppercase;margin-bottom:7px;}
+.fin-pcard-lbl{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;color:rgba(255,255,255,0.38);text-transform:uppercase;margin-bottom:8px;}
 .fin-pcard-val{font-size:clamp(16px,4vw,20px);font-weight:300;color:var(--t1);letter-spacing:-0.02em;}
 .fin-pcard-total .fin-pcard-val{font-size:clamp(22px,5.5vw,30px);}
 .fin-pcard-editable{cursor:text;}
@@ -1561,7 +1578,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   pointer-events:none;
   transition:opacity 0.55s ease;
 }
-#intro-screen.out{opacity:0;}
+#intro-screen.out{opacity:0;pointer-events:none;}
 #intro-screen.gone{display:none;}
 
 #intro-inner{
@@ -1640,7 +1657,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 </div>
 
 <!-- INTRO -->
-<div id="intro-screen" class="gone">
+<div id="intro-screen">
   <div id="intro-inner">
     <div id="intro-greeting"></div>
     <div id="intro-name"></div>
@@ -4252,7 +4269,7 @@ function bootApp(){
   const fullGreet='olá, '+word;
   const userName=(S.userName||'').trim();
 
-  scr.classList.remove('gone','out');
+  scr.classList.remove('out');
 
   setTimeout(()=>{
     greetEl.classList.add('show');
@@ -4278,8 +4295,7 @@ function bootApp(){
         const hold=userName?1100:900;
         setTimeout(()=>{
           scr.classList.add('out');
-          appEl.classList.add('app-visible');
-          appEl.style.opacity='1';
+          appEl.classList.add('ready');
           const fabW=document.getElementById('fab-wrap');
           if(fabW){fabW.style.display='';updateFab();}
           setTimeout(()=>scr.classList.add('gone'),580);
