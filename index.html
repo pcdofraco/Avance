@@ -453,7 +453,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── CONTENT ── */
 #content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 clamp(16px,5vw,48px) calc(24px + var(--sb));}
 #content::-webkit-scrollbar{display:none;}
-.section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}#sec-dashboard{padding-top:52px;}
+.section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}
 #sec-dashboard.anim-up{animation:secInDash 0.3s ease-out both!important;opacity:1!important;}
 @keyframes secIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes secInDash{from{transform:translateY(10px)}to{transform:translateY(0)}}
@@ -768,11 +768,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── DASHBOARD ── */
 /* ── DASHBOARD LAYOUT ── */
 #sec-dashboard{
-  display:flex!important;
   flex-direction:column;
   align-items:center;
-  min-height:calc(100vh - 80px);
+  height:calc(100vh - var(--st) - 80px);
   padding-top:0!important;
+  overflow:hidden;
 }
 #dash-spiral{
   display:block;
@@ -876,44 +876,192 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   transition:background 0.3s,backdrop-filter 0.3s;
 }
 #profile-sheet.open #profile-sheet-bg{
-  background:rgba(0,0,0,0.5);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
 }
 #profile-inner{
-  position:absolute;bottom:0;left:0;right:0;
-  background:rgba(14,14,14,0.98);
-  border-top:1px solid rgba(255,255,255,0.08);
-  border-radius:20px 20px 0 0;
-  padding:28px 28px calc(28px + var(--sb));
-  transform:translateY(100%);
+  position:absolute;bottom:0;
+  left:50%;transform:translateX(-50%) translateY(100%);
+  width:100%;max-width:480px;
+  background:rgba(12,12,12,0.97);
+  border-top:1px solid rgba(255,255,255,0.06);
+  border-radius:24px 24px 0 0;
+  padding:20px 24px calc(32px + var(--sb));
   transition:transform 0.38s cubic-bezier(0.34,1.1,0.64,1);
+  box-sizing:border-box;
 }
-#profile-sheet.open #profile-inner{transform:translateY(0);}
-#profile-avatar{font-size:32px;margin-bottom:14px;}
-#profile-name-display{font-size:22px;font-weight:600;color:rgba(255,255,255,0.85);margin-bottom:6px;letter-spacing:-0.02em;}
+#profile-sheet.open #profile-inner{transform:translateX(-50%) translateY(0);}
+
+/* handle */
+#profile-handle{width:28px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 24px;}
+
+/* top row: avatar + name + gear */
+#profile-top-row{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+
+/* avatar */
+#profile-avatar-btn{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  font-size:26px;line-height:1;
+  overflow:hidden;
+  transition:border-color 0.2s;
+  position:relative;
+}
+#profile-avatar-btn:active{border-color:rgba(255,255,255,0.25);}
+#profile-avatar-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+#profile-avatar-btn .av-edit-hint{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(0,0,0,0.55);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity 0.2s;
+  font-size:11px;color:rgba(255,255,255,0.8);
+}
+#profile-avatar-btn:hover .av-edit-hint{opacity:1;}
+
+/* name + email */
+#profile-name-block{flex:1;min-width:0;}
+#profile-name-display{
+  font-size:17px;font-weight:600;
+  color:rgba(255,255,255,0.88);
+  letter-spacing:-0.02em;
+  margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#profile-sub-display{
+  font-family:var(--mono);font-size:9px;
+  color:rgba(255,255,255,0.22);
+  letter-spacing:0.06em;
+}
 #profile-name-input{
-  width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-  border-radius:10px;padding:10px 14px;color:var(--t1);font-family:var(--sans);font-size:14px;
-  margin-bottom:18px;box-sizing:border-box;outline:none;
+  width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.1);
+  padding:4px 0;color:var(--t1);font-family:var(--sans);font-size:17px;font-weight:600;
+  letter-spacing:-0.02em;outline:none;margin-bottom:3px;
+  transition:border-color 0.2s;
 }
-#profile-name-input:focus{border-color:rgba(255,255,255,0.25);}
-#profile-xp-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
-#p-xp-lbl{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:rgba(255,255,255,0.3);text-transform:uppercase;}
-#p-xp-txt{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2);}
-#profile-xp-track{width:100%;height:2px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:20px;}
-#profile-xp-fill{height:100%;background:rgba(255,255,255,0.4);border-radius:2px;transition:width 0.5s ease;width:0%;}
-#profile-streak-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid rgba(255,255,255,0.06);margin-bottom:16px;}
-.p-stat-lbl{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
-.p-stat-val{font-family:var(--mono);font-size:18px;font-weight:700;color:rgba(255,255,255,0.6);}
-#profile-logout{
-  width:100%;background:none;border:1px solid rgba(255,255,255,0.07);
-  border-radius:10px;padding:12px;
-  font-family:var(--mono);font-size:9px;letter-spacing:0.15em;
-  color:rgba(255,255,255,0.2);text-transform:uppercase;cursor:pointer;
+#profile-name-input:focus{border-bottom-color:rgba(255,255,255,0.28);}
+
+/* gear button */
+#profile-gear-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:none;border:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  color:rgba(255,255,255,0.25);
   transition:border-color 0.2s,color 0.2s;
 }
-#profile-logout:active{border-color:rgba(255,80,70,0.4);color:rgba(255,80,70,0.6);}
+#profile-gear-btn:active{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);}
+#profile-gear-btn svg{width:14px;height:14px;}
+
+/* xp bar */
+#profile-xp-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+#p-xp-lbl{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:rgba(255,255,255,0.22);text-transform:uppercase;}
+#p-xp-txt{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.15);}
+#profile-xp-track{width:100%;height:1px;background:rgba(255,255,255,0.07);border-radius:1px;margin-bottom:22px;}
+#profile-xp-fill{height:100%;background:rgba(255,255,255,0.3);border-radius:1px;transition:width 0.5s ease;width:0%;}
+
+/* stats row */
+#profile-streak-row{
+  display:flex;gap:0;
+  border-top:1px solid rgba(255,255,255,0.05);
+  padding-top:16px;margin-bottom:20px;
+}
+.p-stat-item{flex:1;text-align:center;}
+.p-stat-item+.p-stat-item{border-left:1px solid rgba(255,255,255,0.05);}
+.p-stat-lbl{font-family:var(--mono);font-size:7px;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;display:block;margin-bottom:4px;}
+.p-stat-val{font-family:var(--mono);font-size:18px;font-weight:300;color:rgba(255,255,255,0.5);display:block;letter-spacing:-0.02em;}
+
+/* logout */
+#profile-logout{
+  width:100%;background:none;border:none;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.16em;
+  color:rgba(255,80,70,0.3);text-transform:uppercase;cursor:pointer;
+  padding:8px 0;text-align:center;
+  transition:color 0.2s;
+}
+#profile-logout:active{color:rgba(255,80,70,0.7);}
+
+/* ── AVATAR PICKER ── */
+#avatar-picker{
+  position:fixed;inset:0;z-index:700;
+  display:flex;align-items:flex-end;justify-content:center;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+}
+#avatar-picker.open{pointer-events:all;opacity:1;}
+#avatar-picker-bg{position:absolute;inset:0;background:rgba(0,0,0,0.5);}
+#avatar-picker-inner{
+  position:relative;z-index:1;
+  width:100%;max-width:480px;
+  background:rgba(14,14,14,0.98);
+  border-top:1px solid rgba(255,255,255,0.07);
+  border-radius:20px 20px 0 0;
+  padding:20px 20px calc(28px + var(--sb));
+  transform:translateY(40px);
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#avatar-picker.open #avatar-picker-inner{transform:translateY(0);}
+#avatar-picker-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.2em;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;
+  text-align:center;margin-bottom:18px;
+}
+#avatar-emoji-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
+  margin-bottom:14px;
+}
+.av-emoji-opt{
+  width:100%;aspect-ratio:1;border-radius:50%;
+  background:rgba(255,255,255,0.04);border:1px solid transparent;
+  font-size:22px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background 0.15s,border-color 0.15s;
+  line-height:1;
+}
+.av-emoji-opt:active{background:rgba(255,255,255,0.1);}
+.av-emoji-opt.sel{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.08);}
+#avatar-upload-btn{
+  width:100%;padding:13px;border-radius:12px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.3);text-transform:uppercase;cursor:pointer;
+  transition:background 0.15s,color 0.15s;
+}
+#avatar-upload-btn:active{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);}
+#avatar-file-input{display:none;}
+
+/* ── SETTINGS SHEET ── */
+#settings-sheet{
+  position:fixed;inset:0;z-index:700;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+}
+#settings-sheet.open{pointer-events:all;opacity:1;}
+#settings-sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,0.5);}
+#settings-inner{
+  position:absolute;bottom:0;
+  left:50%;transform:translateX(-50%) translateY(40px);
+  width:100%;max-width:480px;
+  background:rgba(12,12,12,0.98);
+  border-top:1px solid rgba(255,255,255,0.06);
+  border-radius:24px 24px 0 0;
+  padding:20px 24px calc(32px + var(--sb));
+  box-sizing:border-box;
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#settings-sheet.open #settings-inner{transform:translateX(-50%) translateY(0);}
+#settings-handle{width:28px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 22px;}
+#settings-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.22em;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;
+  margin-bottom:24px;
+}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.settings-row:last-of-type{border-bottom:none;}
+.settings-row-lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.35);text-transform:uppercase;}
+.settings-row-val{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.18);}
 
 /* ── DASH HABIT BAR (single) ── */
 .dash-hab-wrap{margin-top:36px;padding:0;}
@@ -965,6 +1113,193 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .dash-task-day-lbl{font-family:var(--mono);font-size:7px;color:rgba(255,255,255,0.18);letter-spacing:0.05em;text-transform:uppercase;}
 .dash-task-day-lbl.today{color:rgba(255,255,255,0.5);}
 .dash-task-sep{width:100%;height:1px;background:rgba(255,255,255,0.06);margin-top:2px;}
+
+/* ── TREINO ── */
+#tr-week-row{
+  display:flex;gap:0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  margin:0 -clamp(16px,5vw,48px) 0;
+  padding:0 clamp(16px,5vw,48px);
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+#tr-week-row::-webkit-scrollbar{display:none;}
+.tr-day-btn{
+  flex:1;min-width:40px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:14px 4px 12px;
+  background:none;border:none;cursor:pointer;
+  position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.tr-day-lbl{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.12em;
+  color:rgba(255,255,255,0.22);text-transform:uppercase;
+  transition:color 0.2s;
+}
+.tr-day-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  transition:background 0.2s;
+}
+/* today highlight */
+.tr-day-btn.today .tr-day-lbl{color:rgba(255,255,255,0.5);}
+.tr-day-btn.today .tr-day-dot{background:rgba(255,255,255,0.35);}
+/* has ficha */
+.tr-day-btn.has-ficha .tr-day-dot{background:rgba(255,255,255,0.55);}
+/* selected */
+.tr-day-btn.sel .tr-day-lbl{color:rgba(255,255,255,0.9);}
+.tr-day-btn.sel::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:1px;background:rgba(255,255,255,0.55);
+}
+
+/* day content */
+#tr-day-content{padding-top:28px;min-height:200px;}
+#tr-day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+#tr-day-title{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+#tr-add-ficha-btn{
+  background:none;border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;padding:6px 12px;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;
+  color:rgba(255,255,255,0.3);text-transform:uppercase;
+  transition:border-color 0.2s,color 0.2s;
+}
+#tr-add-ficha-btn:active{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);}
+
+/* ficha cards */
+.tr-ficha-card{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.tr-ficha-card:active{opacity:0.7;}
+.tr-ficha-badge{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:13px;font-weight:700;
+  color:rgba(255,255,255,0.5);
+  flex-shrink:0;
+}
+.tr-ficha-info{flex:1;min-width:0;}
+.tr-ficha-name{font-size:15px;color:rgba(255,255,255,0.8);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tr-ficha-meta{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.06em;}
+.tr-ficha-arrow{color:rgba(255,255,255,0.15);}
+.tr-ficha-arrow svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5;fill:none;}
+
+.tr-empty{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.15);text-transform:uppercase;
+  text-align:center;padding:48px 0;
+}
+
+/* ficha bottom sheet */
+#tr-sheet-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+#tr-sheet-overlay.open{display:block;}
+#tr-sheet{
+  position:fixed;bottom:0;left:50%;
+  transform:translateX(-50%) translateY(100%);
+  width:100%;max-width:480px;
+  background:rgba(12,12,12,0.98);
+  border-top:1px solid rgba(255,255,255,0.06);
+  border-radius:24px 24px 0 0;
+  padding:16px 20px calc(32px + var(--sb));
+  z-index:501;box-sizing:border-box;
+  transition:transform 0.34s cubic-bezier(0.34,1.1,0.64,1);
+  max-height:80vh;overflow-y:auto;
+}
+#tr-sheet.open{transform:translateX(-50%) translateY(0);}
+#tr-sheet-handle{width:28px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 18px;}
+#tr-sheet-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+#tr-sheet-name{
+  flex:1;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);
+  padding:4px 0;font-size:17px;font-weight:600;color:rgba(255,255,255,0.85);
+  letter-spacing:-0.02em;outline:none;
+  transition:border-color 0.2s;
+}
+#tr-sheet-name:focus{border-bottom-color:rgba(255,255,255,0.28);}
+#tr-sheet-del{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;
+  color:rgba(255,80,70,0.3);text-transform:uppercase;
+  transition:color 0.2s;white-space:nowrap;
+}
+#tr-sheet-del:active{color:rgba(255,80,70,0.7);}
+
+/* exercise rows */
+.tr-ex-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.tr-ex-num{
+  font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2);
+  width:16px;text-align:right;flex-shrink:0;
+}
+.tr-ex-name{
+  flex:1;background:none;border:none;
+  font-size:14px;color:rgba(255,255,255,0.75);
+  outline:none;padding:0;
+}
+.tr-ex-name::placeholder{color:rgba(255,255,255,0.18);}
+.tr-ex-sets{
+  width:48px;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.08);
+  font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.35);
+  text-align:center;outline:none;padding:2px 0;
+}
+.tr-ex-sets::placeholder{color:rgba(255,255,255,0.15);}
+.tr-ex-del{
+  width:24px;height:24px;background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,0.15);font-size:16px;line-height:1;
+  transition:color 0.15s;flex-shrink:0;
+}
+.tr-ex-del:active{color:rgba(255,80,70,0.6);}
+#tr-add-ex-btn{
+  width:100%;margin-top:14px;padding:12px;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:10px;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.25);text-transform:uppercase;
+  transition:background 0.15s,color 0.15s;
+}
+#tr-add-ex-btn:active{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);}
+#tr-sheet-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#tr-mode-toggle{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;padding:5px 12px;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;
+  color:rgba(255,255,255,0.5);text-transform:uppercase;transition:all 0.2s;white-space:nowrap;
+}
+#tr-mode-toggle:active{background:rgba(255,255,255,0.12);}
+#tr-mode-toggle.workout-active{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);}
+.tr-wk-ex{padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.tr-wk-ex-name{font-size:14px;color:rgba(255,255,255,0.75);margin-bottom:10px;font-weight:500;}
+.tr-wk-sets-row{display:flex;gap:8px;flex-wrap:wrap;}
+.tr-wk-set{
+  min-width:44px;height:44px;border-radius:10px;padding:0 10px;
+  border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);
+  cursor:pointer;transition:all 0.18s;-webkit-tap-highlight-color:transparent;user-select:none;
+}
+.tr-wk-set.done{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.85);}
+#tr-conclude-btn{
+  width:100%;margin-top:22px;padding:16px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;cursor:pointer;
+  font-family:var(--mono);font-size:9px;letter-spacing:0.18em;
+  color:rgba(255,255,255,0.35);text-transform:uppercase;transition:all 0.25s;
+}
+#tr-conclude-btn:active{background:rgba(255,255,255,0.1);color:#fff;}
+#tr-conclude-btn.all-done{border-color:rgba(100,220,130,0.4);background:rgba(100,220,130,0.07);color:rgba(100,220,130,0.85);}
+.tr-ficha-done-today .tr-ficha-meta{color:rgba(100,220,130,0.6);}
+.tr-ficha-badge.done-today{border-color:rgba(100,220,130,0.3);background:rgba(100,220,130,0.06);color:rgba(100,220,130,0.7);}
+.tr-day-btn.done-today .tr-day-dot{background:rgba(100,220,130,0.7);box-shadow:0 0 6px rgba(100,220,130,0.4);}
 
 /* ── FINANCE minimal — sem glass nos cards ── */
 .fin-hero-card{border-radius:var(--r);padding:clamp(16px,4vw,24px);margin-bottom:10px;background:none;}
@@ -1324,19 +1659,77 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div id="profile-sheet">
     <div id="profile-sheet-bg" onclick="closeProfile()"></div>
     <div id="profile-inner">
-      <div id="profile-avatar">👤</div>
-      <div id="profile-name-display" id="p-name-display">—</div>
-      <input id="profile-name-input" placeholder="seu nome…" maxlength="32" oninput="updateUserName(this.value)">
+      <div id="profile-handle"></div>
+
+      <!-- top row: avatar + name + gear -->
+      <div id="profile-top-row">
+        <button id="profile-avatar-btn" onclick="openAvatarPicker()">
+          <span id="profile-avatar-emoji">👤</span>
+          <img id="profile-avatar-img" src="" style="display:none">
+          <span class="av-edit-hint">✎</span>
+        </button>
+        <div id="profile-name-block">
+          <div id="profile-name-display">—</div>
+          <input id="profile-name-input" placeholder="seu nome…" maxlength="32" oninput="updateUserName(this.value)">
+          <div id="profile-sub-display">nível 1</div>
+        </div>
+        <button id="profile-gear-btn" onclick="openSettings()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- xp -->
       <div id="profile-xp-row">
-        <span id="p-xp-lbl">Nível 1</span>
-        <span id="p-xp-txt">0 / 200 XP</span>
+        <span id="p-xp-lbl">nível 1</span>
+        <span id="p-xp-txt">0 / 200 xp</span>
       </div>
       <div id="profile-xp-track"><div id="profile-xp-fill"></div></div>
+
+      <!-- stats -->
       <div id="profile-streak-row">
-        <span class="p-stat-lbl">streak</span>
-        <span class="p-stat-val" id="p-streak">0</span>
+        <div class="p-stat-item">
+          <span class="p-stat-lbl">streak</span>
+          <span class="p-stat-val" id="p-streak">0</span>
+        </div>
+        <div class="p-stat-item">
+          <span class="p-stat-lbl">hábitos</span>
+          <span class="p-stat-val" id="p-hab-count">0</span>
+        </div>
+        <div class="p-stat-item">
+          <span class="p-stat-lbl">tarefas</span>
+          <span class="p-stat-val" id="p-task-count">0</span>
+        </div>
       </div>
+
       <button id="profile-logout" onclick="doLogout()">sair da conta</button>
+    </div>
+  </div>
+
+  <!-- AVATAR PICKER -->
+  <div id="avatar-picker">
+    <div id="avatar-picker-bg" onclick="closeAvatarPicker()"></div>
+    <div id="avatar-picker-inner">
+      <div id="avatar-picker-title">escolha um avatar</div>
+      <div id="avatar-emoji-grid"></div>
+      <button id="avatar-upload-btn" onclick="document.getElementById('avatar-file-input').click()">
+        usar sua própria foto
+      </button>
+      <input id="avatar-file-input" type="file" accept="image/*" onchange="_handleAvatarUpload(this)">
+    </div>
+  </div>
+
+  <!-- SETTINGS SHEET -->
+  <div id="settings-sheet">
+    <div id="settings-sheet-bg" onclick="closeSettings()"></div>
+    <div id="settings-inner">
+      <div id="settings-handle"></div>
+      <div id="settings-title">configurações</div>
+      <div class="settings-row">
+        <span class="settings-row-lbl">versão</span>
+        <span class="settings-row-val">1.0</span>
+      </div>
     </div>
   </div>
 
@@ -1526,7 +1919,48 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
 
     <div id="sec-treino" class="section">
-      <div class="empty" style="padding-top:48px;text-align:center;opacity:0.3;font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase">em breve</div>
+
+      <!-- dias da semana -->
+      <div id="tr-week-row">
+        <button class="tr-day-btn" data-dow="1" onclick="_trSelectDay(this,1)"><span class="tr-day-lbl">seg</span><span class="tr-day-dot"></span></button>
+        <button class="tr-day-btn" data-dow="2" onclick="_trSelectDay(this,2)"><span class="tr-day-lbl">ter</span><span class="tr-day-dot"></span></button>
+        <button class="tr-day-btn" data-dow="3" onclick="_trSelectDay(this,3)"><span class="tr-day-lbl">qua</span><span class="tr-day-dot"></span></button>
+        <button class="tr-day-btn" data-dow="4" onclick="_trSelectDay(this,4)"><span class="tr-day-lbl">qui</span><span class="tr-day-dot"></span></button>
+        <button class="tr-day-btn" data-dow="5" onclick="_trSelectDay(this,5)"><span class="tr-day-lbl">sex</span><span class="tr-day-dot"></span></button>
+        <button class="tr-day-btn" data-dow="6" onclick="_trSelectDay(this,6)"><span class="tr-day-lbl">sáb</span><span class="tr-day-dot"></span></button>
+        <button class="tr-day-btn" data-dow="0" onclick="_trSelectDay(this,0)"><span class="tr-day-lbl">dom</span><span class="tr-day-dot"></span></button>
+      </div>
+
+      <!-- ficha do dia selecionado -->
+      <div id="tr-day-content"></div>
+
+      <!-- modal de ficha -->
+      <div id="tr-sheet-overlay" onclick="_trCloseSheet()"></div>
+      <div id="tr-sheet">
+        <div id="tr-sheet-handle"></div>
+
+        <!-- header com nome + ações -->
+        <div id="tr-sheet-head">
+          <input id="tr-sheet-name" placeholder="nome da ficha…" maxlength="24" oninput="_trAutoSave()">
+          <div id="tr-sheet-actions">
+            <button id="tr-mode-toggle" onclick="_trToggleMode()">iniciar</button>
+            <button id="tr-sheet-del" onclick="_trDeleteFicha()">excluir</button>
+          </div>
+        </div>
+
+        <!-- MODO EDIÇÃO -->
+        <div id="tr-edit-mode">
+          <div id="tr-exercises-list"></div>
+          <button id="tr-add-ex-btn" onclick="_trAddExercise()">+ exercício</button>
+        </div>
+
+        <!-- MODO TREINO -->
+        <div id="tr-workout-mode" style="display:none">
+          <div id="tr-workout-list"></div>
+          <button id="tr-conclude-btn" onclick="_trConclude()">concluir treino</button>
+        </div>
+      </div>
+
     </div>
 
     <div id="sec-estudos" class="section">
@@ -1588,12 +2022,13 @@ const DEV_MODE = false;
 
 // Firebase só carrega em produção
 let auth=null,db=null,GoogleAuthProvider=null,signInWithPopup=null,
+    signInWithRedirect=null,getRedirectResult=null,
     signInAnonymously=null,signOut=null,onAuthStateChanged=null,
     fsDoc=null,getDoc=null,setDoc=null;
 
 async function initFirebase(){
   if(DEV_MODE) return;
-  const[{initializeApp},{getAuth,GoogleAuthProvider:GAP,signInWithPopup:SWP,signInAnonymously:SIA,signOut:SO,onAuthStateChanged:OAC},{getFirestore,doc:D,getDoc:GD,setDoc:SD}]=await Promise.all([
+  const[{initializeApp},{getAuth,GoogleAuthProvider:GAP,signInWithPopup:SWP,signInWithRedirect:SWR,getRedirectResult:GRR,signInAnonymously:SIA,signOut:SO,onAuthStateChanged:OAC},{getFirestore,doc:D,getDoc:GD,setDoc:SD}]=await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js'),
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
@@ -1607,8 +2042,8 @@ async function initFirebase(){
     appId:"1:360925170597:web:84b6f1dbf873360214364c"
   });
   auth=getAuth(_app);db=getFirestore(_app);
-  GoogleAuthProvider=GAP;signInWithPopup=SWP;signInAnonymously=SIA;
-  signOut=SO;onAuthStateChanged=OAC;
+  GoogleAuthProvider=GAP;signInWithPopup=SWP;signInWithRedirect=SWR;getRedirectResult=GRR;
+  signInAnonymously=SIA;signOut=SO;onAuthStateChanged=OAC;
   fsDoc=D;getDoc=GD;setDoc=SD;
 }
 await initFirebase();
@@ -1708,6 +2143,7 @@ function setTab(name,dir){
   else if(name==='habitos'){renderHabits();renderHabitFilters();}
   else if(name==='tarefas'){renderTasks();renderTaskFilters();}
   else if(name==='stats')renderStats();
+  else if(name==='treino'){renderTreino();}
   else if(name==='dashboard'){renderDashboard();}
   else{if(window._spiralStop)window._spiralStop();}
   updateFab();
@@ -2536,6 +2972,267 @@ document.addEventListener('keydown',e=>{
   if(mType==='habit')saveHabit();
   else if(mType==='task')saveTask();
 });
+
+/* ── TREINO ── */
+function _trEnsure(){ if(!S.treino)S.treino={fichas:[]}; }
+
+let _trSelDow = new Date().getDay();
+let _trEditId = null;
+let _trWorkoutMode = false;
+let _trSetsDone = {}; // {exIdx: {setIdx: true}}
+
+function renderTreino(){
+  _trEnsure();
+  const dow = new Date().getDay();
+  const today = new Date().toDateString();
+
+  document.querySelectorAll('.tr-day-btn').forEach(btn=>{
+    const d = +btn.dataset.dow;
+    btn.classList.toggle('today', d === dow);
+    btn.classList.toggle('sel',   d === _trSelDow);
+    const hasFicha = S.treino.fichas.some(f=>f.days&&f.days.includes(d));
+    btn.classList.toggle('has-ficha', hasFicha);
+    // green dot if any ficha concluded today on this day
+    const doneToday = S.treino.fichas.some(f=>f.days&&f.days.includes(d)&&f.lastDone===today);
+    btn.classList.toggle('done-today', doneToday);
+  });
+
+  const cont = document.getElementById('tr-day-content');
+  if(!cont) return;
+  const DAY_NAMES = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  const fichaDoDia = S.treino.fichas.filter(f=>f.days&&f.days.includes(_trSelDow));
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  cont.innerHTML = `
+    <div id="tr-day-header">
+      <div id="tr-day-title">${DAY_NAMES[_trSelDow]}</div>
+      <button id="tr-add-ficha-btn" onclick="_trNewFicha()">+ ficha</button>
+    </div>
+    ${fichaDoDia.length === 0
+      ? `<div class="tr-empty">nenhuma ficha neste dia</div>`
+      : fichaDoDia.map(f=>{
+          const letter = LETTERS[S.treino.fichas.indexOf(f) % 26];
+          const exCount = (f.exercises||[]).length;
+          const doneToday = f.lastDone === today;
+          return `<div class="tr-ficha-card${doneToday?' tr-ficha-done-today':''}" onclick="_trOpenFicha('${f.id}')">
+            <div class="tr-ficha-badge${doneToday?' done-today':''}">${doneToday?'✓':letter}</div>
+            <div class="tr-ficha-info">
+              <div class="tr-ficha-name">${f.name||'sem nome'}</div>
+              <div class="tr-ficha-meta">${doneToday?'concluído hoje':exCount+' exercício'+(exCount!==1?'s':'')}</div>
+            </div>
+            <div class="tr-ficha-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>`;
+        }).join('')
+    }
+  `;
+}
+
+function _trSelectDay(btn, dow){
+  _trSelDow = dow;
+  renderTreino();
+}
+
+function _trNewFicha(){
+  _trEnsure();
+  const id = Date.now().toString();
+  S.treino.fichas.push({id, name:'', days:[_trSelDow], exercises:[]});
+  save();
+  renderTreino();
+  _trOpenFicha(id);
+}
+
+function _trOpenFicha(id){
+  _trEnsure();
+  _trEditId = id;
+  _trWorkoutMode = false;
+  _trSetsDone = {};
+  const f = S.treino.fichas.find(x=>x.id===id);
+  if(!f) return;
+  document.getElementById('tr-sheet-name').value = f.name||'';
+  document.getElementById('tr-mode-toggle').textContent = 'iniciar';
+  document.getElementById('tr-mode-toggle').classList.remove('workout-active');
+  document.getElementById('tr-edit-mode').style.display = '';
+  document.getElementById('tr-workout-mode').style.display = 'none';
+  _trRenderExercises(f);
+  document.getElementById('tr-sheet-overlay').classList.add('open');
+  document.getElementById('tr-sheet').classList.add('open');
+}
+
+function _trCloseSheet(){
+  if(_trEditId){
+    const f = S.treino.fichas.find(x=>x.id===_trEditId);
+    if(f){
+      f.name = document.getElementById('tr-sheet-name').value.trim();
+      if(!_trWorkoutMode) _trSaveExercisesFromDOM(f);
+      save();
+    }
+  }
+  _trEditId = null;
+  _trWorkoutMode = false;
+  _trSetsDone = {};
+  document.getElementById('tr-sheet-overlay').classList.remove('open');
+  document.getElementById('tr-sheet').classList.remove('open');
+  renderTreino();
+}
+
+function _trToggleMode(){
+  if(!_trEditId) return;
+  const f = S.treino.fichas.find(x=>x.id===_trEditId);
+  if(!f) return;
+  if(!_trWorkoutMode){
+    // save edits first
+    f.name = document.getElementById('tr-sheet-name').value.trim();
+    _trSaveExercisesFromDOM(f);
+    save();
+    // switch to workout mode
+    _trWorkoutMode = true;
+    _trSetsDone = {};
+    document.getElementById('tr-mode-toggle').textContent = 'editar';
+    document.getElementById('tr-mode-toggle').classList.add('workout-active');
+    document.getElementById('tr-edit-mode').style.display = 'none';
+    document.getElementById('tr-workout-mode').style.display = '';
+    _trRenderWorkout(f);
+  } else {
+    // back to edit
+    _trWorkoutMode = false;
+    _trSetsDone = {};
+    document.getElementById('tr-mode-toggle').textContent = 'iniciar';
+    document.getElementById('tr-mode-toggle').classList.remove('workout-active');
+    document.getElementById('tr-edit-mode').style.display = '';
+    document.getElementById('tr-workout-mode').style.display = 'none';
+    _trRenderExercises(f);
+  }
+}
+
+function _trRenderWorkout(f){
+  const list = document.getElementById('tr-workout-list');
+  if(!list) return;
+  const exs = f.exercises||[];
+  if(!exs.length){list.innerHTML='<div class="tr-empty">nenhum exercício nesta ficha</div>';return;}
+  list.innerHTML = exs.map((ex,ei)=>{
+    const parts = (ex.sets||'').toLowerCase().split('x');
+    const numSets = parseInt(parts[0])||3;
+    const reps = parts[1]||'—';
+    const setsHtml = Array.from({length:numSets},(_,si)=>
+      `<div class="tr-wk-set${(_trSetsDone[ei]&&_trSetsDone[ei][si])?' done':''}" onclick="_trToggleSet(${ei},${si},${numSets})">${reps}</div>`
+    ).join('');
+    return `<div class="tr-wk-ex">
+      <div class="tr-wk-ex-name">${ex.name||'exercício'}</div>
+      <div class="tr-wk-sets-row" id="tr-wk-sets-${ei}">${setsHtml}</div>
+    </div>`;
+  }).join('');
+  _trUpdateConcludeBtn(f);
+}
+
+function _trToggleSet(ei, si, numSets){
+  if(!_trSetsDone[ei]) _trSetsDone[ei]={};
+  _trSetsDone[ei][si] = !_trSetsDone[ei][si];
+  // re-render just that row's sets
+  const f = S.treino.fichas.find(x=>x.id===_trEditId);
+  if(!f) return;
+  const ex = (f.exercises||[])[ei];
+  const parts = (ex?.sets||'').toLowerCase().split('x');
+  const reps = parts[1]||'—';
+  const row = document.getElementById(`tr-wk-sets-${ei}`);
+  if(row) row.innerHTML = Array.from({length:numSets},(_,s)=>
+    `<div class="tr-wk-set${(_trSetsDone[ei]&&_trSetsDone[ei][s])?' done':''}" onclick="_trToggleSet(${ei},${s},${numSets})">${reps}</div>`
+  ).join('');
+  _trUpdateConcludeBtn(f);
+}
+
+function _trUpdateConcludeBtn(f){
+  const exs = f.exercises||[];
+  let allDone = exs.length > 0;
+  exs.forEach((ex,ei)=>{
+    const parts = (ex.sets||'').toLowerCase().split('x');
+    const numSets = parseInt(parts[0])||3;
+    for(let s=0;s<numSets;s++){
+      if(!(_trSetsDone[ei]&&_trSetsDone[ei][s])) allDone=false;
+    }
+  });
+  const btn = document.getElementById('tr-conclude-btn');
+  if(btn) btn.classList.toggle('all-done', allDone);
+}
+
+function _trConclude(){
+  if(!_trEditId) return;
+  const f = S.treino.fichas.find(x=>x.id===_trEditId);
+  if(!f) return;
+  f.lastDone = new Date().toDateString();
+  if(!f.history) f.history=[];
+  f.history.push({date:f.lastDone, sets:JSON.parse(JSON.stringify(_trSetsDone))});
+  save();
+  addXP(30);
+  _trCloseSheet();
+}
+
+function _trRenderExercises(f){
+  const list = document.getElementById('tr-exercises-list');
+  if(!list) return;
+  const exs = f.exercises||[];
+  list.innerHTML = exs.length===0
+    ? `<div class="tr-empty" style="padding:24px 0 8px">nenhum exercício ainda</div>`
+    : exs.map((ex,i)=>`
+    <div class="tr-ex-row" data-idx="${i}">
+      <span class="tr-ex-num">${i+1}</span>
+      <input class="tr-ex-name" value="${ex.name||''}" placeholder="exercício…" oninput="_trAutoSave()">
+      <input class="tr-ex-sets" value="${ex.sets||''}" placeholder="3x12" oninput="_trAutoSave()">
+      <button class="tr-ex-del" onclick="_trDelExercise(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function _trSaveExercisesFromDOM(f){
+  const rows = document.querySelectorAll('.tr-ex-row');
+  f.exercises = Array.from(rows).map(row=>({
+    name: row.querySelector('.tr-ex-name')?.value.trim()||'',
+    sets: row.querySelector('.tr-ex-sets')?.value.trim()||''
+  }));
+}
+
+function _trAutoSave(){
+  if(!_trEditId||_trWorkoutMode) return;
+  const f = S.treino.fichas.find(x=>x.id===_trEditId);
+  if(!f) return;
+  f.name = document.getElementById('tr-sheet-name').value.trim();
+  _trSaveExercisesFromDOM(f);
+  save();
+}
+
+function _trAddExercise(){
+  if(!_trEditId) return;
+  const f = S.treino.fichas.find(x=>x.id===_trEditId);
+  if(!f) return;
+  f.name = document.getElementById('tr-sheet-name').value.trim();
+  _trSaveExercisesFromDOM(f);
+  if(!f.exercises) f.exercises=[];
+  f.exercises.push({name:'',sets:''});
+  save();
+  _trRenderExercises(f);
+  const rows = document.querySelectorAll('.tr-ex-name');
+  if(rows.length) rows[rows.length-1].focus();
+}
+
+function _trDelExercise(idx){
+  if(!_trEditId) return;
+  const f = S.treino.fichas.find(x=>x.id===_trEditId);
+  if(!f) return;
+  _trSaveExercisesFromDOM(f);
+  f.exercises.splice(idx,1);
+  save();
+  _trRenderExercises(f);
+}
+
+function _trDeleteFicha(){
+  if(!_trEditId) return;
+  S.treino.fichas = S.treino.fichas.filter(x=>x.id!==_trEditId);
+  save();
+  document.getElementById('tr-sheet-overlay').classList.remove('open');
+  document.getElementById('tr-sheet').classList.remove('open');
+  _trEditId = null;
+  _trWorkoutMode = false;
+  renderTreino();
+}
 
 function onFabClick(){
   if(curTab==='habitos')openModal('habit',null);
@@ -3411,10 +4108,20 @@ function setLoginLoading(on){
   if(on&&bg)bg.innerHTML='<span class="login-loading">conectando…</span>';
   else if(bg)bg.innerHTML=`<svg class="g-icon" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Entrar com Google`;
 }
+const _isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||window.innerWidth<768;
+
 async function loginGoogle(){
   setLoginError('');setLoginLoading(true);
+  const provider=new GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
   try{
-    await signInWithPopup(auth,new GoogleAuthProvider());
+    if(_isMobile){
+      // redirect: mostra contas salvas do dispositivo nativamente
+      await signInWithRedirect(auth,provider);
+      // a página recarrega; getRedirectResult é chamado no onAuthStateChanged
+    }else{
+      await signInWithPopup(auth,provider);
+    }
   }catch(e){
     setLoginLoading(false);
     if(e.code!=='auth/popup-closed-by-user')setLoginError('Erro ao entrar com Google. Tente novamente.');
@@ -3440,6 +4147,34 @@ function hideLoginScreen(){
   if(ls){ls.classList.remove('visible');ls.classList.add('out');setTimeout(()=>ls.classList.add('gone'),520);}
 }
 
+/* ── EXPOSE GLOBALS (required for type=module) ── */
+function _selectSess(btn,sess){
+  document.querySelectorAll('.dash-sess-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  _applyTintFromSel();
+}
+
+Object.assign(window,{
+  toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
+  onFabClick,fabAction,updateFab,
+  saveHabit,saveTask,saveFinance,selectRecur,toggleInvest,deleteItem,deleteTransaction,
+  selectPill,setPeriod,updateAvail,
+  updateUserName,hidNameInput,
+  renderHabitFilters,renderTaskFilters,
+  openSwitcher,closeSwitcher,openProfile,closeProfile,doLogout,
+  openAvatarPicker,closeAvatarPicker,_setAvatar,_handleAvatarUpload,
+  openSettings,closeSettings,
+  toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
+  selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,
+  _setTransFilter,_renderTransList,
+  _setFinPeriod,
+  _selectSess, _applyTintFromSel, _pctToTint,
+  renderTreino, _trSelectDay, _trNewFicha, _trOpenFicha,
+  _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
+  _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
+  initNotifications:()=>{},scheduleTaskNotifications:()=>{},
+});
+
 /* ── AUTH STATE ── */
 // fallback: se Firebase não responder em 6s, mostra login
 let authResolved=false;
@@ -3457,6 +4192,9 @@ if(DEV_MODE){
       if(ls){ls.classList.remove('out','gone');ls.classList.add('visible');}
     }
   },6000);
+
+  // captura resultado do redirect do Google ao voltar à página
+  getRedirectResult(auth).catch(()=>{});
 
   onAuthStateChanged(auth,async(user)=>{
     authResolved=true;
@@ -3486,7 +4224,7 @@ function bootApp(){
   // pequeno delay para garantir que o DOM está pronto no mobile
   setTimeout(()=>{
     try{
-      updateGreeting();updateXPBar();updateRing();
+      updateGreeting();updateXPBar();updateRing();_applyAvatarUI();
       renderDashboard();renderHabitFilters();renderTaskFilters();snapshotHistory();
     }catch(e){console.warn('bootApp render error',e);}
 
@@ -3616,6 +4354,37 @@ function buildSwitcherPreview(id){
       <div class="sw-mini-bar w75 fill"></div>
       <div style="height:4px"></div>
       <div class="sw-mini-bar w40"></div>`;
+  } else if(id==='treino'){
+    _trEnsure();
+    const today = new Date().toDateString();
+    const dow   = new Date().getDay();
+    const fichasDia = S.treino.fichas.filter(f=>f.days&&f.days.includes(dow));
+    const feitas    = fichasDia.filter(f=>f.lastDone===today).length;
+    const LETTERS   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const rows = fichasDia.length
+      ? fichasDia.slice(0,4).map(f=>{
+          const letter = LETTERS[S.treino.fichas.indexOf(f)%26];
+          const done   = f.lastDone===today;
+          const exCount= (f.exercises||[]).length;
+          return `<div class="sw-mini-row">
+            <div class="sw-mini-sq ${done?'done':''}" style="border-radius:4px;font-family:var(--mono);font-size:6px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,${done?'0.7':'0.25'})">${done?'✓':letter}</div>
+            <div class="sw-mini-line ${done?'done':''}"></div>
+            <span style="font-family:var(--mono);font-size:7px;color:rgba(255,255,255,0.18);margin-left:2px">${exCount}ex</span>
+          </div>`;
+        }).join('')
+      : Array(3).fill(`<div class="sw-mini-row"><div class="sw-mini-sq"></div><div class="sw-mini-line"></div></div>`).join('');
+    const DAY_SHORT = ['dom','seg','ter','qua','qui','sex','sáb'];
+    d.innerHTML=`
+      <div class="sw-mini-label">treino</div>
+      <div class="sw-mini-val">${feitas}/${fichasDia.length||'—'}</div>
+      ${rows}
+      <div style="height:5px"></div>
+      <div style="font-family:var(--mono);font-size:7px;color:rgba(255,255,255,0.2);letter-spacing:0.08em">${DAY_SHORT[dow]}</div>`;
+  } else if(id==='estudos'){
+    d.innerHTML=`
+      <div class="sw-mini-label">estudos</div>
+      <div class="sw-mini-val" style="font-size:10px;opacity:0.3">em breve</div>
+      ${Array(3).fill(`<div class="sw-mini-row"><div class="sw-mini-sq"></div><div class="sw-mini-line"></div></div>`).join('')}`;
   } else if(id==='stats'){
     const ht=S.habits.length?Math.round(S.habits.filter(h=>h.doneToday).length/S.habits.length*100):0;
     d.innerHTML=`
@@ -3737,20 +4506,89 @@ function pickFromSwitcher(card,tabId){
 
 
 /* ── PROFILE SHEET ── */
+/* ── AVATAR ── */
+const AVATARS=['😀','😎','🧠','🔥','⚡','🌙','🦊','🐺','🐉','🦋','🌊','🍀','🎯','🏆','💎','🚀','🌌','🧬','🤖','🦾','🌿','🎭'];
+function _renderAvatarGrid(){
+  const grid=document.getElementById('avatar-emoji-grid');
+  if(!grid)return;
+  const cur=S.avatar||'👤';
+  grid.innerHTML=AVATARS.map(e=>`<button class="av-emoji-opt${e===cur?' sel':''}" onclick="_setAvatar('${e}')">${e}</button>`).join('');
+}
+function _setAvatar(emoji){
+  S.avatar=emoji;S.avatarImg=null;save();
+  _applyAvatarUI();closeAvatarPicker();
+}
+function _handleAvatarUpload(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    S.avatarImg=e.target.result;S.avatar=null;save();
+    _applyAvatarUI();closeAvatarPicker();
+  };
+  reader.readAsDataURL(file);
+}
+function _applyAvatarUI(){
+  const emojiEl=document.getElementById('profile-avatar-emoji');
+  const imgEl=document.getElementById('profile-avatar-img');
+  const headerBtn=document.getElementById('btn-profile');
+  if(S.avatarImg){
+    if(emojiEl)emojiEl.style.display='none';
+    if(imgEl){imgEl.src=S.avatarImg;imgEl.style.display='block';}
+    if(headerBtn)headerBtn.innerHTML=`<img src="${S.avatarImg}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">`;
+  } else {
+    const av=S.avatar||'👤';
+    if(emojiEl){emojiEl.textContent=av;emojiEl.style.display='block';}
+    if(imgEl)imgEl.style.display='none';
+    if(headerBtn)headerBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  }
+}
+function openAvatarPicker(){
+  _renderAvatarGrid();
+  document.getElementById('avatar-picker').classList.add('open');
+}
+function closeAvatarPicker(){
+  document.getElementById('avatar-picker').classList.remove('open');
+}
+
+/* ── SETTINGS ── */
+function openSettings(){
+  closeProfile();
+  setTimeout(()=>document.getElementById('settings-sheet').classList.add('open'),120);
+}
+function closeSettings(){
+  document.getElementById('settings-sheet').classList.remove('open');
+}
+
+/* ── PROFILE ── */
 function openProfile(){
   const sheet=document.getElementById('profile-sheet');
   sheet.classList.add('open');
-  // populate
+  _applyAvatarUI();
   const nm=S.userName||'';
-  document.getElementById('profile-name-display').textContent=nm||'Sem nome';
+  document.getElementById('profile-name-display').textContent=nm||'sem nome';
+  document.getElementById('profile-name-display').style.display='block';
   const inp=document.getElementById('profile-name-input');
   inp.value=nm;
+  inp.style.display='none';
+  // tap name to edit
+  document.getElementById('profile-name-display').onclick=function(){
+    this.style.display='none';
+    inp.style.display='block';
+    inp.focus();
+  };
+  inp.onblur=function(){
+    const v=this.value.trim();
+    document.getElementById('profile-name-display').textContent=v||'sem nome';
+    document.getElementById('profile-name-display').style.display='block';
+    this.style.display='none';
+  };
   // xp
   const lvl=Math.floor(S.xp/200)+1;
   const xpInLevel=S.xp%200;
-  document.getElementById('p-xp-lbl').textContent='Nível '+lvl;
-  document.getElementById('p-xp-txt').textContent=xpInLevel+' / 200 XP';
-  document.getElementById('profile-xp-fill').style.width=(xpInLevel/2)+'%';
+  document.getElementById('p-xp-lbl').textContent='nível '+lvl;
+  document.getElementById('p-xp-txt').textContent=xpInLevel+' / 200 xp';
+  document.getElementById('profile-sub-display').textContent='nível '+lvl;
+  setTimeout(()=>{document.getElementById('profile-xp-fill').style.width=(xpInLevel/2)+'%';},80);
   // streak
   let streak=0;
   const now=new Date();
@@ -3762,7 +4600,9 @@ function openProfile(){
     if(dayH.every(h=>h.done&&h.done[key]))streak++;
     else if(i>0)break;
   }
-  document.getElementById('p-streak').textContent=streak+(streak===1?' dia':' dias');
+  document.getElementById('p-streak').textContent=streak;
+  document.getElementById('p-hab-count').textContent=S.habits.length;
+  document.getElementById('p-task-count').textContent=S.tasks.filter(t=>t.done).length;
 }
 function closeProfile(){
   document.getElementById('profile-sheet').classList.remove('open');
@@ -3916,30 +4756,6 @@ function _setFinPeriod(p,btn){
   if(btn)btn.classList.add('act');
   renderFinance(true);
 }
-
-
-/* ── EXPOSE GLOBALS (required for type=module) ── */
-function _selectSess(btn,sess){
-  document.querySelectorAll('.dash-sess-btn').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  _applyTintFromSel();
-}
-
-Object.assign(window,{
-  toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
-  onFabClick,fabAction,updateFab,
-  saveHabit,saveTask,saveFinance,selectRecur,toggleInvest,deleteItem,deleteTransaction,
-  selectPill,setPeriod,updateAvail,
-  updateUserName,hidNameInput,
-  renderHabitFilters,renderTaskFilters,
-  openSwitcher,closeSwitcher,openProfile,closeProfile,doLogout,
-  toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
-  selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,
-  _setTransFilter,_renderTransList,
-  _setFinPeriod,
-  _selectSess, _applyTintFromSel, _pctToTint,
-  initNotifications:()=>{},scheduleTaskNotifications:()=>{},
-});
 </script>
 </body>
 </html>
