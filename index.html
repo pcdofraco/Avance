@@ -1133,6 +1133,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .settings-row-lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.35);text-transform:uppercase;}
 .settings-row-val{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.18);}
 
+
 /* ── DASH HABIT BAR (single) ── */
 .dash-hab-wrap{margin-top:36px;padding:0;}
 .dash-hab-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
@@ -2012,30 +2013,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="trans-lbl">transações</div>
       <div id="trans-list"></div>
     </div>
-    <div id="sec-stats" class="section">
-      <div class="period-row">
-        <button class="period-btn act" onclick="setPeriod('week',this)">semana</button>
-        <button class="period-btn" onclick="setPeriod('month',this)">mês</button>
-        <button class="period-btn" onclick="setPeriod('year',this)">ano</button>
-      </div>
-      <div class="mini-grid">
-        <div class="mini-card"><div class="mini-val" id="ms-h">—</div><div class="mini-lbl">Taxa hábitos</div></div>
-        <div class="mini-card"><div class="mini-val" id="ms-t">—</div><div class="mini-lbl">Taxa tarefas</div></div>
-        <div class="mini-card"><div class="mini-val" id="ms-s">0</div><div class="mini-lbl">Melhor streak</div></div>
-        <div class="mini-card"><div class="mini-val" id="ms-x">0</div><div class="mini-lbl">XP total</div></div>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-hdr"><div class="chart-title">Conclusão de hábitos</div><div class="chart-avg" id="avg-h">—</div></div>
-        <svg class="chart-svg" id="svg-h" viewBox="0 0 300 70" preserveAspectRatio="none"></svg>
-        <div class="chart-xlbls" id="xlbl-h"></div>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-hdr"><div class="chart-title">Tarefas concluídas</div><div class="chart-avg" id="avg-t">—</div></div>
-        <svg class="chart-svg" id="svg-t" viewBox="0 0 300 70" preserveAspectRatio="none"></svg>
-        <div class="chart-xlbls" id="xlbl-t"></div>
-      </div>
-    </div>
-
     <div id="sec-treino" class="section">
 
       <!-- dias da semana -->
@@ -2231,7 +2208,7 @@ function toggleDrawer(){}
 function closeDrawer(){}
 
 /* TABS */
-const TAB_ORDER=['dashboard','habitos','tarefas','financas','treino','estudos','stats'];
+const TAB_ORDER=['dashboard','habitos','tarefas','financas','treino','estudos'];
 function setTab(name,dir){
   const prev=curTab;
   curTab=name;
@@ -2869,34 +2846,10 @@ function updateAvail(){
 }
 
 /* STATS */
-function setPeriod(p,btn){
-  curPd=p;document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('act'));
-  btn.classList.add('act');renderStats();
-}
 function getDays(){
   const out=[],n=curPd==='week'?7:curPd==='month'?30:365;
   for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);out.push(d.toDateString());}
   return out;
-}
-function renderStats(){
-  const days=getDays();
-  const hVals=days.map(date=>{const e=S.history.find(x=>x.date===date);return(e&&e.hTotal)?Math.round((e.hDone/e.hTotal)*100):null;});
-  const tVals=days.map(date=>{const e=S.history.find(x=>x.date===date);return e?e.tDone:null;});
-  const lbls=days.map(date=>{const d=new Date(date);return curPd==='week'?DAYS[d.getDay()]:curPd==='month'?String(d.getDate()):d.toLocaleDateString('pt-BR',{month:'short'});});
-  const hF=hVals.filter(v=>v!==null),tF=tVals.filter(v=>v!==null);
-  const avgH=hF.length?Math.round(hF.reduce((a,b)=>a+b,0)/hF.length):null;
-  const avgT=tF.length?Math.round(tF.reduce((a,b)=>a+b,0)/tF.length):null;
-  document.getElementById('avg-h').textContent=avgH!==null?avgH+'% média':'—';
-  document.getElementById('avg-t').textContent=avgT!==null?avgT+' média/dia':'—';
-  const taskRate=S.tasks.length?Math.round((S.tasks.filter(t=>t.done).length/S.tasks.length)*100):0;
-  const bestStreak=S.habits.length?Math.max(...S.habits.map(h=>h.streak||0)):0;
-  document.getElementById('ms-h').textContent=avgH!==null?avgH+'%':'—';
-  document.getElementById('ms-t').textContent=taskRate+'%';
-  document.getElementById('ms-s').textContent=bestStreak;
-  document.getElementById('ms-x').textContent=S.xp;
-  drawChart('svg-h','xlbl-h',hVals,lbls,'%');
-  const maxT=Math.max(...tVals.filter(v=>v!==null),1);
-  drawChart('svg-t','xlbl-t',tVals.map(v=>v===null?null:Math.round((v/maxT)*100)),lbls,'');
 }
 function drawChart(svgId,lblId,data,labels,suffix){
   const svg=document.getElementById(svgId),lblEl=document.getElementById(lblId);
@@ -3307,6 +3260,9 @@ function renderTreino(){
 function _trSelectDay(btn, dow){
   _trSelDow = dow;
   renderTreino();
+  // scroll content into view smoothly
+  const cont = document.getElementById('tr-day-content');
+  if(cont) cont.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 function _trNewFicha(){
@@ -4547,11 +4503,13 @@ function _selectSess(btn,sess){
   _applyTintFromSel();
 }
 
+
+
 Object.assign(window,{
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
   onFabClick,fabAction,updateFab,
   saveHabit,saveTask,saveFinance,selectRecur,toggleInvest,deleteItem,deleteTransaction,
-  selectPill,setPeriod,updateAvail,
+  selectPill,updateAvail,
   updateUserName,hidNameInput,
   renderHabitFilters,renderTaskFilters,
   openSwitcher,closeSwitcher,openProfile,closeProfile,doLogout,
@@ -4680,7 +4638,6 @@ const TABS_META=[
   {id:'financas',  icon:'◇', name:'Finanças'},
   {id:'treino',    icon:'△', name:'Treino'},
   {id:'estudos',   icon:'◫', name:'Estudos'},
-  {id:'stats',     icon:'∿', name:'Stats'},
 ];
 
 function buildSwitcherPreview(id){
@@ -5042,11 +4999,11 @@ function _updateChip(id,label,hasVal){
 
 
 /* ── SECTIONS / PREFS ── */
-const SECTION_LABELS={dashboard:'Dashboard',habitos:'Hábitos',tarefas:'Tarefas',financas:'Finanças',treino:'Treino',estudos:'Estudos',stats:'Estatísticas'};
+const SECTION_LABELS={dashboard:'Dashboard',habitos:'Hábitos',tarefas:'Tarefas',financas:'Finanças',treino:'Treino',estudos:'Estudos'};
 
 function applyPrefs(){
   if(!S.prefs)return;
-  const all=['dashboard','habitos','tarefas','financas','treino','estudos','stats'];
+  const all=['dashboard','habitos','tarefas','financas','treino','estudos'];
   const active=all.filter(t=>S.prefs.sections[t]!==false);
   if(!active.includes('dashboard'))active.unshift('dashboard');
   TAB_ORDER.length=0;active.forEach(t=>TAB_ORDER.push(t));
