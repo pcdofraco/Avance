@@ -505,12 +505,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── STATS BAR ── (removido) */
 
 /* ── CONTENT ── */
-#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0;display:flex;flex-direction:column;align-items:center;}
-.section{width:100%;max-width:540px;padding:0 clamp(16px,5vw,32px) calc(90px + var(--sb));box-sizing:border-box;}
-#sec-dashboard{max-width:540px;}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 clamp(16px,5vw,48px) calc(24px + var(--sb));}
+@media(min-width:600px){
+  #content{padding-left:clamp(48px,8vw,120px);padding-right:clamp(48px,8vw,120px);}
+}
+.section{width:100%;box-sizing:border-box;}
+#sec-dashboard{max-width:none;}
 #content::-webkit-scrollbar{display:none;}
-.section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}
-#sec-dashboard.anim-up{animation:secInDash 0.3s ease-out both!important;opacity:1!important;}
+.section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}#sec-dashboard.anim-up{animation:secInDash 0.3s ease-out both!important;opacity:1!important;}
 @keyframes secIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes secInDash{from{transform:translateY(10px)}to{transform:translateY(0)}}
 @keyframes secInLeft{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
@@ -1359,8 +1361,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #tr-week-row{
   display:flex;gap:0;
   border-bottom:1px solid rgba(255,255,255,0.05);
-  margin:0 -clamp(16px,5vw,32px) 0;
-  padding:0 clamp(16px,5vw,32px);
+  margin:0 -clamp(16px,5vw,48px) 0;
+  padding:0 clamp(16px,5vw,48px);
   overflow-x:auto;
   scrollbar-width:none;
 }
@@ -2024,7 +2026,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
 
   <!-- CONTENT -->
-  <div id="content">
+  <div id="content" style="padding-bottom:calc(90px + var(--sb))">
 
     <div id="sec-dashboard" class="section active">
 
