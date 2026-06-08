@@ -2480,6 +2480,12 @@ function setTab(name,dir){
   else if(name==='stats')renderStats();
   else if(name==='treino'){renderTreino();}
   else if(name==='estudos'){renderEstudos();}
+  // fechar sheet do treino ao sair da aba
+  if(name!=='treino'&&_trEditId){
+    document.getElementById('tr-sheet-overlay')?.classList.remove('open');
+    document.getElementById('tr-sheet')?.classList.remove('open');
+    _trEditId=null;_trWorkoutMode=false;
+  }
   else if(name==='dashboard'){renderDashboard();}
   else{if(window._spiralStop)window._spiralStop();}
   updateFab();
@@ -2633,7 +2639,7 @@ function renderHabits(){
     row.dataset.id=h.id;
     row.dataset.tag=h.tag||'';
     row.innerHTML=`
-      <div class="chk-c${done?' done':''}" style="${chkStyle}"></div>
+      <div class="chk-s${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
         <div class="item-name">${h.name}</div>
         <div class="item-meta">${metaText}</div>
@@ -2647,7 +2653,7 @@ function renderHabits(){
           </div>
         </div>
       </div>`;
-    row.querySelector('.chk-c').addEventListener('click',e=>{e.stopPropagation();if(activeToday)toggleHabit(h.id,row);});
+    row.querySelector('.chk-s').addEventListener('click',e=>{e.stopPropagation();if(activeToday)toggleHabit(h.id,row);});
     row.querySelector('.edit-btn').addEventListener('click',e=>{e.stopPropagation();openModal('habit',h.id);});
     // expand on body click
     row.querySelector('.item-body').addEventListener('click',e=>{
@@ -2806,7 +2812,7 @@ function toggleHabit(id,row){
   const h=S.habits.find(x=>x.id===id);if(!h)return;
   const today=new Date().toDateString();
   if(!h.done)h.done={};
-  const chk=row.querySelector('.chk-c');
+  const chk=row.querySelector('.chk-s');
   const dot=h.color||TAG_COLORS[0];
   const isBad=h.style==='count';
   const target=h.style==='streak'?(h.streakTarget||1):1;
@@ -3455,6 +3461,12 @@ let _trSetsDone = {}; // {exIdx: {setIdx: true}}
 
 function renderTreino(){
   _trEnsure();
+  // fechar sheet só se não há edição ativa
+  if(!_trEditId){
+    document.getElementById('tr-sheet-overlay')?.classList.remove('open');
+    document.getElementById('tr-sheet')?.classList.remove('open');
+    _trWorkoutMode=false;
+  }
   const dow = new Date().getDay();
   const today = new Date().toDateString();
 
@@ -3510,11 +3522,9 @@ function _trSelectDay(btn, dow){
 function _trNewFicha(){
   _trEnsure();
   const id = Date.now().toString();
-  S.treino.fichas.push({id, name:'Novo treino', days:[_trSelDow], exercises:[]});
+  S.treino.fichas.push({id, name:'', days:[_trSelDow], exercises:[]});
   save();
-  renderTreino();
-  // open sheet after a tiny delay so renderTreino settles
-  setTimeout(()=>_trOpenFicha(id), 60);
+  _trOpenFicha(id);
 }
 
 function _trOpenFicha(id){
@@ -4451,7 +4461,7 @@ function initHabitDrag(container){
   container=fresh;
   container.querySelectorAll('.list-item[data-id]').forEach(row=>{
     const id=parseInt(row.dataset.id);
-    row.querySelector('.chk-c')?.addEventListener('click',e=>{
+    row.querySelector('.chk-s')?.addEventListener('click',e=>{
       e.stopPropagation();
       const h=S.habits.find(x=>x.id===id);
       const today=new Date().toDateString();
@@ -5805,7 +5815,7 @@ function _setHabitTagFilter(tag){
   if(panel)panel.classList.remove('open');
   if(btn)btn.classList.toggle('active',tag!=='all');
 }
-let _finPeriod='month';
+let _finPeriod='week';
 function _setFinPeriod(p,btn){
   _finPeriod=p;
   document.querySelectorAll('.fin-period-btn').forEach(b=>b.classList.remove('act'));
