@@ -3300,10 +3300,11 @@ function _trSelectDay(btn, dow){
 function _trNewFicha(){
   _trEnsure();
   const id = Date.now().toString();
-  S.treino.fichas.push({id, name:'', days:[_trSelDow], exercises:[]});
+  S.treino.fichas.push({id, name:'Novo treino', days:[_trSelDow], exercises:[]});
   save();
   renderTreino();
-  _trOpenFicha(id);
+  // open sheet after a tiny delay so renderTreino settles
+  setTimeout(()=>_trOpenFicha(id), 60);
 }
 
 function _trOpenFicha(id){
@@ -4858,16 +4859,25 @@ function buildSwitcherPreview(id){
       <div class="sw-mini-val">${done}/${total}</div>
       ${rows}`;
   } else if(id==='tarefas'){
-    const tasks=S.tasks.filter(t=>t.repeat==='once'||t.doneToday).slice(0,5);
-    const rows=tasks.length?tasks.map(t=>`<div class="sw-mini-row">
-      <div class="sw-mini-sq ${t.doneToday?'done':''}"></div>
-      <div class="sw-mini-line ${t.doneToday?'done':''}"></div>
-    </div>`).join(''):Array(4).fill(`<div class="sw-mini-row"><div class="sw-mini-sq"></div><div class="sw-mini-line"></div></div>`).join('');
-    const pending=S.tasks.filter(t=>!t.doneToday).length;
+    const total=S.tasks.length||1;
+    const done=S.tasks.filter(t=>t.done).length;
+    const pct=Math.round(done/total*100);
+    const circ=2*Math.PI*18;
+    const offset=circ*(1-pct/100);
+    const col=pct>=70?'rgba(74,222,128,0.7)':pct>=30?'rgba(251,191,36,0.65)':'rgba(248,113,113,0.6)';
+    const pending=total-done;
     d.innerHTML=`
       <div class="sw-mini-label">tarefas</div>
-      <div class="sw-mini-val">${pending} pend.</div>
-      ${rows}`;
+      <div style="position:relative;width:44px;height:44px;margin:4px auto 4px">
+        <svg viewBox="0 0 44 44" style="width:44px;height:44px;display:block">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="3.5"/>
+          <circle cx="22" cy="22" r="18" fill="none" stroke="${col}" stroke-width="3.5"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+            stroke-linecap="round" transform="rotate(-90 22 22)"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;color:rgba(255,255,255,0.75)">${pct}%</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);text-align:center">${pending} pend.</div>`;
   } else if(id==='financas'){
     const ins=S.transactions.filter(t=>t.type==='in').reduce((a,t)=>a+t.amount,0);
     const outs=S.transactions.filter(t=>t.type==='out').reduce((a,t)=>a+t.amount,0);
@@ -4917,10 +4927,22 @@ function buildSwitcherPreview(id){
       <div style="height:5px"></div>
       <div style="font-family:var(--mono);font-size:7px;color:rgba(255,255,255,0.2);letter-spacing:0.08em">${DAY_SHORT[dow]}</div>`;
   } else if(id==='estudos'){
+    const sessions=S.studySessions||[];
+    const totalMin=sessions.reduce((a,s)=>a+(s.duration||0),0);
+    const todaySess=sessions.filter(s=>new Date(s.date).toDateString()===new Date().toDateString()).length;
+    const fmtT=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(Math.floor(m%60)).padStart(2,'0'):''):m+'m';
+    // last 5 days activity dots
+    const dotDays=Array.from({length:5},(_,i)=>{
+      const d2=new Date();d2.setDate(d2.getDate()-i);
+      const key=d2.toDateString();
+      const active=sessions.some(s=>new Date(s.date).toDateString()===key);
+      return `<div style="width:8px;height:8px;border-radius:50%;background:${active?'rgba(167,139,250,0.7)':'rgba(255,255,255,0.07)'}"></div>`;
+    }).reverse().join('');
     d.innerHTML=`
       <div class="sw-mini-label">estudos</div>
-      <div class="sw-mini-val" style="font-size:10px;opacity:0.3">em breve</div>
-      ${Array(3).fill(`<div class="sw-mini-row"><div class="sw-mini-sq"></div><div class="sw-mini-line"></div></div>`).join('')}`;
+      <div class="sw-mini-val" style="font-size:18px;letter-spacing:-0.02em;margin-bottom:2px">${totalMin?fmtT(totalMin):'0h'}</div>
+      <div style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.2);margin-bottom:8px">${todaySess} sessão${todaySess!==1?'s':''} hoje</div>
+      <div style="display:flex;gap:5px;align-items:center">${dotDays}</div>`;
   } else if(id==='stats'){
     const ht=S.habits.length?Math.round(S.habits.filter(h=>h.doneToday).length/S.habits.length*100):0;
     d.innerHTML=`
