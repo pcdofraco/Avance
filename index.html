@@ -505,7 +505,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── STATS BAR ── (removido) */
 
 /* ── CONTENT ── */
-#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 clamp(16px,5vw,48px) calc(24px + var(--sb));}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0;display:flex;flex-direction:column;align-items:center;}
+.section{width:100%;max-width:540px;padding:0 clamp(16px,5vw,32px) calc(90px + var(--sb));box-sizing:border-box;}
+#sec-dashboard{max-width:540px;}
 #content::-webkit-scrollbar{display:none;}
 .section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}
 #sec-dashboard.anim-up{animation:secInDash 0.3s ease-out both!important;opacity:1!important;}
@@ -579,6 +581,148 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .list-item:hover .edit-btn{opacity:1;}
 @media(hover:none){.edit-btn{opacity:0.45;}}
 .edit-btn:active{opacity:1;color:var(--t1);background:rgba(255,255,255,0.06);}
+
+/* ── ESTUDOS ── */
+#est-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+#est-title{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+
+/* cronômetro */
+#est-timer-block{
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:32px;
+  gap:8px;
+}
+#est-timer-display{
+  font-family:var(--mono);font-size:clamp(42px,12vw,64px);
+  font-weight:300;letter-spacing:-0.03em;
+  color:rgba(255,255,255,0.85);
+  line-height:1;
+}
+#est-timer-display.running{color:#fff;}
+#est-timer-subject{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;
+  cursor:pointer;border-bottom:1px solid transparent;
+  transition:color 0.2s,border-color 0.2s;
+}
+#est-timer-subject:hover{color:rgba(255,255,255,0.45);border-color:rgba(255,255,255,0.15);}
+#est-timer-btns{display:flex;gap:10px;margin-top:4px;}
+.est-timer-btn{
+  padding:9px 22px;border-radius:10px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.4);text-transform:uppercase;cursor:pointer;
+  transition:all 0.18s;
+}
+.est-timer-btn:active{background:rgba(255,255,255,0.1);color:#fff;}
+.est-timer-btn.primary{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.75);}
+.est-timer-btn.running{border-color:rgba(255,100,100,0.3);color:rgba(255,100,100,0.7);}
+
+/* meta de horas */
+#est-meta-row{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 0;
+  border-top:1px solid rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  margin-bottom:28px;
+}
+#est-meta-info{flex:1;}
+#est-meta-lbl{font-family:var(--mono);font-size:8px;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-bottom:5px;}
+#est-meta-track{width:100%;height:2px;background:rgba(255,255,255,0.07);border-radius:2px;}
+#est-meta-fill{height:100%;border-radius:2px;background:rgba(255,255,255,0.35);transition:width 0.5s ease;width:0%;}
+#est-meta-nums{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3);margin-top:5px;letter-spacing:-0.01em;}
+#est-meta-edit{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  color:rgba(255,255,255,0.18);text-transform:uppercase;
+  transition:color 0.18s;white-space:nowrap;
+}
+#est-meta-edit:active{color:rgba(255,255,255,0.6);}
+
+/* stats row */
+#est-stats-row{
+  display:flex;gap:0;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:28px;
+}
+.est-stat{flex:1;padding:14px 0;text-align:center;}
+.est-stat+.est-stat{border-left:1px solid rgba(255,255,255,0.06);}
+.est-stat-val{font-family:var(--mono);font-size:18px;font-weight:300;color:rgba(255,255,255,0.55);display:block;letter-spacing:-0.02em;}
+.est-stat-lbl{font-family:var(--mono);font-size:7px;letter-spacing:0.14em;color:rgba(255,255,255,0.2);text-transform:uppercase;display:block;margin-top:3px;}
+
+/* heatmap */
+#est-heatmap-wrap{margin-bottom:24px;}
+#est-heatmap-title{font-family:var(--mono);font-size:8px;letter-spacing:0.18em;color:rgba(255,255,255,0.18);text-transform:uppercase;margin-bottom:12px;}
+#est-heatmap{
+  display:flex;gap:3px;
+  overflow-x:auto;scrollbar-width:none;
+}
+#est-heatmap::-webkit-scrollbar{display:none;}
+.est-hm-col{display:flex;flex-direction:column;gap:3px;}
+.est-hm-cell{
+  width:11px;height:11px;border-radius:2px;
+  background:rgba(255,255,255,0.05);
+  flex-shrink:0;
+  transition:background 0.2s;
+}
+.est-hm-cell.l1{background:rgba(255,255,255,0.14);}
+.est-hm-cell.l2{background:rgba(255,255,255,0.28);}
+.est-hm-cell.l3{background:rgba(255,255,255,0.48);}
+.est-hm-cell.l4{background:rgba(255,255,255,0.72);}
+.est-hm-cell.today{box-shadow:0 0 0 1px rgba(255,255,255,0.4);}
+
+/* subject picker (inline input) */
+#est-subject-input{
+  width:100%;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);
+  padding:4px 0;font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.6);text-transform:uppercase;outline:none;
+  display:none;
+}
+#est-subject-input::placeholder{color:rgba(255,255,255,0.18);}
+
+/* sessions list */
+#est-sessions-wrap{margin-top:4px;}
+#est-sessions-title{font-family:var(--mono);font-size:8px;letter-spacing:0.18em;color:rgba(255,255,255,0.18);text-transform:uppercase;margin-bottom:12px;}
+.est-session-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.est-session-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);flex-shrink:0;}
+.est-session-info{flex:1;min-width:0;}
+.est-session-subj{font-size:13px;color:rgba(255,255,255,0.65);font-weight:500;}
+.est-session-meta{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2);margin-top:1px;}
+.est-session-dur{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.3);}
+
+/* meta modal */
+#est-meta-sheet{position:fixed;inset:0;z-index:700;pointer-events:none;opacity:0;transition:opacity 0.25s;}
+#est-meta-sheet.open{pointer-events:all;opacity:1;}
+#est-meta-sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,0.5);}
+#est-meta-inner{
+  position:absolute;bottom:0;left:50%;
+  transform:translateX(-50%) translateY(40px);
+  width:100%;max-width:480px;
+  background:rgba(12,12,12,0.98);
+  border-top:1px solid rgba(255,255,255,0.06);
+  border-radius:24px 24px 0 0;
+  padding:20px 24px calc(32px + var(--sb));
+  box-sizing:border-box;
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#est-meta-sheet.open #est-meta-inner{transform:translateX(-50%) translateY(0);}
+#est-meta-handle{width:28px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 20px;}
+#est-meta-sheet-title{font-family:var(--mono);font-size:8px;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-bottom:18px;}
+.est-meta-option{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+}
+.est-meta-option:last-child{border:none;}
+.est-meta-option-lbl{font-size:15px;color:rgba(255,255,255,0.7);}
+.est-meta-option-sub{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.2);}
+.est-meta-option.sel .est-meta-option-lbl{color:#fff;}
+.est-meta-option.sel::after{content:'✓';font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.4);}
 
 /* ── FINANCE ── */
 /* saldo hero */
@@ -1215,8 +1359,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #tr-week-row{
   display:flex;gap:0;
   border-bottom:1px solid rgba(255,255,255,0.05);
-  margin:0 -clamp(16px,5vw,48px) 0;
-  padding:0 clamp(16px,5vw,48px);
+  margin:0 -clamp(16px,5vw,32px) 0;
+  padding:0 clamp(16px,5vw,32px);
   overflow-x:auto;
   scrollbar-width:none;
 }
@@ -1880,7 +2024,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
 
   <!-- CONTENT -->
-  <div id="content" style="padding-bottom:calc(90px + var(--sb))">
+  <div id="content">
 
     <div id="sec-dashboard" class="section active">
 
@@ -2090,7 +2234,70 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
 
     <div id="sec-estudos" class="section">
-      <div class="empty" style="padding-top:48px;text-align:center;opacity:0.3;font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase">em breve</div>
+
+      <!-- cronômetro -->
+      <div id="est-timer-block">
+        <div id="est-timer-display">00:00:00</div>
+        <div id="est-timer-subject" onclick="_estEditSubject()">toque para definir matéria</div>
+        <input id="est-subject-input" placeholder="ex: matemática…" maxlength="32"
+               onblur="_estSubjectBlur()" onkeydown="if(event.key==='Enter')this.blur()">
+        <div id="est-timer-btns">
+          <button class="est-timer-btn primary" id="est-btn-start" onclick="_estToggle()">iniciar</button>
+          <button class="est-timer-btn" id="est-btn-reset" onclick="_estReset()">zerar</button>
+        </div>
+      </div>
+
+      <!-- meta de horas -->
+      <div id="est-meta-row">
+        <div id="est-meta-info">
+          <div id="est-meta-lbl">meta diária</div>
+          <div id="est-meta-track"><div id="est-meta-fill"></div></div>
+          <div id="est-meta-nums">0h / 2h</div>
+        </div>
+        <button id="est-meta-edit" onclick="_estOpenMeta()">editar</button>
+      </div>
+
+      <!-- stats -->
+      <div id="est-stats-row">
+        <div class="est-stat">
+          <span class="est-stat-val" id="est-stat-today">0h</span>
+          <span class="est-stat-lbl">hoje</span>
+        </div>
+        <div class="est-stat">
+          <span class="est-stat-val" id="est-stat-streak">0</span>
+          <span class="est-stat-lbl">streak</span>
+        </div>
+        <div class="est-stat">
+          <span class="est-stat-val" id="est-stat-record">0</span>
+          <span class="est-stat-lbl">recorde</span>
+        </div>
+        <div class="est-stat">
+          <span class="est-stat-val" id="est-stat-week">0h</span>
+          <span class="est-stat-lbl">semana</span>
+        </div>
+      </div>
+
+      <!-- heatmap -->
+      <div id="est-heatmap-wrap">
+        <div id="est-heatmap-title">últimos 16 semanas</div>
+        <div id="est-heatmap"></div>
+      </div>
+
+      <!-- sessões recentes -->
+      <div id="est-sessions-wrap">
+        <div id="est-sessions-title">sessões recentes</div>
+        <div id="est-sessions-list"></div>
+      </div>
+
+    </div>
+
+    <!-- META SHEET -->
+    <div id="est-meta-sheet">
+      <div id="est-meta-sheet-bg" onclick="_estCloseMeta()"></div>
+      <div id="est-meta-inner">
+        <div id="est-meta-handle"></div>
+        <div id="est-meta-sheet-title">meta diária de estudo</div>
+      </div>
     </div>
 
   </div>
@@ -2143,7 +2350,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ─────────────────────────────────────────
    DEV_MODE — mude para false antes de subir
    ───────────────────────────────────────── */
-const DEV_MODE = false;
+const DEV_MODE = true;
 /* ───────────────────────────────────────── */
 
 // Firebase só carrega em produção
@@ -2270,6 +2477,7 @@ function setTab(name,dir){
   else if(name==='tarefas'){renderTasks();renderTaskFilters();}
   else if(name==='stats')renderStats();
   else if(name==='treino'){renderTreino();}
+  else if(name==='estudos'){renderEstudos();}
   else if(name==='dashboard'){renderDashboard();}
   else{if(window._spiralStop)window._spiralStop();}
   updateFab();
@@ -4692,6 +4900,270 @@ function _selectSess(btn,sess){
 
 
 
+/* ── ESTUDOS ── */
+// S.estudos = { sessions:[{id,subject,start,end,duration}], dailyGoalMin:120, heatmap:{date:minutes} }
+function _estEnsure(){
+  if(!S.estudos) S.estudos={sessions:[],dailyGoalMin:120,heatmap:{}};
+  if(!S.estudos.heatmap) S.estudos.heatmap={};
+}
+
+let _estRunning=false;
+let _estStartTs=0;
+let _estElapsed=0; // ms accumulated before current start
+let _estTick=null;
+let _estSubject='';
+
+function renderEstudos(){
+  _estEnsure();
+  _estUpdateDisplay();
+  _estRenderMeta();
+  _estRenderStats();
+  _estRenderHeatmap();
+  _estRenderSessions();
+}
+
+function _estFmt(ms){
+  const s=Math.floor(ms/1000);
+  const hh=String(Math.floor(s/3600)).padStart(2,'0');
+  const mm=String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const ss=String(s%60).padStart(2,'0');
+  return hh+':'+mm+':'+ss;
+}
+
+function _estUpdateDisplay(){
+  const total=_estRunning?(Date.now()-_estStartTs+_estElapsed):_estElapsed;
+  const el=document.getElementById('est-timer-display');
+  if(el) el.textContent=_estFmt(total);
+}
+
+function _estToggle(){
+  _estEnsure();
+  if(!_estRunning){
+    _estRunning=true;
+    _estStartTs=Date.now();
+    _estTick=setInterval(()=>_estUpdateDisplay(),1000);
+    const btn=document.getElementById('est-btn-start');
+    if(btn){btn.textContent='pausar';btn.classList.add('running');btn.classList.remove('primary');}
+    document.getElementById('est-timer-display')?.classList.add('running');
+  } else {
+    _estElapsed+=Date.now()-_estStartTs;
+    _estRunning=false;
+    clearInterval(_estTick);
+    const btn=document.getElementById('est-btn-start');
+    if(btn){btn.textContent='continuar';btn.classList.remove('running');btn.classList.add('primary');}
+    document.getElementById('est-timer-display')?.classList.remove('running');
+  }
+}
+
+function _estReset(){
+  if(_estElapsed===0&&!_estRunning) return;
+  // save session if meaningful (>1 min)
+  const total=_estRunning?(Date.now()-_estStartTs+_estElapsed):_estElapsed;
+  if(total>=60000){
+    _estEnsure();
+    const now=new Date();
+    const dateKey=now.toDateString();
+    const session={
+      id:Date.now(),
+      subject:_estSubject||'sem matéria',
+      start:new Date(now.getTime()-total).toISOString(),
+      end:now.toISOString(),
+      duration:Math.floor(total/1000)
+    };
+    S.estudos.sessions.unshift(session);
+    // update heatmap
+    const mins=Math.floor(total/60000);
+    S.estudos.heatmap[dateKey]=(S.estudos.heatmap[dateKey]||0)+mins;
+    save();
+    addXP(Math.floor(mins/10)*5);
+  }
+  // reset
+  clearInterval(_estTick);
+  _estRunning=false;_estElapsed=0;_estStartTs=0;
+  const btn=document.getElementById('est-btn-start');
+  if(btn){btn.textContent='iniciar';btn.classList.add('primary');btn.classList.remove('running');}
+  document.getElementById('est-timer-display')?.classList.remove('running');
+  _estUpdateDisplay();
+  renderEstudos();
+}
+
+function _estEditSubject(){
+  const lbl=document.getElementById('est-timer-subject');
+  const inp=document.getElementById('est-subject-input');
+  if(!lbl||!inp) return;
+  inp.value=_estSubject;
+  lbl.style.display='none';
+  inp.style.display='block';
+  inp.focus();
+}
+function _estSubjectBlur(){
+  const lbl=document.getElementById('est-timer-subject');
+  const inp=document.getElementById('est-subject-input');
+  _estSubject=(inp?.value.trim()||'');
+  if(lbl){
+    lbl.textContent=_estSubject||'toque para definir matéria';
+    lbl.style.display='';
+  }
+  if(inp) inp.style.display='none';
+}
+
+function _estRenderMeta(){
+  _estEnsure();
+  const today=new Date().toDateString();
+  const todayMins=S.estudos.heatmap[today]||0;
+  const goal=S.estudos.dailyGoalMin||120;
+  const pct=Math.min(1,todayMins/goal);
+  const el=document.getElementById('est-meta-fill');
+  if(el) setTimeout(()=>el.style.width=(pct*100)+'%',80);
+  const nums=document.getElementById('est-meta-nums');
+  const fmt=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):''):(m+'min');
+  if(nums) nums.textContent=fmt(todayMins)+' / '+fmt(goal);
+}
+
+function _estRenderStats(){
+  _estEnsure();
+  const hm=S.estudos.heatmap;
+  const today=new Date();
+  const todayKey=today.toDateString();
+  const goal=S.estudos.dailyGoalMin||120;
+
+  // today
+  const todayMins=hm[todayKey]||0;
+  _el('est-stat-today').textContent=todayMins>=60?Math.floor(todayMins/60)+'h':todayMins+'m';
+
+  // streak
+  let streak=0,best=0,cur=0;
+  for(let i=0;i<365;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const k=d.toDateString();
+    if((hm[k]||0)>=goal){if(i===0||streak>0)streak++;cur++;}
+    else{if(i>0)streak=0;cur=0;}
+    best=Math.max(best,cur);
+  }
+  // recalculate streak properly
+  let s=0;
+  for(let i=0;i<365;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    if((hm[d.toDateString()]||0)>=goal)s++;
+    else break;
+  }
+  _el('est-stat-streak').textContent=s;
+  _el('est-stat-record').textContent=best;
+
+  // week total
+  let weekMins=0;
+  for(let i=0;i<7;i++){const d=new Date(today);d.setDate(d.getDate()-i);weekMins+=(hm[d.toDateString()]||0);}
+  _el('est-stat-week').textContent=weekMins>=60?Math.floor(weekMins/60)+'h':weekMins+'m';
+}
+
+function _el(id){return document.getElementById(id)||{textContent:''};}
+
+function _estRenderHeatmap(){
+  _estEnsure();
+  const wrap=document.getElementById('est-heatmap');
+  if(!wrap) return;
+  const hm=S.estudos.heatmap;
+  const goal=S.estudos.dailyGoalMin||120;
+  const today=new Date();
+  // 16 weeks = 112 days, start from Sunday of 16 weeks ago
+  const weeks=16;
+  const days=weeks*7;
+  // find start day (Sunday)
+  const startDay=new Date(today);
+  startDay.setDate(startDay.getDate()-(days-1));
+  // align to Sunday
+  const startOffset=startDay.getDay();
+  startDay.setDate(startDay.getDate()-startOffset);
+  const totalDays=(weeks+1)*7;
+
+  const cols=[];
+  for(let w=0;w<=weeks;w++){
+    const col=document.createElement('div');
+    col.className='est-hm-col';
+    for(let d=0;d<7;d++){
+      const date=new Date(startDay);
+      date.setDate(startDay.getDate()+w*7+d);
+      if(date>today){const empty=document.createElement('div');empty.style.width='11px';empty.style.height='11px';col.appendChild(empty);continue;}
+      const key=date.toDateString();
+      const mins=hm[key]||0;
+      const cell=document.createElement('div');
+      cell.className='est-hm-cell';
+      if(mins>0){
+        const pct=mins/goal;
+        if(pct>=1)cell.classList.add('l4');
+        else if(pct>=0.66)cell.classList.add('l3');
+        else if(pct>=0.33)cell.classList.add('l2');
+        else cell.classList.add('l1');
+      }
+      if(key===today.toDateString()) cell.classList.add('today');
+      cell.title=key+': '+mins+'min';
+      col.appendChild(cell);
+    }
+    cols.push(col);
+  }
+  wrap.innerHTML='';
+  cols.forEach(c=>wrap.appendChild(c));
+  // scroll to end
+  setTimeout(()=>wrap.scrollLeft=wrap.scrollWidth,50);
+}
+
+function _estRenderSessions(){
+  _estEnsure();
+  const list=document.getElementById('est-sessions-list');
+  if(!list) return;
+  const sessions=S.estudos.sessions.slice(0,8);
+  if(!sessions.length){list.innerHTML='<div style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.15);letter-spacing:0.12em;text-transform:uppercase;padding:16px 0">nenhuma sessão ainda</div>';return;}
+  list.innerHTML=sessions.map(s=>{
+    const d=Math.floor(s.duration/60);
+    const dur=d>=60?Math.floor(d/60)+'h '+(d%60?d%60+'min':''):d+'min';
+    const date=new Date(s.end);
+    const dateStr=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    return `<div class="est-session-row">
+      <div class="est-session-dot"></div>
+      <div class="est-session-info">
+        <div class="est-session-subj">${s.subject}</div>
+        <div class="est-session-meta">${dateStr}</div>
+      </div>
+      <div class="est-session-dur">${dur}</div>
+    </div>`;
+  }).join('');
+}
+
+const EST_GOALS=[
+  {label:'30 minutos',val:30},
+  {label:'1 hora',val:60},
+  {label:'2 horas',val:120},
+  {label:'3 horas',val:180},
+  {label:'4 horas',val:240},
+  {label:'6 horas',val:360},
+];
+function _estOpenMeta(){
+  _estEnsure();
+  const inner=document.getElementById('est-meta-inner');
+  // rebuild options
+  const cur=S.estudos.dailyGoalMin||120;
+  const opts=inner.querySelector('.est-meta-options')||document.createElement('div');
+  opts.className='est-meta-options';
+  opts.innerHTML=EST_GOALS.map(g=>`
+    <div class="est-meta-option${g.val===cur?' sel':''}" onclick="_estSetGoal(${g.val})">
+      <span class="est-meta-option-lbl">${g.label}</span>
+    </div>`).join('');
+  if(!inner.querySelector('.est-meta-options')) inner.appendChild(opts);
+  else inner.replaceChild(opts,inner.querySelector('.est-meta-options'));
+  document.getElementById('est-meta-sheet').classList.add('open');
+}
+function _estSetGoal(val){
+  _estEnsure();
+  S.estudos.dailyGoalMin=val;
+  save();
+  _estCloseMeta();
+  _estRenderMeta();
+  _estRenderStats();
+}
+function _estCloseMeta(){
+  document.getElementById('est-meta-sheet').classList.remove('open');
+}
+
 Object.assign(window,{
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
   onFabClick,fabAction,updateFab,
@@ -4711,6 +5183,8 @@ Object.assign(window,{
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
   _toggleHabitStats,
+  renderEstudos,_estToggle,_estReset,_estEditSubject,_estSubjectBlur,
+  _estOpenMeta,_estSetGoal,_estCloseMeta,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
 });
 
@@ -4927,22 +5401,27 @@ function buildSwitcherPreview(id){
       <div style="height:5px"></div>
       <div style="font-family:var(--mono);font-size:7px;color:rgba(255,255,255,0.2);letter-spacing:0.08em">${DAY_SHORT[dow]}</div>`;
   } else if(id==='estudos'){
-    const sessions=S.studySessions||[];
-    const totalMin=sessions.reduce((a,s)=>a+(s.duration||0),0);
-    const todaySess=sessions.filter(s=>new Date(s.date).toDateString()===new Date().toDateString()).length;
-    const fmtT=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(Math.floor(m%60)).padStart(2,'0'):''):m+'m';
-    // last 5 days activity dots
+    _estEnsure();
+    const today=new Date().toDateString();
+    const todayMins=S.estudos.heatmap[today]||0;
+    const goal=S.estudos.dailyGoalMin||120;
+    const pct=Math.min(1,todayMins/goal);
+    const fmt=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):''):(m+'m');
+    const now2=new Date();
     const dotDays=Array.from({length:5},(_,i)=>{
-      const d2=new Date();d2.setDate(d2.getDate()-i);
-      const key=d2.toDateString();
-      const active=sessions.some(s=>new Date(s.date).toDateString()===key);
-      return `<div style="width:8px;height:8px;border-radius:50%;background:${active?'rgba(167,139,250,0.7)':'rgba(255,255,255,0.07)'}"></div>`;
-    }).reverse().join('');
+      const dt=new Date(now2);dt.setDate(dt.getDate()-(4-i));
+      const m=S.estudos.heatmap[dt.toDateString()]||0;
+      const a=m===0?0.07:m>=goal?0.6:0.3;
+      return `<div style="width:8px;height:8px;border-radius:2px;background:rgba(255,255,255,${a})"></div>`;
+    }).join('');
     d.innerHTML=`
       <div class="sw-mini-label">estudos</div>
-      <div class="sw-mini-val" style="font-size:18px;letter-spacing:-0.02em;margin-bottom:2px">${totalMin?fmtT(totalMin):'0h'}</div>
-      <div style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.2);margin-bottom:8px">${todaySess} sessão${todaySess!==1?'s':''} hoje</div>
-      <div style="display:flex;gap:5px;align-items:center">${dotDays}</div>`;
+      <div class="sw-mini-val">${fmt(todayMins)}</div>
+      <div style="font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.2);margin-bottom:8px">meta ${fmt(goal)}</div>
+      <div style="display:flex;gap:4px;align-items:center;margin-bottom:8px">${dotDays}</div>
+      <div style="width:100%;height:1px;background:rgba(255,255,255,0.07);border-radius:1px;overflow:hidden">
+        <div style="height:100%;width:${Math.round(pct*100)}%;background:rgba(255,255,255,0.35);border-radius:1px"></div>
+      </div>`;
   } else if(id==='stats'){
     const ht=S.habits.length?Math.round(S.habits.filter(h=>h.doneToday).length/S.habits.length*100):0;
     d.innerHTML=`
