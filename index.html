@@ -336,24 +336,56 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 .task-filter-active-tag.visible{max-height:20px;opacity:1;}
 /* vertical dropdown */
-#task-tag-panel{
-  position:absolute;top:100%;right:0;
-  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
-  overflow:hidden;max-height:0;
-  transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.25s;
-  opacity:0;padding:0;
-  background:none;
-  min-width:80px;
-  z-index:10;
+#task-tag-panel, #habit-tag-panel{
+  position:fixed;inset:0;z-index:400;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:rgba(0,0,0,0);
+  backdrop-filter:blur(0px);
+  -webkit-backdrop-filter:blur(0px);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.25s ease, backdrop-filter 0.25s ease;
 }
-#task-tag-panel.open{max-height:300px;opacity:1;padding:10px 0 4px;}
+#task-tag-panel.open, #habit-tag-panel.open{
+  opacity:1;pointer-events:all;
+  background:rgba(0,0,0,0.25);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.tag-panel-dismiss{
+  position:fixed;inset:0;z-index:-1;cursor:pointer;
+}
 .task-tag-opt{
-  padding:4px 12px;border-radius:16px;
-  border:1px solid rgba(255,255,255,0.08);background:none;
-  font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);
+  padding:10px 28px;border-radius:22px;
+  border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.05);
+  font-family:var(--mono);font-size:11px;letter-spacing:0.12em;
+  color:rgba(255,255,255,0.45);
   cursor:pointer;transition:all 0.15s;white-space:nowrap;
+  transform:scale(0.9);
+  opacity:0;
 }
-.task-tag-opt.sel{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.75);}
+#task-tag-panel.open .task-tag-opt,
+#habit-tag-panel.open .task-tag-opt{
+  transform:scale(1);opacity:1;
+}
+/* stagger */
+#task-tag-panel.open .task-tag-opt:nth-child(2),
+#habit-tag-panel.open .task-tag-opt:nth-child(2){transition-delay:30ms;}
+#task-tag-panel.open .task-tag-opt:nth-child(3),
+#habit-tag-panel.open .task-tag-opt:nth-child(3){transition-delay:60ms;}
+#task-tag-panel.open .task-tag-opt:nth-child(4),
+#habit-tag-panel.open .task-tag-opt:nth-child(4){transition-delay:90ms;}
+#task-tag-panel.open .task-tag-opt:nth-child(5),
+#habit-tag-panel.open .task-tag-opt:nth-child(5){transition-delay:120ms;}
+#task-tag-panel.open .task-tag-opt:nth-child(6),
+#habit-tag-panel.open .task-tag-opt:nth-child(6){transition-delay:150ms;}
+.task-tag-opt.sel{
+  background:rgba(255,255,255,0.12);
+  border-color:rgba(255,255,255,0.3);
+  color:#fff;
+}
+.task-tag-opt:active{transform:scale(0.96)!important;}
 /* dim non-matching */
 .list-item.tag-dimmed{pointer-events:none;}
 .list-item.tag-dimmed .item-body,
@@ -512,7 +544,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .section{width:100%;box-sizing:border-box;}
 #sec-dashboard{max-width:none;}
 #content::-webkit-scrollbar{display:none;}
-.section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}#sec-dashboard.anim-up{animation:secInDash 0.3s ease-out both!important;opacity:1!important;}
+.section{display:none;}.section.active{display:block;}#sec-dashboard.active{display:flex!important;}#sec-habitos.active{display:flex!important;}#sec-dashboard.anim-up{animation:secInDash 0.3s ease-out both!important;opacity:1!important;}
 @keyframes secIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes secInDash{from{transform:translateY(10px)}to{transform:translateY(0)}}
 @keyframes secInLeft{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
@@ -574,6 +606,32 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .item-body{flex:1;min-width:0;}
 .item-name{font-size:clamp(14px,2.8vw,16px);font-weight:500;color:var(--t1);line-height:1.3;transition:all 0.2s;}
 .item-name.done{text-decoration:line-through;color:var(--t3);}
+.item-name-row{display:flex;align-items:center;gap:10px;line-height:1.3;}
+.item-name-row .item-name{font-size:clamp(14px,2.8vw,16px);font-weight:500;color:var(--t1);transition:all 0.2s;}
+.hab-flame{
+  display:inline-flex;align-items:center;gap:2px;
+  flex-shrink:0;
+}
+.flame-svg{
+  width:14px;height:18px;
+  transition:transform 0.3s ease, filter 0.3s ease;
+  display:block;
+}
+.flame-hot{
+  animation:flamePulse 1.4s ease-in-out infinite;
+  filter:drop-shadow(0 0 3px rgba(255,80,10,0.7));
+}
+@keyframes flamePulse{
+  0%,100%{transform:scaleY(1) scaleX(1);}
+  35%{transform:scaleY(1.1) scaleX(0.94);}
+  65%{transform:scaleY(0.93) scaleX(1.04);}
+}
+.hab-streak-num{
+  font-family:var(--mono);font-size:9px;
+  color:rgba(255,255,255,0.25);
+  letter-spacing:0.04em;
+  line-height:1;
+}
 .item-meta{font-family:var(--mono);font-size:clamp(9px,1.8vw,10px);color:var(--t3);margin-top:3px;}
 .item-tag{padding:2px 8px;border-radius:20px;font-family:var(--mono);font-size:clamp(8px,1.5vw,9px);letter-spacing:0.07em;text-transform:uppercase;border:1px solid rgba(255,255,255,0.12);color:var(--t3);flex-shrink:0;}
 .item-tag.high{border-color:rgba(255,255,255,0.26);color:var(--t2);}
@@ -1596,6 +1654,49 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   animation:qa-blink 2.4s ease-in-out infinite;
 }
 
+/* ── HABIT SECTION LAYOUT ── */
+#sec-habitos{
+  display:flex!important;
+  flex-direction:column;
+  height:calc(100vh - var(--st) - 80px);
+  padding-bottom:0!important;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+#sec-habitos .sec-tarefas-hdr{flex-shrink:0;}
+#hab-scroll-wrap{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  position:relative;
+  padding-bottom:0;
+}
+#hab-scroll-wrap::-webkit-scrollbar{display:none;}
+#hab-fade-mask{
+  position:sticky;
+  bottom:0;left:0;right:0;
+  height:0;
+  background:linear-gradient(to bottom, rgba(13,13,13,0) 0%, rgba(13,13,13,0.7) 100%);
+  pointer-events:none;
+  transition:height 0.3s ease;
+  margin:0 -clamp(16px,5vw,48px);
+}
+#hab-fade-mask.active{height:48px;}
+/* bottom chart */
+#hab-bottom-chart{
+  flex-shrink:0;
+  padding:20px clamp(40px,12vw,120px) calc(var(--sb) + 16px);
+  box-sizing:border-box;
+}
+#hab-history-canvas{
+  width:100%;
+  height:48px;
+  display:block;
+  opacity:0.7;
+}
+
 /* ── HABIT STATS PANEL ── */
 .hab-stats{
   width:100%;
@@ -2085,20 +2186,29 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
     <div id="sec-habitos" class="section">
       <div class="sec-tarefas-hdr">
-        <div class="filter-bar" id="habit-filters"></div>
         <div class="task-filter-wrap">
           <button class="task-filter-btn" id="habit-filter-toggle" onclick="toggleHabitFilterPanel()">filtrar</button>
           <div class="task-filter-active-tag" id="habit-filter-active-tag"></div>
           <div id="habit-tag-panel"></div>
         </div>
       </div>
-      <div id="habits-list"></div>
-      <button class="hab-add-btn" onclick="openModal('habit',null)">+ adicionar hábito</button>
+
+      <!-- scrollable habits area -->
+      <div id="hab-scroll-wrap">
+        <div id="habits-list"></div>
+        <button class="hab-add-btn" onclick="openModal('habit',null)">+ adicionar hábito</button>
+        <!-- fade mask before chart -->
+        <div id="hab-fade-mask"></div>
+      </div>
+
+      <!-- fixed bottom chart -->
+      <div id="hab-bottom-chart">
+        <canvas id="hab-history-canvas"></canvas>
+      </div>
     </div>
 
     <div id="sec-tarefas" class="section">
       <div class="sec-tarefas-hdr">
-        <div class="filter-bar" id="task-filters"></div>
         <div class="task-filter-wrap">
           <button class="task-filter-btn" id="task-filter-toggle" onclick="toggleTaskFilterPanel()">filtrar</button>
           <div class="task-filter-active-tag" id="task-filter-active-tag"></div>
@@ -2616,6 +2726,17 @@ function renderTaskFilters(){
 }
 
 /* HABITS */
+function _flamesvg(streak){
+  const active=streak>0;
+  const outer=active?'rgba(255,120,30,0.85)':'rgba(255,255,255,0.12)';
+  const inner=active?'rgba(255,220,80,0.7)':'none';
+  const pulse=streak>=7?' flame-hot':'';
+  return `<svg viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="flame-svg${pulse}">
+    <path d="M10 22C5.5 22 3 19 3 15.5c0-2.5 1.2-4.2 2.8-5.8C7.5 8 7.8 5.5 8 4c.8 1.2 1.2 2.8 1.2 2.8S9.8 4.5 11 2c0 0 .5 3.5 2 5.5 1.5 2 3 3.5 3 7.5 0 3.8-2.5 7-6 7z" fill="${outer}"/>
+    ${inner!=='none'?`<path d="M10 20c-2 0-3.5-1.5-3.5-3.5 0-1.5.8-2.5 1.8-3.5.5 1 1.2 1.8 1.2 1.8s.5-1 1.2-2c.5 1 1.5 2 1.5 3.5C12.2 18 11.2 20 10 20z" fill="${inner}"/>`:''}
+  </svg>`;
+}
+
 function renderHabits(){
   const el=document.getElementById('habits-list');
   const list=habitFilter==='all'?S.habits:S.habits.filter(h=>h.tag===habitFilter);
@@ -2641,11 +2762,14 @@ function renderHabits(){
         ?`background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.4);`
         :`border-color:${dot};`;
 
-    // meta: always show streak, plus progress for streak/bad
-    const streakPart=`🔥 ${h.streak||0}d`;
-    const progressPart=h.style==='streak'?` · ${todayCount}/${target}`:isBad?` · ✗ ${todayCount||0}`:'';
-    const tagPart=h.tag?`#${h.tag} · `:'';
-    const metaText=`${tagPart}${streakPart}${progressPart}`;
+    const streakCount=h.streak||0;
+    const flameSvg=`<span class="hab-flame" title="${streakCount} dias">${_flamesvg(streakCount)}<span class="hab-streak-num">${streakCount}</span></span>`;
+
+    const descPart=h.desc?h.desc:'';
+    const progressPart=h.style==='streak'?`${todayCount}/${target}`:isBad?`✗ ${todayCount||0}`:'';
+    const tagPart=h.tag?`#${h.tag}`:'';
+    const metaParts=[descPart,tagPart,progressPart].filter(Boolean);
+    const metaText=metaParts.join(' · ');
 
     const row=document.createElement('div');
     row.className='list-item hab-expandable'+(activeToday?'':' item-inactive');
@@ -2654,7 +2778,10 @@ function renderHabits(){
     row.innerHTML=`
       <div class="chk-s${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
-        <div class="item-name">${h.name}</div>
+        <div class="item-name-row">
+          <span class="item-name">${h.name}</span>
+          ${flameSvg}
+        </div>
         <div class="item-meta">${metaText}</div>
       </div>
       <button class="edit-btn" title="Editar">✎</button>
@@ -2676,7 +2803,73 @@ function renderHabits(){
     el.appendChild(row);
   });
   initHabitDrag(el);
+  setTimeout(_renderHabBottomChart, 50);
 }
+
+function _renderHabBottomChart(){
+  // toggle fade mask only when list overflows
+  const wrap=document.getElementById('hab-scroll-wrap');
+  const mask=document.getElementById('hab-fade-mask');
+  if(wrap&&mask){
+    const overflowing=wrap.scrollHeight>wrap.clientHeight+8;
+    mask.classList.toggle('active',overflowing);
+    // update on scroll too
+    wrap.onscroll=()=>{
+      const atBottom=wrap.scrollTop+wrap.clientHeight>=wrap.scrollHeight-16;
+      mask.classList.toggle('active',overflowing&&!atBottom);
+    };
+  }
+
+  const canvas=document.getElementById('hab-history-canvas');
+  if(!canvas) return;
+  const W=canvas.parentElement.clientWidth||300;
+  const H=48;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const now=new Date();
+  const days=30;
+  const data=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const key=d.toDateString();const dow=d.getDay();
+    const active=S.habits.filter(h=>!h.days||h.days.includes(dow));
+    if(!active.length){data.push(null);continue;}
+    const getTarget=h=>h.style==='streak'?(h.streakTarget||1):1;
+    const done=active.filter(h=>(h.done&&h.done[key]||0)>=getTarget(h)).length;
+    data.push(done/active.length);
+  }
+  const valid=data.filter(v=>v!==null);
+  if(!valid.length)return;
+  const padY=4;const plotH=H-padY*2;const plotW=W;
+  const pts=data.map((v,i)=>v===null?null:{
+    x:(i/(days-1))*plotW,
+    y:padY+plotH-(v*plotH)
+  });
+  // fill
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(255,255,255,0.06)');
+  grad.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();
+  let started=false;
+  pts.forEach((p,i)=>{
+    if(!p)return;
+    if(!started){ctx.moveTo(p.x,p.y);started=true;}
+    else{const prev=pts.slice(0,i).reverse().find(x=>x);if(prev){const cx=(prev.x+p.x)/2;ctx.bezierCurveTo(cx,prev.y,cx,p.y,p.x,p.y);}}
+  });
+  const lp=pts.slice().reverse().find(x=>x);
+  const fp=pts.find(x=>x);
+  if(lp&&fp){ctx.lineTo(lp.x,H);ctx.lineTo(fp.x,H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();}
+  // line
+  ctx.beginPath();started=false;
+  pts.forEach((p,i)=>{
+    if(!p)return;
+    if(!started){ctx.moveTo(p.x,p.y);started=true;}
+    else{const prev=pts.slice(0,i).reverse().find(x=>x);if(prev){const cx=(prev.x+p.x)/2;ctx.bezierCurveTo(cx,prev.y,cx,p.y,p.x,p.y);}}
+  });
+  ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1.5;ctx.stroke();
+}
+
 function _toggleHabitStats(row,h){
   const stats=row.querySelector('.hab-stats');
   const isOpen=stats.classList.contains('open');
@@ -2856,12 +3049,19 @@ function toggleHabit(id,row){
     }
   }
 
-  // update meta live
+  // update name row flame live
   const newCount=h.done[today]||0;
-  const streakPart=`🔥 ${h.streak||0}d`;
   const progressPart=h.style==='streak'?` · ${newCount}/${target}`:isBad?` · ✗ ${newCount}`:'';
   const tagPart=h.tag?`#${h.tag} · `:'';
-  row.querySelector('.item-meta').textContent=`${tagPart}${streakPart}${progressPart}`;
+  const metaEl=row.querySelector('.item-meta');
+  if(metaEl) metaEl.textContent=`${tagPart}${progressPart}`.replace(/^ · /,'');
+  // refresh flame
+  const flameEl=row.querySelector('.hab-flame');
+  if(flameEl){
+    const sc=h.streak||0;
+    flameEl.title=sc+' dias';
+    flameEl.innerHTML=_flamesvg(sc)+'<span class="hab-streak-num">'+sc+'</span>';
+  }
 
   save();updateRing();updateXPBar();snapshotHistory();
 
@@ -5212,7 +5412,7 @@ Object.assign(window,{
   renderTreino, _trSelectDay, _trNewFicha, _trOpenFicha,
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
-  _toggleHabitStats,
+  _toggleHabitStats, _flamesvg, _renderHabBottomChart,
   renderEstudos,_estToggle,_estReset,_estEditSubject,_estSubjectBlur,
   _estOpenMeta,_estSetGoal,_estCloseMeta,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
@@ -5753,7 +5953,8 @@ function _renderTaskTagPanel(){
   const panel = document.getElementById('task-tag-panel');
   if(!panel) return;
   const tags = [...new Set(S.tasks.map(t=>t.tag).filter(Boolean))];
-  panel.innerHTML = ['all',...tags].map(tag=>`
+  panel.innerHTML=`<div class="tag-panel-dismiss" onclick="toggleTaskFilterPanel()"></div>`
+    +['all',...tags].map(tag=>`
     <button class="task-tag-opt${taskTagFilter===tag?' sel':''}"
       onclick="_setTaskTagFilter('${tag}')">${tag==='all'?'todos':tag}</button>
   `).join('');
@@ -5815,7 +6016,8 @@ function _renderHabitTagPanel(){
   const panel=document.getElementById('habit-tag-panel');
   if(!panel)return;
   const tags=[...new Set(S.habits.map(h=>h.tag).filter(Boolean))];
-  panel.innerHTML=['all',...tags].map(tag=>`
+  panel.innerHTML=`<div class="tag-panel-dismiss" onclick="toggleHabitFilterPanel()"></div>`
+    +['all',...tags].map(tag=>`
     <button class="task-tag-opt${habitTagFilter===tag?' sel':''}"
       onclick="_setHabitTagFilter('${tag}')">${tag==='all'?'todos':tag}</button>
   `).join('');
@@ -5831,7 +6033,7 @@ function _setHabitTagFilter(tag){
   const panel=document.getElementById('habit-tag-panel');
   const btn=document.getElementById('habit-filter-toggle');
   if(panel)panel.classList.remove('open');
-  if(btn)btn.classList.toggle('active',tag!=='all');
+  if(btn){btn.classList.remove('active');btn.classList.toggle('active',tag!=='all');}
 }
 let _finPeriod='week';
 function _setFinPeriod(p,btn){
