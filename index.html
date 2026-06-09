@@ -1456,8 +1456,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   z-index:501;box-sizing:border-box;
   transition:transform 0.34s cubic-bezier(0.34,1.1,0.64,1);
   max-height:80vh;overflow-y:auto;
+  visibility:hidden;
 }
-#tr-sheet.open{transform:translateX(-50%) translateY(0);}
+#tr-sheet.open{transform:translateX(-50%) translateY(0);visibility:visible;}
 #tr-sheet-handle{width:28px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 18px;}
 #tr-sheet-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
 #tr-sheet-name{
@@ -2478,7 +2479,19 @@ function setTab(name,dir){
   else if(name==='habitos'){renderHabits();renderHabitFilters();}
   else if(name==='tarefas'){renderTasks();renderTaskFilters();}
   else if(name==='stats')renderStats();
-  else if(name==='treino'){renderTreino();}
+  else if(name==='treino'){
+    // fechar sheet instantaneamente ao entrar (sem animação)
+    _trEditId=null;_trWorkoutMode=false;
+    const overlay=document.getElementById('tr-sheet-overlay');
+    const sheet=document.getElementById('tr-sheet');
+    if(sheet){
+      sheet.style.transition='none';
+      sheet.classList.remove('open');
+      setTimeout(()=>sheet.style.transition='',50);
+    }
+    overlay?.classList.remove('open');
+    renderTreino();
+  }
   else if(name==='estudos'){renderEstudos();}
   // fechar sheet do treino ao sair da aba
   if(name!=='treino'&&_trEditId){
@@ -2976,6 +2989,11 @@ function renderFinance(animate){
   const outs=recent.filter(t=>t.type==='out').reduce((a,t)=>a+t.amount,0);
   const saldo=ins-outs;
 
+  // saldo total: todas as transações, sem filtro de período
+  const allIns=S.transactions.filter(t=>t.type==='in').reduce((a,t)=>a+t.amount,0);
+  const allOuts=S.transactions.filter(t=>t.type==='out').reduce((a,t)=>a+t.amount,0);
+  const saldoTotal=allIns-allOuts;
+
   const pct=ins>0?Math.round(Math.max(0,saldo)/ins*100):0;
 
   if(animate){
@@ -2988,14 +3006,14 @@ function renderFinance(animate){
     const tick=()=>{
       const p=Math.min(1,(Date.now()-t0)/dur);
       const e=1-Math.pow(1-p,3);
-      if(totalEl) totalEl.textContent='R$ '+fmt(saldo*e);
+      if(totalEl) totalEl.textContent='R$ '+fmt(saldoTotal*e);
       if(recEl)   recEl.textContent=fmtShort(ins*e);
       if(econEl)  econEl.textContent=Math.round(pct*e)+'%';
       if(inEl)    inEl.textContent=fmtShort(ins*e);
       if(outEl)   outEl.textContent=fmtShort(outs*e);
       if(p<1){requestAnimationFrame(tick);}
       else{
-        if(totalEl) totalEl.textContent='R$ '+fmt(saldo);
+        if(totalEl) totalEl.textContent='R$ '+fmt(saldoTotal);
         if(recEl)   recEl.textContent=fmtShort(ins);
         if(econEl)  econEl.textContent=pct+'%';
         if(inEl)    inEl.textContent=fmtShort(ins);
@@ -3009,7 +3027,7 @@ function renderFinance(animate){
     const econEl=document.getElementById('fp-save');
     const inEl=document.getElementById('fin-in');
     const outEl=document.getElementById('fin-out');
-    if(totalEl) totalEl.textContent='R$ '+fmt(saldo);
+    if(totalEl) totalEl.textContent='R$ '+fmt(saldoTotal);
     if(recEl)   recEl.textContent=fmtShort(ins);
     if(econEl)  econEl.textContent=pct+'%';
     if(inEl)    inEl.textContent=fmtShort(ins);
