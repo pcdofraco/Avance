@@ -2729,6 +2729,8 @@ function _flamesvg(streak){
 }
 
 function renderHabits(){
+  // recalculate all streaks from history on every render
+  S.habits.forEach(h=>{ h.streak=_calcStreak(h); });
   const el=document.getElementById('habits-list');
   const list=habitFilter==='all'?S.habits:S.habits.filter(h=>h.tag===habitFilter);
   if(!list.length){el.innerHTML='<div class="empty">'+(S.habits.length?'Nenhum hábito com essa tag':'Nenhum hábito ainda')+'</div>';return;}
@@ -3004,6 +3006,25 @@ function getRepeatLabel(h){
     :REPEAT_TYPES.find(r=>r.id===h.repeat)?.label||'↻';
 }
 
+function _calcStreak(h){
+  // recalcula streak real a partir do historico
+  const target=h.style==='streak'?(h.streakTarget||1):1;
+  const now=new Date();
+  let streak=0;
+  for(let i=0;i<365;i++){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const key=d.toDateString();
+    const dow=d.getDay();
+    // se o habito nao esta ativo neste dia, pula (nao quebra streak)
+    if(h.days&&h.days.length&&!h.days.includes(dow)) continue;
+    const val=(h.done&&h.done[key])||0;
+    if(val>=target) streak++;
+    else if(i>0) break; // hoje pode ainda não ter feito, não quebra
+    // se i===0 e não fez hoje, ainda não conta como quebrado
+  }
+  return streak;
+}
+
 function toggleHabit(id,row){
   const h=S.habits.find(x=>x.id===id);if(!h)return;
   const today=new Date().toDateString();
@@ -3015,36 +3036,36 @@ function toggleHabit(id,row){
   const cur=h.done[today]||0;
 
   if(isBad){
-    // bad habit: each tap = +1 failure. Long tap could reset, but for now tap = log failure
     h.done[today]=(cur+1);
-    // streak counts days with ZERO failures
     chk.style.background=dot+'44';chk.style.borderColor=dot;
     showToast('✗ registrado');
   } else if(cur>=target){
-    // already done — untoggle
+    // untoggle
     delete h.done[today];
-    h.streak=Math.max(0,(h.streak||1)-1);
     chk.classList.remove('done');
     chk.style.background='var(--bg)';chk.style.borderColor=dot;
-  }else{
+  } else {
     h.done[today]=(cur+1);
     const newCount=h.done[today];
     if(newCount>=target){
-      h.streak=(h.streak||0)+1;h.doneToday=true;
       chk.classList.add('done');
       chk.style.background=dot;chk.style.borderColor='transparent';
       addXP(XP_H,chk);showToast('+'+XP_H+' XP');
-    }else{
+    } else {
       chk.style.background=dot+'55';chk.style.borderColor=dot;
     }
   }
 
-  // update name row flame live
+  // recalculate streak from history
+  h.streak=_calcStreak(h);
+
+  // update meta live
   const newCount=h.done[today]||0;
   const progressPart=h.style==='streak'?` · ${newCount}/${target}`:isBad?` · ✗ ${newCount}`:'';
   const tagPart=h.tag?`#${h.tag} · `:'';
   const metaEl=row.querySelector('.item-meta');
   if(metaEl) metaEl.textContent=`${tagPart}${progressPart}`.replace(/^ · /,'');
+
   // refresh flame
   const flameEl=row.querySelector('.hab-flame');
   if(flameEl){
@@ -5402,7 +5423,7 @@ Object.assign(window,{
   renderTreino, _trSelectDay, _trNewFicha, _trOpenFicha,
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
-  _toggleHabitStats, _flamesvg, _renderHabBottomChart,
+  _toggleHabitStats, _flamesvg, _renderHabBottomChart, _calcStreak,
   renderEstudos,_estToggle,_estReset,_estEditSubject,_estSubjectBlur,
   _estOpenMeta,_estSetGoal,_estCloseMeta,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
