@@ -1656,13 +1656,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── HABIT SECTION LAYOUT ── */
 #sec-habitos{
-  display:flex!important;
   flex-direction:column;
   height:calc(100vh - var(--st) - 80px);
   padding-bottom:0!important;
   overflow:hidden;
   box-sizing:border-box;
 }
+#sec-habitos.active{display:flex!important;}
 #sec-habitos .sec-tarefas-hdr{flex-shrink:0;}
 #hab-scroll-wrap{
   flex:1;
@@ -1671,31 +1671,22 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
   position:relative;
-  padding-bottom:0;
+  /* mask fades content at bottom when overflowing */
+  -webkit-mask-image:linear-gradient(to bottom,black 0%,black 70%,transparent 100%);
+  mask-image:linear-gradient(to bottom,black 0%,black 70%,transparent 100%);
+}
+#hab-scroll-wrap.no-overflow{
+  -webkit-mask-image:none;
+  mask-image:none;
 }
 #hab-scroll-wrap::-webkit-scrollbar{display:none;}
-#hab-fade-mask{
-  position:sticky;
-  bottom:0;left:0;right:0;
-  height:0;
-  background:linear-gradient(to bottom, rgba(13,13,13,0) 0%, rgba(13,13,13,0.7) 100%);
-  pointer-events:none;
-  transition:height 0.3s ease;
-  margin:0 -clamp(16px,5vw,48px);
-}
-#hab-fade-mask.active{height:48px;}
-/* bottom chart */
+#hab-fade-mask{display:none;}
 #hab-bottom-chart{
   flex-shrink:0;
-  padding:20px clamp(40px,12vw,120px) calc(var(--sb) + 16px);
+  padding:6px clamp(40px,12vw,120px) calc(var(--sb) + 16px);
   box-sizing:border-box;
 }
-#hab-history-canvas{
-  width:100%;
-  height:48px;
-  display:block;
-  opacity:0.7;
-}
+#hab-history-canvas{width:100%;height:48px;display:block;opacity:0.65;}
 
 /* ── HABIT STATS PANEL ── */
 .hab-stats{
@@ -2809,15 +2800,14 @@ function renderHabits(){
 function _renderHabBottomChart(){
   // toggle fade mask only when list overflows
   const wrap=document.getElementById('hab-scroll-wrap');
-  const mask=document.getElementById('hab-fade-mask');
-  if(wrap&&mask){
-    const overflowing=wrap.scrollHeight>wrap.clientHeight+8;
-    mask.classList.toggle('active',overflowing);
-    // update on scroll too
-    wrap.onscroll=()=>{
+  if(wrap){
+    const check=()=>{
+      const overflowing=wrap.scrollHeight>wrap.clientHeight+8;
       const atBottom=wrap.scrollTop+wrap.clientHeight>=wrap.scrollHeight-16;
-      mask.classList.toggle('active',overflowing&&!atBottom);
+      wrap.classList.toggle('no-overflow',!overflowing||atBottom);
     };
+    check();
+    wrap.onscroll=check;
   }
 
   const canvas=document.getElementById('hab-history-canvas');
