@@ -5015,11 +5015,15 @@ let currentUser=null;
 /* ── FIRESTORE SYNC ── */
 async function fsLoad(uid){
   try{
-    const snap=await getDoc(fsDoc(db,'users',uid));
+    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('fsLoad timeout')),5000));
+    const snap=await Promise.race([getDoc(fsDoc(db,'users',uid)),timeout]);
     if(snap.exists()){
       S=Object.assign({habits:[],tasks:[],transactions:[],investments:[],xp:0,streak:0,available:0,savings:0,lastDate:'',history:[],userName:''},snap.data());
     }
-  }catch(e){console.warn('fsLoad',e);}
+  }catch(e){
+    console.warn('fsLoad',e);
+    load(); // fallback: usa dados locais se Firestore não responder
+  }
 }
 async function fsSave(){
   if(!currentUser||currentUser.isAnonymous)return;
@@ -5571,6 +5575,7 @@ if(DEV_MODE || !auth){
 
   onAuthStateChanged(auth,async(user)=>{
     authResolved=true;
+    console.log('[auth] state changed, user=',user&&user.uid);
     if(!user){
       const ls=document.getElementById('login-screen');
       const is=document.getElementById('intro-screen');
@@ -5582,11 +5587,14 @@ if(DEV_MODE || !auth){
     }
     currentUser=user;
     if(!user.isAnonymous){
+      console.log('[auth] loading firestore data...');
       await fsLoad(user.uid);
+      console.log('[auth] firestore load done');
       if(!S.userName&&user.displayName){S.userName=user.displayName.split(' ')[0];fsSave();}
     }else{
       load();
     }
+    console.log('[auth] calling hideLoginScreen + bootApp');
     hideLoginScreen();
     bootApp();
   });
@@ -5594,8 +5602,10 @@ if(DEV_MODE || !auth){
 
 /* ── BOOT APP (after auth) ── */
 function bootApp(){
+  console.log('[bootApp] start');
   // pequeno delay para garantir que o DOM está pronto no mobile
   setTimeout(()=>{
+    console.log('[bootApp] inner start');
     try{
       updateGreeting();updateXPBar();updateRing();_applyAvatarUI();
       renderDashboard();renderHabitFilters();renderTaskFilters();snapshotHistory();
