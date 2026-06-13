@@ -5561,7 +5561,8 @@ if(DEV_MODE){
   },6000);
 
   // captura resultado do redirect do Google ao voltar à página
-  getRedirectResult(auth).catch(()=>{});
+  // (signInWithPopup pode cair em redirect no PWA se o popup for bloqueado)
+  getRedirectResult(auth).catch(e=>console.warn('getRedirectResult',e));
 
   onAuthStateChanged(auth,async(user)=>{
     authResolved=true;
@@ -5601,12 +5602,32 @@ function bootApp(){
     const logoEl=document.getElementById('intro-logo');
     const appEl=document.getElementById('app');
 
+    // safety net: garante que o app fica visível mesmo se a animação de intro falhar
+    if(appEl){
+      setTimeout(()=>{
+        if(!appEl.classList.contains('ready')){
+          console.warn('bootApp: intro animation did not complete, forcing app visible');
+          if(scr){scr.classList.add('out','gone');}
+          appEl.classList.add('ready','app-visible');
+          const fabW=document.getElementById('fab-wrap');
+          if(fabW){fabW.style.display='';updateFab&&updateFab();}
+        }
+      },2500);
+    }
+
+    if(!scr||!greetEl||!nameEl||!logoEl||!appEl){
+      console.warn('bootApp: intro elements missing, skipping animation');
+      if(appEl)appEl.classList.add('ready','app-visible');
+      if(scr){scr.classList.add('out','gone');}
+      return;
+    }
+
   const h=new Date().getHours();
   const word=h<12?'bom dia':h<18?'boa tarde':'boa noite';
   const fullGreet='olá, '+word;
   const userName=(S.userName||'').trim();
 
-  scr.classList.remove('out');
+  scr.classList.remove('out','gone');
 
   setTimeout(()=>{
     greetEl.classList.add('show');
