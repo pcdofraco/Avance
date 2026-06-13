@@ -1705,15 +1705,34 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 .hab-cat-sep{
   display:flex;align-items:center;gap:10px;
-  padding:16px 0 6px;
+  padding:18px 0 6px;
   margin-top:4px;
+  position:relative;z-index:1;
 }
-.hab-cat-line{flex:1;height:1px;background:rgba(255,255,255,0.06);}
+/* mask that covers the vertical timeline line */
+.hab-cat-sep::before{
+  content:'';
+  position:absolute;
+  left:-4px;top:0;bottom:0;
+  width:24px;
+  background:var(--bg);
+  z-index:0;
+}
+.hab-cat-line{flex:1;height:1px;background:rgba(255,255,255,0.06);position:relative;z-index:1;}
 .hab-cat-name{
   font-family:var(--mono);font-size:7px;letter-spacing:0.18em;
   color:rgba(255,255,255,0.2);text-transform:uppercase;
   white-space:nowrap;
+  position:relative;z-index:1;
 }
+
+/* ── TASK CATEGORY SEPARATOR ── */
+.task-cat-sep{
+  padding:18px 0 6px;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.2em;
+  color:rgba(255,255,255,0.15);text-transform:uppercase;
+}
+.task-cat-sep+.list-item{border-top:none;}
 
 /* ── HABIT STATS PANEL ── */
 .hab-stats{
@@ -2723,28 +2742,10 @@ function snapshotHistory(){
 
 /* FILTERS */
 function renderHabitFilters(){
-  const wrap=document.getElementById('habit-filters');if(!wrap)return;
-  const tags=[...new Set(S.habits.map(h=>h.tag).filter(Boolean))];
-  wrap.innerHTML='';
-  if(!tags.length)return;
-  const all=document.createElement('div');
-  all.className='filter-chip'+(habitFilter==='all'?' act':'');
-  all.textContent='Todos';
-  all.addEventListener('click',()=>{habitFilter='all';renderHabits();renderHabitFilters();});
-  wrap.appendChild(all);
-  tags.forEach(tag=>{
-    const chip=document.createElement('div');
-    chip.className='filter-chip'+(habitFilter===tag?' act':'');
-    const col=S.habits.find(h=>h.tag===tag)?.color||'#fff';
-    chip.innerHTML=`<span class="filter-dot" style="background:${col}"></span>${tag}`;
-    chip.addEventListener('click',()=>{habitFilter=tag;renderHabits();renderHabitFilters();});
-    wrap.appendChild(chip);
-  });
+  // filter-bar removida — usando tag panel. Noop.
 }
 function renderTaskFilters(){
-  // old filter-bar hidden — using new tag panel instead
-  const wrap=document.getElementById('task-filters');
-  if(wrap)wrap.innerHTML='';
+  // filter-bar removida — usando tag panel. Noop.
 }
 
 /* HABITS */
@@ -2763,7 +2764,7 @@ function renderHabits(){
   // recalculate all streaks from history on every render
   S.habits.forEach(h=>{ h.streak=_calcStreak(h); });
   const el=document.getElementById('habits-list');
-  const list=habitTagFilter==='all'?S.habits:S.habits.filter(h=>h.tag===habitTagFilter);
+  const list=habitFilter==='all'?S.habits:S.habits.filter(h=>h.tag===habitFilter);
   if(!list.length){el.innerHTML='<div class="empty">'+(S.habits.length?'Nenhum hábito com essa tag':'Nenhum hábito ainda')+'</div>';return;}
   const today=new Date().toDateString();
   el.innerHTML='';
@@ -3152,9 +3153,9 @@ function renderTasks(){
   el.innerHTML='';
   const today=new Date();today.setHours(0,0,0,0);
   const pending=list.filter(t=>!t.done),done=list.filter(t=>t.done);
-  [...pending,...done].forEach(t=>{
+
+  function buildRow(t){
     const dot=t.color||TAG_COLORS[0];
-    // a task is active today if: no days set, OR days includes today
     const activeToday=!t.days||t.days.length===0||t.days.includes(new Date().getDay());
     let dueBadge='';
     if(t.due){
@@ -3166,11 +3167,8 @@ function renderTasks(){
     }
     const row=document.createElement('div');
     row.className='list-item'+(activeToday?'':' item-inactive');
-    row.dataset.id=t.id;
-    row.dataset.tag=t.tag||'';
-    const chkStyle=t.done
-      ?`background:${dot};border-color:${dot};`
-      :`border-color:${dot};`;
+    row.dataset.id=t.id;row.dataset.tag=t.tag||'';
+    const chkStyle=t.done?`background:${dot};border-color:${dot};`:`border-color:${dot};`;
     const metaParts=[];
     if(t.tag)metaParts.push('#'+t.tag);
     if(t.priority==='alta')metaParts.push('alta');
@@ -3184,8 +3182,11 @@ function renderTasks(){
       <button class="edit-btn" title="Editar">✎</button>`;
     row.querySelector('.chk-c').addEventListener('click',e=>{e.stopPropagation();toggleTask(t.id,row);});
     row.querySelector('.edit-btn').addEventListener('click',e=>{e.stopPropagation();openModal('task',t.id);});
-    el.appendChild(row);
-  });
+    return row;
+  }
+
+  // simple order: pending first, done after
+  [...list.filter(t=>!t.done),...list.filter(t=>t.done)].forEach(t=>el.appendChild(buildRow(t)));
   initDrag(el);
 }
 function toggleTask(id,row){
@@ -3498,8 +3499,6 @@ function openModal(type,editId){
     if(t){mColor=t.color||TAG_COLORS[0];mRepeat=t.repeat||'once';mDays=[...(t.days||[])];}
     else{mRepeat='once';mDays=[];mColor=TAG_COLORS[0];}
     title.textContent=isEdit?'Editar tarefa':'Nova tarefa';
-    const TASK_CATS=['trabalho','pessoal','saúde','estudos','casa','financeiro','treino','outro'];
-    const curCat=t&&t.cat?t.cat:'';
     const curTag=t&&t.tag?t.tag:'';
     const curDue=t&&t.due?t.due:'';
     const dueLbl=curDue?new Date(curDue+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
@@ -3510,9 +3509,7 @@ function openModal(type,editId){
       <textarea class="m-flat" id="m-desc" placeholder="Descrição (opcional)" rows="2" style="resize:none;line-height:1.5;margin-top:10px;border-bottom:none">${t&&t.desc?t.desc:''}</textarea>
       <div class="m-divider"></div>
       <div class="m-chips-row">
-        <div class="m-chip${curCat?' has-val':''}" id="chip-cat-t" onclick="toggleChipPanel('cat-t')">
-          <span class="m-chip-lbl">cat</span>${curCat||'—'}
-        </div>
+
         <div class="m-chip${curTag?' has-val':''}" id="chip-tag" onclick="toggleChipPanel('tag')">
           <span class="m-chip-lbl">tag</span>${curTag||'—'}
         </div>
@@ -3526,9 +3523,7 @@ function openModal(type,editId){
           <span class="m-chip-lbl">data</span>${dueLbl}
         </div>
       </div>
-      <div class="m-chip-panel" id="panel-cat-t">
-        <div class="m-tag-presets" id="m-cat-t-presets"></div>
-      </div>
+
       <div class="m-chip-panel" id="panel-tag">
         <input class="m-flat" id="m-tag" placeholder="sua tag…" value="${curTag}">
       </div>
@@ -3694,7 +3689,7 @@ function saveHabit(){
     const h=S.habits.find(x=>x.id===mEditId);
     if(h){h.name=name;h.desc=desc;h.tag=tag;h.cat=cat;h.color=mColor;h.repeat=mRepeat;h.days=[...days];h.style=habStyle;h.streakTarget=streakTarget;}
   }else{
-    S.habits.push({id:Date.now(),name,desc,tag,cat,color:mColor,repeat:mRepeat,style:habStyle||'check',streakTarget,days:[...days],streak:0,done:{}});
+    S.habits.push({id:Date.now(),name,desc,tag,color:mColor,repeat:mRepeat,style:habStyle||'check',streakTarget,days:[...days],streak:0,done:{}});
   }
   save();closeModal();renderHabits();renderHabitFilters();updateRing();
 }
@@ -3707,10 +3702,9 @@ function saveTask(){
   const prio=prioMap[prioText]||'normal';
   const due=document.getElementById('m-due')?document.getElementById('m-due').value||null:null;
   const desc=(document.getElementById('m-desc')?.value||'').trim();
-  const cat=window._mTaskCat||'';
   if(mEditId){
     const t=S.tasks.find(x=>x.id===mEditId);
-    if(t){t.name=name;t.desc=desc;t.tag=tag;t.cat=cat;t.color=mColor;t.priority=prio;t.due=due;}
+    if(t){t.name=name;t.desc=desc;t.tag=tag;t.color=mColor;t.priority=prio;t.due=due;}
   }else{
     S.tasks.push({id:Date.now(),name,desc,tag,cat,color:mColor,priority:prio,due,done:false});
   }
@@ -5047,16 +5041,13 @@ async function loginGoogle(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
   try{
-    if(_isMobile){
-      // redirect: mostra contas salvas do dispositivo nativamente
-      await signInWithRedirect(auth,provider);
-      // a página recarrega; getRedirectResult é chamado no onAuthStateChanged
-    }else{
-      await signInWithPopup(auth,provider);
-    }
+    // always use popup — redirect breaks on iOS PWA
+    await signInWithPopup(auth,provider);
   }catch(e){
     setLoginLoading(false);
-    if(e.code!=='auth/popup-closed-by-user')setLoginError('Erro ao entrar com Google. Tente novamente.');
+    if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request'){
+      setLoginError('Erro ao entrar com Google. Tente novamente.');
+    }
   }
 }
 async function loginGuest(){
@@ -6073,7 +6064,7 @@ function toggleSection(id,on){
 
 
 /* ── TASK TAG FILTER PANEL ── */
-let taskTagFilter = 'all';
+
 
 function _positionPanel(panelId,btnId){
   const panel=document.getElementById(panelId);
@@ -6120,31 +6111,20 @@ function _renderTaskTagPanel(){
   if(!panel)return;
   const tags=[...new Set(S.tasks.map(t=>t.tag).filter(Boolean))];
   panel.innerHTML=['all',...tags].map(tag=>`
-    <button class="task-tag-opt${taskTagFilter===tag?' sel':''}"
+    <button class="task-tag-opt${taskFilter===tag?' sel':''}"
       onclick="_setTaskTagFilter('${tag}')">${tag==='all'?'todos':tag}</button>
   `).join('');
 }
 
 function _setTaskTagFilter(tag){
-  taskTagFilter = tag;
-  // dim non-matching items
-  document.querySelectorAll('#tasks-list .list-item').forEach(row=>{
-    if(tag==='all'){row.classList.remove('tag-dimmed');return;}
-    const rowTag = row.dataset.tag||'';
-    row.classList.toggle('tag-dimmed', rowTag !== tag);
-  });
-  // update active tag indicator
-  const indicator = document.getElementById('task-filter-active-tag');
-  if(indicator){
-    indicator.textContent = tag==='all'?'':tag;
-    indicator.classList.toggle('visible', tag!=='all');
-  }
-  // close panel after selection
-  const panel = document.getElementById('task-tag-panel');
-  const btn = document.getElementById('task-filter-toggle');
-  if(panel){panel.classList.remove('open');}
-  if(btn){btn.classList.toggle('active', tag!=='all');}
-  _closeAllFilters();if(tag!=='all')btn?.classList.add('active');
+  taskFilter=tag;
+  taskTagFilter=tag;
+  renderTasks();
+  const indicator=document.getElementById('task-filter-active-tag');
+  if(indicator){indicator.textContent=tag==='all'?'':tag;indicator.classList.toggle('visible',tag!=='all');}
+  _closeAllFilters();
+  const btn=document.getElementById('task-filter-toggle');
+  if(btn) btn.classList.toggle('active',tag!=='all');
 }
 
 
@@ -6197,18 +6177,14 @@ function _renderHabitTagPanel(){
   `).join('');
 }
 function _setHabitTagFilter(tag){
+  habitFilter=tag;
   habitTagFilter=tag;
-  document.querySelectorAll('#habits-list .list-item').forEach(row=>{
-    if(tag==='all'){row.classList.remove('tag-dimmed');return;}
-    row.classList.toggle('tag-dimmed',(row.dataset.tag||'')!==tag);
-  });
+  renderHabits();
   const ind=document.getElementById('habit-filter-active-tag');
   if(ind){ind.textContent=tag==='all'?'':tag;ind.classList.toggle('visible',tag!=='all');}
-  const panel=document.getElementById('habit-tag-panel');
+  _closeAllFilters();
   const btn=document.getElementById('habit-filter-toggle');
-  if(panel)panel.classList.remove('open');
-  if(btn){btn.classList.remove('active');btn.classList.toggle('active',tag!=='all');}
-  _closeAllFilters();if(tag!=='all')btn?.classList.add('active');
+  if(btn) btn.classList.toggle('active',tag!=='all');
 }
 let _finPeriod='week';
 function _setFinPeriod(p,btn){
