@@ -1709,15 +1709,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   margin-top:4px;
   position:relative;z-index:1;
 }
-/* mask that covers the vertical timeline line */
-.hab-cat-sep::before{
-  content:'';
-  position:absolute;
-  left:-4px;top:0;bottom:0;
-  width:24px;
-  background:var(--bg);
-  z-index:0;
-}
+
 .hab-cat-line{flex:1;height:1px;background:rgba(255,255,255,0.06);position:relative;z-index:1;}
 .hab-cat-name{
   font-family:var(--mono);font-size:7px;letter-spacing:0.18em;
@@ -2801,7 +2793,6 @@ function renderHabits(){
       const target=h.style==='streak'?(h.streakTarget||1):1;
       const markedToday=todayCount>=target;
       const done=isBad?false:markedToday;
-      const resisted=isBad&&!markedToday;
 
       // bad habits: always red border, filled with their color when failed
       let chkStyle;
@@ -3072,6 +3063,7 @@ function getRepeatLabel(h){
 
 function _calcStreak(h){
   // recalcula streak real a partir do historico
+  const isBad=h.style==='count';
   const target=h.style==='streak'?(h.streakTarget||1):1;
   const now=new Date();
   let streak=0;
@@ -3082,7 +3074,8 @@ function _calcStreak(h){
     // se o habito nao esta ativo neste dia, pula (nao quebra streak)
     if(h.days&&h.days.length&&!h.days.includes(dow)) continue;
     const val=(h.done&&h.done[key])||0;
-    if(val>=target) streak++;
+    const success=isBad?(val<target):(val>=target);
+    if(success) streak++;
     else if(i>0) break; // hoje pode ainda não ter feito, não quebra
     // se i===0 e não fez hoje, ainda não conta como quebrado
   }
@@ -3139,7 +3132,7 @@ function toggleHabit(id,row){
     flameEl.innerHTML=_flamesvg(sc)+'<span class="hab-streak-num">'+sc+'</span>';
   }
 
-  save();updateRing();updateXPBar();snapshotHistory();
+  save();updateRing();updateXPBar();snapshotHistory();_renderHabBottomChart();
 
   // re-render charts if panel is open
   const stats=row.querySelector('.hab-stats');
@@ -3152,15 +3145,39 @@ function toggleHabit(id,row){
 /* TASKS */
 function renderTasks(){
   const el=document.getElementById('tasks-list');
-  const list=taskFilter==='all'?S.tasks:S.tasks.filter(t=>t.tag===taskFilter);
+  const todayKey=new Date().toDateString();
+  const todayDow=new Date().getDay();
+  const todayMid=new Date();todayMid.setHours(0,0,0,0);
+
+  // filter out 'once' tasks completed before today (they disappear next day)
+  let visible=S.tasks.filter(t=>{
+    if(t.repeat==='once'&&t.done&&t.doneDate&&t.doneDate!==todayKey)return false;
+    return true;
+  });
+  // recurring tasks: only show on their active days
+  visible=visible.filter(t=>{
+    if(t.repeat&&t.repeat!=='once'&&Array.isArray(t.days)&&t.days.length){
+      return t.days.includes(todayDow);
+    }
+    return true;
+  });
+
+  const list=taskFilter==='all'?visible:visible.filter(t=>t.tag===taskFilter);
   if(!list.length){el.innerHTML='<div class="empty" style="padding-left:34px;">'+(S.tasks.length?'Nenhuma tarefa com essa tag':'')+'</div>';return;}
   el.innerHTML='';
-  const today=new Date();today.setHours(0,0,0,0);
-  const pending=list.filter(t=>!t.done),done=list.filter(t=>t.done);
+  const today=todayMid;
+
+  function isDoneToday(t){
+    if(t.repeat&&t.repeat!=='once'){
+      return !!(t.doneByDate&&t.doneByDate[todayKey]);
+    }
+    return !!t.done;
+  }
 
   function buildRow(t){
     const dot=t.color||TAG_COLORS[0];
     const activeToday=!t.days||t.days.length===0||t.days.includes(new Date().getDay());
+    const done=isDoneToday(t);
     let dueBadge='';
     if(t.due){
       const d=new Date(t.due+'T00:00:00');
@@ -3172,14 +3189,14 @@ function renderTasks(){
     const row=document.createElement('div');
     row.className='list-item'+(activeToday?'':' item-inactive');
     row.dataset.id=t.id;row.dataset.tag=t.tag||'';
-    const chkStyle=t.done?`background:${dot};border-color:${dot};`:`border-color:${dot};`;
+    const chkStyle=done?`background:${dot};border-color:${dot};`:`border-color:${dot};`;
     const metaParts=[];
     if(t.tag)metaParts.push('#'+t.tag);
-    if(t.priority==='alta')metaParts.push('alta');
+    if(t.priority&&t.priority!=='normal')metaParts.push(t.priority);
     row.innerHTML=`
-      <div class="chk-c${t.done?' done':''}" style="${chkStyle}"></div>
+      <div class="chk-c${done?' done':''}" style="${chkStyle}"></div>
       <div class="item-body">
-        <div class="item-name${t.done?' done':''}">${t.name}${dueBadge?'&ensp;'+dueBadge:''}</div>
+        <div class="item-name${done?' done':''}">${t.name}${dueBadge?'&ensp;'+dueBadge:''}</div>
         ${t.desc?`<div class="item-desc">${t.desc}</div>`:''}
         ${metaParts.length?`<div class="item-meta">${metaParts.join(' · ')}</div>`:''}
       </div>
@@ -3190,15 +3207,25 @@ function renderTasks(){
   }
 
   // simple order: pending first, done after
-  [...list.filter(t=>!t.done),...list.filter(t=>t.done)].forEach(t=>el.appendChild(buildRow(t)));
+  [...list.filter(t=>!isDoneToday(t)),...list.filter(t=>isDoneToday(t))].forEach(t=>el.appendChild(buildRow(t)));
   initDrag(el);
 }
 function toggleTask(id,row){
   const t=S.tasks.find(x=>x.id===id);if(!t)return;
-  t.done=!t.done;
-  const chk=row.querySelector('.chk-c'),nm=row.querySelector('.item-name');
+  const todayKey=new Date().toDateString();
   const dot=t.color||TAG_COLORS[0];
-  if(t.done){
+  let nowDone;
+  if(t.repeat&&t.repeat!=='once'){
+    if(!t.doneByDate)t.doneByDate={};
+    if(t.doneByDate[todayKey]){delete t.doneByDate[todayKey];nowDone=false;}
+    else{t.doneByDate[todayKey]=true;nowDone=true;}
+  }else{
+    t.done=!t.done;
+    t.doneDate=t.done?todayKey:null;
+    nowDone=t.done;
+  }
+  const chk=row.querySelector('.chk-c'),nm=row.querySelector('.item-name');
+  if(nowDone){
     chk.classList.add('done');
     chk.style.background=dot;chk.style.borderColor='transparent';
     if(nm){nm.classList.add('done');}
@@ -3523,6 +3550,9 @@ function openModal(type,editId){
         <div class="m-chip${curPrio!=='normal'?' has-val':''}" id="chip-prio" onclick="toggleChipPanel('prio')">
           <span class="m-chip-lbl">prio</span>${prioLabel[curPrio]||'normal'}
         </div>
+        <div class="m-chip${mRepeat!=='once'?' has-val':''}" id="chip-recur" onclick="toggleChipPanel('recur')">
+          <span class="m-chip-lbl">rep</span>${REPEAT_TYPES.find(r=>r.id===mRepeat)?.label||'uma vez'}
+        </div>
         <div class="m-chip${curDue?' has-val':''}" id="chip-due" onclick="toggleChipPanel('due')">
           <span class="m-chip-lbl">data</span>${dueLbl}
         </div>
@@ -3533,6 +3563,12 @@ function openModal(type,editId){
       </div>
       <div class="m-chip-panel" id="panel-due">
         <input class="m-chip-date" id="m-due" type="date" value="${curDue}">
+      </div>
+      <div class="m-chip-panel" id="panel-recur">
+        <div class="m-recur-chips" id="m-repeat-row"></div>
+        <div id="m-days-section" style="display:none;margin-top:8px">
+          <div class="m-days" id="m-days-row"></div>
+        </div>
       </div>
 
       <div class="m-chip-panel" id="panel-color">
@@ -3548,21 +3584,8 @@ function openModal(type,editId){
       </div>
       ${isEdit?`<button class="m-delete" onclick="deleteItem('task')">excluir tarefa</button>`:''}
       <button class="m-save" onclick="saveTask()">${isEdit?'salvar':'criar tarefa'}</button>`;
-    // cat presets (igual ao hábito)
-    const taskCatPresetsEl=document.getElementById('m-cat-t-presets');
-    TASK_CATS.forEach(cat=>{
-      const b=document.createElement('button');
-      b.className='m-tag-preset'+(curCat===cat?' sel':'');
-      b.textContent=cat;
-      b.onclick=()=>{
-        taskCatPresetsEl.querySelectorAll('.m-tag-preset').forEach(x=>x.classList.remove('sel'));
-        b.classList.add('sel');
-        _updateChip('cat-t',cat,true);
-        window._mTaskCat=cat;
-      };
-      taskCatPresetsEl.appendChild(b);
-    });
-    window._mTaskCat=curCat;
+
+    renderMColors();renderMRepeat();
     // tag live update
     const tagEl=document.getElementById('m-tag');
     if(tagEl) tagEl.addEventListener('input',()=>_updateChip('tag',tagEl.value||'—',!!tagEl.value));
@@ -3573,7 +3596,6 @@ function openModal(type,editId){
       const lbl=v?new Date(v+'T00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
       _updateChip('due',lbl,!!v);
     });
-    renderMColors();
 
   }else{
     const isIn=type==='fin-in';
@@ -3646,6 +3668,7 @@ function renderMRepeat(){
       mRepeat=r.id;
       if(r.id==='daily'){mDays=[0,1,2,3,4,5,6];}
       else if(r.id==='once'){mDays=[];}
+      else if(r.id==='weekly'&&!mDays.length){mDays=[new Date().getDay()];}
       renderMRepeat();
       const ds=document.getElementById('m-days-section');
       if(ds)ds.style.display=(r.id==='custom')?'block':'none';
@@ -3706,11 +3729,15 @@ function saveTask(){
   const prio=prioMap[prioText]||'normal';
   const due=document.getElementById('m-due')?document.getElementById('m-due').value||null:null;
   const desc=(document.getElementById('m-desc')?.value||'').trim();
+  const repeat=mRepeat||'once';
+  const days=repeat==='daily'?[0,1,2,3,4,5,6]:repeat==='once'?[]:[...mDays];
   if(mEditId){
     const t=S.tasks.find(x=>x.id===mEditId);
-    if(t){t.name=name;t.desc=desc;t.tag=tag;t.color=mColor;t.priority=prio;t.due=due;}
+    if(t){t.name=name;t.desc=desc;t.tag=tag;t.color=mColor;t.priority=prio;t.due=due;t.repeat=repeat;t.days=days;
+      if(repeat==='once'&&t.done){if(!t.doneByDate)t.doneByDate={};} // keep legacy done as-is
+    }
   }else{
-    S.tasks.push({id:Date.now(),name,desc,tag,cat,color:mColor,priority:prio,due,done:false});
+    S.tasks.push({id:Date.now(),name,desc,tag,color:mColor,priority:prio,due,repeat,days,done:false,doneByDate:{}});
   }
   save();closeModal();renderTasks();renderTaskFilters();updateRing();
 }
