@@ -2521,19 +2521,23 @@ async function initFirebase(){
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
   ]);
   const _app=initializeApp({
-    apiKey:"AIzaSyBkqTwAQBQ83WGPd5U6ho4kvxI_Ubv0YXQ",
-    authDomain:"aura-app-a6b0d.firebaseapp.com",
-    projectId:"aura-app-a6b0d",
-    storageBucket:"aura-app-a6b0d.firebasestorage.app",
-    messagingSenderId:"360925170597",
-    appId:"1:360925170597:web:84b6f1dbf873360214364c"
+    apiKey:"AIzaSyBoaW5jaWppsgnGxWyONlCsOK-J2E1Lo6Y",
+    authDomain:"avance-0.firebaseapp.com",
+    projectId:"avance-0",
+    storageBucket:"avance-0.firebasestorage.app",
+    messagingSenderId:"522859049222",
+    appId:"1:522859049222:web:75a983573798b21ce0ae87"
   });
   auth=getAuth(_app);db=getFirestore(_app);
   GoogleAuthProvider=GAP;signInWithPopup=SWP;signInWithRedirect=SWR;getRedirectResult=GRR;
   signInAnonymously=SIA;signOut=SO;onAuthStateChanged=OAC;
   fsDoc=D;getDoc=GD;setDoc=SD;
 }
-await initFirebase();
+try{
+  await initFirebase();
+}catch(e){
+  console.error('initFirebase failed, falling back to local mode',e);
+}
 const DAYS=['D','S','T','Q','Q','S','S'];
 const DAY_FULL=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const XP_LVL=200,XP_H=25,XP_T=15,XP_F=10;
@@ -5546,7 +5550,8 @@ Object.assign(window,{
 // fallback: se Firebase não responder em 6s, mostra login
 let authResolved=false;
 
-if(DEV_MODE){
+if(DEV_MODE || !auth){
+  if(!DEV_MODE)console.warn('Firebase indisponível — entrando em modo local');
   authResolved=true;
   currentUser=null;
   load();
