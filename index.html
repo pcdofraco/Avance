@@ -5586,6 +5586,8 @@ if(DEV_MODE || !auth){
       return;
     }
     currentUser=user;
+    const ap=document.getElementById('app');
+    if(ap)ap.style.opacity='';
     if(!user.isAnonymous){
       console.log('[auth] loading firestore data...');
       await fsLoad(user.uid);
