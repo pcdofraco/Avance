@@ -832,25 +832,90 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .val-in{color:rgba(255,255,255,0.85);}
 .val-out{color:rgba(255,255,255,0.5);}
 /* ── FINANCE ACTIONS ── */
-.fin-actions{display:flex;gap:10px;margin-bottom:24px;}
-.fin-pill-btn{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:9px 20px;border-radius:100px;
-  background:rgba(74,222,128,0.06);
-  border:1px solid rgba(74,222,128,0.18);
-  color:rgba(134,239,172,0.8);
-  font-family:var(--mono);font-size:10px;letter-spacing:0.14em;
+/* fin add button */
+#fin-add-btn{
+  width:28px;height:28px;border-radius:50%;
+  background:#fff;
+  border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:transform 0.3s cubic-bezier(0.34,1.4,0.64,1), border-radius 0.3s ease, width 0.3s ease, height 0.3s ease, box-shadow 0.2s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  position:relative;
+  z-index:10;
+  overflow:visible;
+}
+#fin-add-btn svg{
+  width:12px;height:12px;stroke:#000;stroke-width:2.5;
+  transition:transform 0.3s ease, opacity 0.2s;
+  flex-shrink:0;
+}
+#fin-add-btn:active{transform:scale(0.88);}
+
+/* expanded card */
+#fin-add-card{
+  position:absolute;
+  top:0;right:0;
+  width:28px;height:28px;
+  border-radius:50%;
+  background:rgba(18,18,22,0.96);
+  border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(12px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+  overflow:hidden;
+  z-index:9;
+  pointer-events:none;
+  transition:
+    width 0.35s cubic-bezier(0.34,1.1,0.64,1),
+    height 0.35s cubic-bezier(0.34,1.1,0.64,1),
+    border-radius 0.35s cubic-bezier(0.34,1.1,0.64,1),
+    opacity 0.2s ease;
+  opacity:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:0;
+}
+#fin-add-card.open{
+  width:160px;
+  height:96px;
+  border-radius:16px;
+  opacity:1;
+  pointer-events:all;
+}
+.fin-add-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;
+  background:none;border:none;
+  font-family:var(--mono);font-size:10px;letter-spacing:0.12em;
   text-transform:uppercase;cursor:pointer;
-  transition:background 0.15s,border-color 0.15s,transform 0.1s,color 0.15s;
+  color:rgba(255,255,255,0.6);
+  transition:background 0.12s, color 0.12s;
+  opacity:0;
+  transform:translateY(4px);
+  transition:opacity 0.2s ease, transform 0.2s ease, background 0.12s;
+  width:100%;text-align:left;
 }
-.fin-pill-btn:active{transform:scale(0.96);}
-.fin-pill-btn:hover{background:rgba(74,222,128,0.1);color:rgba(134,239,172,1);}
-.fin-pill-out{
-  background:rgba(248,113,113,0.06);
-  border-color:rgba(248,113,113,0.18);
-  color:rgba(252,165,165,0.7);
+#fin-add-card.open .fin-add-opt{
+  opacity:1;transform:translateY(0);
 }
-.fin-pill-out:hover{background:rgba(248,113,113,0.1);color:rgba(252,165,165,0.95);}
+#fin-add-card.open .fin-add-opt:nth-child(1){transition-delay:0.12s;}
+#fin-add-card.open .fin-add-opt:nth-child(2){transition-delay:0.18s;}
+.fin-add-opt:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.9);}
+.fin-add-opt:active{background:rgba(255,255,255,0.1);}
+.fin-add-sep{height:1px;background:rgba(255,255,255,0.07);margin:0 12px;}
+.fin-add-opt svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.5;opacity:0.5;flex-shrink:0;}
+
+/* overlay */
+#fin-add-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:8;
+  transition:opacity 0.2s;
+}
+#fin-add-overlay.open{display:block;}
 
 /* ── PATRIMÔNIO CARDS ── */
 .fin-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:20px;}
@@ -1067,12 +1132,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   align-items:stretch;
   gap:0;
   margin-bottom:20px;
-  background:linear-gradient(145deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.01) 60%,rgba(0,0,0,0.1) 100%);
+  background:none;
   border:1px solid rgba(255,255,255,0.08);
-  border-bottom:1px solid rgba(0,0,0,0.3);
   border-radius:18px;
   padding:16px;
-  box-shadow:0 1px 0 rgba(255,255,255,0.05) inset,0 4px 20px rgba(0,0,0,0.3);
+  box-shadow:none;
+  position:relative;
+  overflow:hidden;
+}
+#dash-hero::after{
+  content:'';
+  position:absolute;
+  top:0;left:0;
+  width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent);
+  transform:translateX(-100%) skewX(-12deg);
+  animation:shimmer 12s ease-in-out infinite;
+  animation-delay:2s;
+  pointer-events:none;
 }
 #dash-spiral-wrap{
   flex-shrink:0;
@@ -1101,8 +1178,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .dsp-streak-num{font-size:clamp(20px,5.5vw,26px);font-weight:300;color:#fff;letter-spacing:-0.04em;line-height:1.1;}
 .dsp-streak-sub{font-family:var(--mono);font-size:7px;color:rgba(255,255,255,0.22);margin-top:1px;}
 #dsp-week{margin-top:0;width:100%;}
-.dsp-week-track{display:flex;gap:0;justify-content:space-between;align-items:center;}
-.dsp-wd{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.dsp-week-track{display:flex;gap:0;justify-content:flex-start;align-items:center;}
+.dsp-wd{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;margin-right:8px;}
 .dsp-wd-dot{
   width:20px;height:20px;
   border-radius:50%;
@@ -1141,45 +1218,25 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
+@keyframes shimmer{
+  0%{transform:translateX(-100%) skewX(-12deg);opacity:0;}
+  20%{opacity:1;}
+  100%{transform:translateX(300%) skewX(-12deg);opacity:0;}
+}
 .dash-stat-card{
-  background:
-    linear-gradient(145deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.01) 60%, rgba(0,0,0,0.12) 100%);
-  border:1px solid rgba(255,255,255,0.09);
-  border-bottom:1px solid rgba(0,0,0,0.35);
-  border-right:1px solid rgba(0,0,0,0.2);
-  border-radius:16px;
+  background:none;
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;
   padding:14px 14px 12px;
   cursor:pointer;
   position:relative;
   overflow:hidden;
-  transition:transform 0.12s, box-shadow 0.12s;
-  box-shadow:
-    0 1px 0 0 rgba(255,255,255,0.06) inset,
-    0 -1px 0 0 rgba(0,0,0,0.3) inset,
-    0 4px 16px rgba(0,0,0,0.35),
-    0 1px 3px rgba(0,0,0,0.4);
-}
-.dash-stat-card::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:40%;
-  background:linear-gradient(180deg,rgba(255,255,255,0.05) 0%,transparent 100%);
-  border-radius:16px 16px 0 0;
-  pointer-events:none;
-}
-.dash-stat-card:active{
-  transform:translateY(1px) scale(0.98);
-  box-shadow:0 2px 8px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.5);
-}
-.dash-stat-card.wide{grid-column:auto;}
-.dash-stat-card.placeholder{
-  opacity:0.35;
-  cursor:default;
-  background:rgba(255,255,255,0.02);
+  transition:opacity 0.12s,transform 0.1s,border-color 0.15s;
   box-shadow:none;
-  border:1px dashed rgba(255,255,255,0.1);
 }
+.dash-stat-card:active{transform:scale(0.97);opacity:0.7;}
+.dash-stat-card.wide{grid-column:auto;}
+.dash-stat-card.placeholder{opacity:0.3;cursor:default;}
 .dsc-icon-wrap{
   width:32px;height:32px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
@@ -2321,18 +2378,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
     <div id="sec-financas" class="section">
 
-      <!-- BOTÕES PILL -->
-      <div class="fin-actions">
-        <button class="fin-pill-btn" onclick="openModal('fin-in',null)">
-          <svg width="10" height="10" viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          entrada
-        </button>
-        <button class="fin-pill-btn fin-pill-out" onclick="openModal('fin-out',null)">
-          <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          saída
-        </button>
-      </div>
-
       <!-- CARDS -->
       <div class="fin-period-row">
         <button class="fin-period-btn act" onclick="_setFinPeriod('week',this)">semana</button>
@@ -2342,7 +2387,28 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="fin-cards-grid">
         <div class="fin-pcard fin-pcard-total">
           <div class="fin-pcard-lbl">total</div>
-          <div class="fin-pcard-val" id="fp-total">R$ 0</div>
+          <div style="display:flex;align-items:center;gap:10px;position:relative;">
+            <div class="fin-pcard-val" id="fp-total">R$ 0</div>
+            <div style="position:relative;">
+              <button id="fin-add-btn" onclick="_toggleFinAdd()" aria-label="Adicionar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+              </button>
+              <div id="fin-add-card">
+                <button class="fin-add-opt" onclick="_toggleFinAdd();openModal('fin-in',null)">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  entrada
+                </button>
+                <div class="fin-add-sep"></div>
+                <button class="fin-add-opt" onclick="_toggleFinAdd();openModal('fin-out',null)">
+                  <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  saída
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- dropdown + overlay rendered at body level via JS -->
         </div>
         <div class="fin-pcard">
           <div class="fin-pcard-lbl">receita</div>
@@ -3348,6 +3414,17 @@ function animateCount(el,target,prefix,suffix,duration){
   };
   requestAnimationFrame(tick);
 }
+function _toggleFinAdd(){
+  const btn=document.getElementById('fin-add-btn');
+  const card=document.getElementById('fin-add-card');
+  const ov=document.getElementById('fin-add-overlay');
+  if(!btn||!card)return;
+  const open=card.classList.toggle('open');
+  if(ov)ov.classList.toggle('open',open);
+  // rotate + icon when open
+  if(btn.querySelector('svg'))btn.querySelector('svg').style.transform=open?'rotate(45deg)':'rotate(0deg)';
+}
+
 function renderFinance(animate){
   _renderFinGoalsSection();
   const now=Date.now();
@@ -5303,7 +5380,7 @@ Object.assign(window,{
   openSettings,closeSettings,
   toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
   selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,_closeAllFilters,_positionPanel,
-  _setTransFilter,_renderTransList,
+  _setTransFilter,_renderTransList,_toggleFinAdd,
   _setFinPeriod, openFinGoalModal, saveFinGoal, deleteFinGoal, selectFinGoalType, selectFinGoalPeriod, _renderFinGoalsSection,
   renderTreino, _trSelectDay, _trNewFicha, _trOpenFicha,
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
@@ -5996,5 +6073,8 @@ function _setFinPeriod(p,btn){
   renderFinance(true);
 }
 </script>
+  <!-- FIN ADD OVERLAY -->
+  <div id="fin-add-overlay" onclick="_toggleFinAdd()"></div>
+
 </body>
 </html>
