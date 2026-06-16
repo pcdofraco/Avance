@@ -321,27 +321,26 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sec-tarefas-hdr{display:flex;align-items:flex-start;justify-content:space-between;min-height:32px;margin-bottom:4px;position:relative;z-index:410;}
 .task-filter-wrap{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;position:relative;z-index:420;}
 .task-filter-btn{
-  background:none;border:none;
-  font-family:var(--mono);font-size:8px;letter-spacing:0.18em;
-  color:rgba(255,255,255,0.2);text-transform:uppercase;cursor:pointer;
-  padding:4px 0;transition:color 0.2s;
+  height:26px;
+  padding:0 12px;
+  border-radius:99px;
+  background:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  transition:transform 0.1s;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
+  color:#000;text-transform:uppercase;font-weight:600;
+  white-space:nowrap;
 }
-.task-filter-btn.active{color:rgba(255,255,255,0.55);}
-.task-filter-active-tag{
-  font-family:var(--mono);font-size:7px;letter-spacing:0.1em;
-  color:rgba(255,255,255,0.45);font-weight:600;text-transform:uppercase;
-  margin-top:2px;text-align:right;
-  max-height:0;overflow:hidden;opacity:0;
-  transition:max-height 0.2s,opacity 0.2s;
-}
-.task-filter-active-tag.visible{max-height:20px;opacity:1;}
-/* vertical dropdown */
+.task-filter-btn:active{transform:scale(0.93);}
+.task-filter-btn.active{box-shadow:0 2px 8px rgba(255,255,255,0.2);}
+.task-filter-active-tag{display:none;}
 /* ── FILTER OVERLAY + DROPDOWN ── */
 #filter-overlay{
   position:fixed;inset:0;z-index:395;
-  pointer-events:none;/* never captures clicks */
+  pointer-events:none;
 }
-/* blur applied only to content area, not header */
 #content.filter-open{
   filter:blur(6px) brightness(0.7);
   transition:filter 0.25s ease;
@@ -349,31 +348,48 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 #content{ transition:filter 0.25s ease; }
 #app{ transition:none; }
-/* panels */
+/* expanding card panels */
 #task-tag-panel, #habit-tag-panel{
   position:fixed;
   z-index:500;
+  width:70px;height:26px;
+  border-radius:99px;
+  background:#fff;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  overflow:hidden;
+  pointer-events:none;
+  opacity:0;
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
+  justify-content:center;
   gap:0;
-  pointer-events:none;
+  transition:
+    width 0.32s cubic-bezier(0.34,1.1,0.64,1),
+    height 0.32s cubic-bezier(0.34,1.1,0.64,1),
+    border-radius 0.32s cubic-bezier(0.34,1.1,0.64,1),
+    opacity 0.15s ease;
+}
+#task-tag-panel.open, #habit-tag-panel.open{
+  width:150px;
+  border-radius:14px;
+  opacity:1;
+  pointer-events:all;
 }
 .task-tag-opt{
-  padding:10px 0;
+  padding:10px 14px;
   border:none;
   background:none;
-  font-family:var(--mono);font-size:9px;letter-spacing:0.12em;
-  color:rgba(255,255,255,0.35);
+  font-family:var(--mono);font-size:10px;letter-spacing:0.12em;
+  color:rgba(0,0,0,0.5);
   cursor:pointer;white-space:nowrap;
   opacity:0;
-  transform:translateX(6px);
-  transition:opacity 0.18s ease, transform 0.22s cubic-bezier(0.34,1.2,0.64,1), color 0.15s;
+  transform:translateX(-6px);
+  transition:opacity 0.18s ease, transform 0.22s cubic-bezier(0.34,1.2,0.64,1), color 0.12s, background 0.12s;
   pointer-events:none;
   display:block;
   text-transform:lowercase;
+  width:100%;text-align:left;
 }
-#task-tag-panel.open, #habit-tag-panel.open{pointer-events:all;}
 #task-tag-panel.open .task-tag-opt,
 #habit-tag-panel.open .task-tag-opt{opacity:1;transform:translateX(0);pointer-events:all;}
 #task-tag-panel.open .task-tag-opt:nth-child(1),
@@ -388,8 +404,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #habit-tag-panel.open .task-tag-opt:nth-child(5){transition-delay:160ms;}
 #task-tag-panel.open .task-tag-opt:nth-child(6),
 #habit-tag-panel.open .task-tag-opt:nth-child(6){transition-delay:200ms;}
-.task-tag-opt.sel{color:rgba(255,255,255,0.85);}
-.task-tag-opt:active{opacity:0.5!important;}
+.task-tag-opt.sel{color:rgba(0,0,0,0.9);font-weight:600;}
+.task-tag-opt:hover{background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.8);}
+.task-tag-opt:active{background:rgba(0,0,0,0.08);}
 /* dim non-matching */
 .list-item.tag-dimmed{pointer-events:none;}
 .list-item.tag-dimmed .item-body,
@@ -1633,14 +1650,75 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #tr-day-content{padding-top:28px;min-height:200px;}
 #tr-day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 #tr-day-title{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+/* ── TREINO ADD BTN (expansível igual ao filtrar) ── */
+.tr-add-btn-wrap{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;position:relative;z-index:420;}
 #tr-add-ficha-btn{
-  background:none;border:1px solid rgba(255,255,255,0.1);
-  border-radius:8px;padding:6px 12px;cursor:pointer;
-  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;
-  color:rgba(255,255,255,0.3);text-transform:uppercase;
-  transition:border-color 0.2s,color 0.2s;
+  height:26px;
+  padding:0 12px;
+  border-radius:99px;
+  background:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  transition:transform 0.1s;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
+  color:#000;text-transform:uppercase;font-weight:600;
+  white-space:nowrap;
 }
-#tr-add-ficha-btn:active{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);}
+#tr-add-ficha-btn:active{transform:scale(0.93);}
+#tr-add-ficha-btn.active{box-shadow:0 2px 8px rgba(255,255,255,0.2);}
+
+#tr-add-panel{
+  position:fixed;
+  z-index:500;
+  width:26px;height:26px;
+  border-radius:99px;
+  background:#fff;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  overflow:hidden;
+  pointer-events:none;
+  opacity:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:0;
+  transform-origin:right center;
+  transition:
+    width 0.32s cubic-bezier(0.34,1.1,0.64,1),
+    height 0.32s cubic-bezier(0.34,1.1,0.64,1),
+    border-radius 0.32s cubic-bezier(0.34,1.1,0.64,1),
+    opacity 0.15s ease;
+}
+#tr-add-panel.open{
+  width:170px;
+  height:84px;
+  border-radius:14px;
+  opacity:1;
+  pointer-events:all;
+}
+.tr-add-opt{
+  padding:10px 14px;
+  border:none;
+  background:none;
+  font-family:var(--mono);font-size:10px;letter-spacing:0.12em;
+  color:rgba(0,0,0,0.5);
+  cursor:pointer;white-space:nowrap;
+  opacity:0;
+  transform:translateX(6px);
+  transition:opacity 0.18s ease, transform 0.22s cubic-bezier(0.34,1.2,0.64,1), color 0.12s, background 0.12s;
+  pointer-events:none;
+  display:block;
+  text-transform:lowercase;
+  width:100%;text-align:left;
+  flex-shrink:0;
+}
+#tr-add-panel.open .tr-add-opt{opacity:1;transform:translateX(0);pointer-events:all;}
+#tr-add-panel.open .tr-add-opt:nth-child(1){transition-delay:0ms;}
+#tr-add-panel.open .tr-add-opt:nth-child(2){transition-delay:40ms;}
+#tr-add-panel.open .tr-add-opt:nth-child(3){transition-delay:80ms;}
+.tr-add-opt:hover{background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.8);}
+.tr-add-opt:active{background:rgba(0,0,0,0.08);}
+.tr-add-sep{height:1px;background:rgba(0,0,0,0.08);margin:0 10px;flex-shrink:0;}
 
 /* ficha cards */
 .tr-ficha-card{
@@ -1678,20 +1756,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 #tr-sheet-overlay.open{display:block;}
 #tr-sheet{
-  position:fixed;bottom:0;left:50%;
-  transform:translateX(-50%) translateY(100%);
-  width:100%;max-width:480px;
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.94);
+  width:calc(100% - 32px);max-width:440px;
   background:rgba(12,12,12,0.98);
-  border-top:1px solid rgba(255,255,255,0.06);
-  border-radius:24px 24px 0 0;
-  padding:16px 20px calc(32px + var(--sb));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:24px;
+  padding:20px 20px 24px;
   z-index:501;box-sizing:border-box;
-  transition:transform 0.34s cubic-bezier(0.34,1.1,0.64,1);
-  max-height:80vh;overflow-y:auto;
+  transition:transform 0.32s cubic-bezier(0.34,1.1,0.64,1), opacity 0.22s ease;
+  max-height:85vh;overflow-y:auto;
   visibility:hidden;
+  opacity:0;
 }
-#tr-sheet.open{transform:translateX(-50%) translateY(0);visibility:visible;}
-#tr-sheet-handle{width:28px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 18px;}
+#tr-sheet.open{transform:translate(-50%,-50%) scale(1);visibility:visible;opacity:1;}
+#tr-sheet-handle{display:none;}
 #tr-sheet-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
 #tr-sheet-name{
   flex:1;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.1);
@@ -2335,7 +2414,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
     <div id="sec-dashboard" class="section active">
 
-      <!-- hero card -->
+<!-- hero card -->
       <div id="dash-hero">
         <div id="dash-spiral-wrap">
           <canvas id="dash-spiral" width="120" height="120"></canvas>
@@ -4040,6 +4119,37 @@ document.addEventListener('keydown',e=>{
 /* ── TREINO ── */
 function _trEnsure(){ if(!S.treino)S.treino={fichas:[]}; }
 
+function _toggleTrAdd(forceClose){
+  const panel=document.getElementById('tr-add-panel');
+  const btn=document.getElementById('tr-add-ficha-btn');
+  if(!panel)return;
+  const isOpen=panel.classList.contains('open');
+  if(forceClose||isOpen){
+    panel.classList.remove('open');
+    btn&&btn.classList.remove('active');
+    if(btn){btn.style.opacity='';btn.style.pointerEvents='';}
+    document.getElementById('content')?.classList.remove('filter-open');
+  } else {
+    const r=btn.getBoundingClientRect();
+    // ancora pelo lado direito do botão, expande para a esquerda preenchendo até lá
+    panel.style.top=(r.top + r.height/2 - 13)+'px';
+    panel.style.right=(window.innerWidth - r.right)+'px';
+    panel.style.left='auto';
+    btn.style.opacity='0';
+    btn.style.pointerEvents='none';
+    btn&&btn.classList.add('active');
+    panel.classList.add('open');
+    document.getElementById('content')?.classList.add('filter-open');
+  }
+}
+
+function _trNewCardio(){
+  // placeholder — abre modal de cardio (a implementar)
+  alert('Em breve: Atividade Cardíaca');
+}
+
+
+
 let _trSelDow = new Date().getDay();
 let _trEditId = null;
 let _trWorkoutMode = false;
@@ -4076,7 +4186,9 @@ function renderTreino(){
   cont.innerHTML = `
     <div id="tr-day-header">
       <div id="tr-day-title">${DAY_NAMES[_trSelDow]}</div>
-      <button id="tr-add-ficha-btn" onclick="_trNewFicha()">+ ficha</button>
+      <div class="tr-add-btn-wrap">
+        <button id="tr-add-ficha-btn" onclick="_toggleTrAdd()">+ adicionar</button>
+      </div>
     </div>
     ${fichaDoDia.length === 0
       ? `<div class="tr-empty">nenhuma ficha neste dia</div>`
@@ -5479,7 +5591,7 @@ Object.assign(window,{
   selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,_closeAllFilters,_positionPanel,
   _setTransFilter,_renderTransList,_toggleFinAdd,_finAddOutside,_toggleTransTipo,_transTipoOutside,
   _setFinPeriod, openFinGoalModal, saveFinGoal, deleteFinGoal, selectFinGoalType, selectFinGoalPeriod, _renderFinGoalsSection,
-  renderTreino, _trSelectDay, _trNewFicha, _trOpenFicha,
+  renderTreino, _trSelectDay, _trNewFicha, _trOpenFicha, _toggleTrAdd, _trNewCardio,
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
   _toggleHabitStats, _flamesvg, _renderHabBottomChart, _calcStreak,
@@ -6047,18 +6159,25 @@ function _positionPanel(panelId,btnId){
   const btn=document.getElementById(btnId);
   if(!panel||!btn)return;
   const r=btn.getBoundingClientRect();
-  // first item appears right beside the button, rest grow downward
   panel.style.top=r.top+'px';
-  panel.style.left=(r.right+12)+'px';
+  panel.style.left=r.left+'px';
   panel.style.right='auto';
+  // hide btn — card replaces it visually
+  btn.style.opacity='0';
+  btn.style.pointerEvents='none';
 }
 
 function _closeAllFilters(){
   document.getElementById('content')?.classList.remove('filter-open');
   document.getElementById('task-tag-panel')?.classList.remove('open');
   document.getElementById('habit-tag-panel')?.classList.remove('open');
-  document.getElementById('task-filter-toggle')?.classList.remove('active');
-  document.getElementById('habit-filter-toggle')?.classList.remove('active');
+  // restore buttons
+  const tb=document.getElementById('task-filter-toggle');
+  const hb=document.getElementById('habit-filter-toggle');
+  if(tb){tb.style.opacity='';tb.style.pointerEvents='';}
+  if(hb){hb.style.opacity='';hb.style.pointerEvents='';}
+  tb?.classList.remove('active');
+  hb?.classList.remove('active');
 }
 
 // close on click outside panels
@@ -6066,6 +6185,9 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('#task-tag-panel,#habit-tag-panel,.task-filter-btn')){
     if(document.querySelector('#task-tag-panel.open,#habit-tag-panel.open'))
       _closeAllFilters();
+  }
+  if(!e.target.closest('#tr-add-panel,#tr-add-ficha-btn')){
+    if(document.querySelector('#tr-add-panel.open')) _toggleTrAdd(true);
   }
 },true);
 
@@ -6077,6 +6199,9 @@ function toggleTaskFilterPanel(){
   _closeAllFilters();
   if(!isOpen){
     _renderTaskTagPanel();
+    const tags=[...new Set(S.tasks.map(t=>t.tag).filter(Boolean))];
+    const count=tags.length+1; // +1 for "todos"
+    panel.style.height=(count*38+4)+'px';
     _positionPanel('task-tag-panel','task-filter-toggle');
     panel.classList.add('open');
     btn?.classList.add('active');
@@ -6139,6 +6264,9 @@ function toggleHabitFilterPanel(){
   _closeAllFilters();
   if(!isOpen){
     _renderHabitTagPanel();
+    const tags=[...new Set(S.habits.map(h=>h.tag).filter(Boolean))];
+    const count=tags.length+1;
+    panel.style.height=(count*38+4)+'px';
     _positionPanel('habit-tag-panel','habit-filter-toggle');
     panel.classList.add('open');
     btn?.classList.add('active');
@@ -6176,6 +6304,13 @@ function _setFinPeriod(p){
   renderFinance(true);
 }
 </script>
+  <!-- TREINO ADD PANEL -->
+  <div id="tr-add-panel">
+    <button class="tr-add-opt" onclick="_toggleTrAdd(true);_trNewFicha()">adicionar treino</button>
+    <div class="tr-add-sep"></div>
+    <button class="tr-add-opt" onclick="_toggleTrAdd(true);_trNewCardio()">atividade cardíaca</button>
+  </div>
+
   <!-- FIN ADD OVERLAY -->
   <div id="fin-add-overlay" onclick="_toggleFinAdd(true)"></div>
   <div id="fin-add-card">
