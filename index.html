@@ -689,8 +689,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── ESTUDOS ── */
 /* ── ESTUDOS ── */
-#sec-estudos{padding-top:0;}
-#est-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+#sec-estudos{padding-top:0;display:none;flex-direction:column;height:calc(100vh - var(--st) - 80px);overflow:hidden;box-sizing:border-box;padding-bottom:0!important;position:relative;}
+#sec-estudos.active{display:flex!important;}#est-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
 #est-title{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
 #est-add-btn{
   height:26px;padding:0 12px;border-radius:99px;
@@ -725,6 +725,180 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #est-add-panel.open .est-add-opt:nth-child(2){transition-delay:40ms;}
 .est-add-opt:hover{background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.8);}
 .est-add-sep{height:1px;background:rgba(0,0,0,0.08);margin:0 10px;flex-shrink:0;}
+/* ── MODO ANOTAÇÕES ── */
+#sec-estudos.notes-mode{position:relative;}
+#sec-estudos.notes-mode #est-list-mode{display:none;}
+#sec-estudos.notes-mode #est-timer-mode{display:none;}
+#sec-estudos.notes-mode #est-notes-mode{display:flex;}
+
+#est-notes-mode{
+  display:none;flex-direction:column;
+  position:absolute;inset:0;
+  overflow:hidden;
+}
+#est-notes-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;margin-bottom:0;padding-bottom:16px;
+}
+#est-notes-title-input{
+  background:none;border:none;outline:none;
+  font-size:17px;font-weight:600;
+  color:rgba(255,255,255,0.85);
+  flex:1;min-width:0;
+  letter-spacing:-0.02em;
+}
+#est-notes-title-input::placeholder{color:rgba(255,255,255,0.2);}
+#est-notes-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#est-notes-save{
+  height:26px;padding:0 12px;border-radius:99px;
+  background:#fff;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
+  color:rgba(0,0,0,0.5);text-transform:uppercase;font-weight:600;
+  transition:transform 0.1s;white-space:nowrap;
+}
+#est-notes-save:active{transform:scale(0.93);}
+#est-notes-back{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;
+  transition:color 0.15s;padding:0;
+}
+#est-notes-back:active{color:rgba(255,255,255,0.6);}
+/* área de texto */
+#est-notes-body{
+  flex:1;overflow-y:auto;
+  scrollbar-width:none;
+}
+#est-notes-body::-webkit-scrollbar{display:none;}
+#est-notes-textarea{
+  width:100%;height:100%;min-height:200px;
+  background:none;border:none;outline:none;resize:none;
+  font-size:15px;line-height:1.7;
+  color:rgba(255,255,255,0.7);
+  font-family:inherit;
+  box-sizing:border-box;
+  padding:0;
+}
+#est-notes-textarea::placeholder{color:rgba(255,255,255,0.15);}
+/* separador */
+#est-notes-sep{
+  height:1px;background:rgba(255,255,255,0.06);
+  flex-shrink:0;margin-bottom:14px;
+}
+/* lista de anotações salvas */
+#est-notes-list-wrap{
+  flex-shrink:0;
+  max-height:38%;
+  overflow-y:auto;scrollbar-width:none;
+  margin-top:10px;
+}
+#est-notes-list-wrap::-webkit-scrollbar{display:none;}
+#est-notes-list-label{
+  font-family:var(--mono);font-size:7px;letter-spacing:0.18em;
+  color:rgba(255,255,255,0.18);text-transform:uppercase;
+  margin-bottom:10px;
+}
+.est-note-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  cursor:pointer;
+}
+.est-note-item:last-child{border-bottom:none;}
+.est-note-item-body{flex:1;min-width:0;}
+.est-note-item-title{font-size:14px;font-weight:500;color:rgba(255,255,255,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.est-note-item-preview{font-size:12px;color:rgba(255,255,255,0.25);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.est-note-item-date{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.2);flex-shrink:0;margin-top:2px;}
+.est-note-del{background:none;border:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.12);padding:2px 4px;transition:color 0.15s;flex-shrink:0;}
+.est-note-del:active{color:rgba(248,113,113,0.6);}
+.est-notes-empty{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.12);letter-spacing:0.12em;text-transform:uppercase;padding:12px 0;}
+
+/* modos da seção estudos */
+
+#est-list-mode{display:block;flex:1;overflow-y:auto;}
+#est-timer-mode{
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:absolute;inset:0;
+  gap:0;
+}
+#sec-estudos.timer-mode{position:relative;}
+#sec-estudos.timer-mode #est-list-mode{display:none;}
+#sec-estudos.timer-mode #est-notes-mode{display:none;}
+#sec-estudos.timer-mode #est-timer-mode{display:flex;}
+#est-timer-back{
+  position:absolute;top:0;left:0;
+  background:none;border:none;cursor:pointer;
+  padding:4px;display:flex;align-items:center;justify-content:center;
+  opacity:0.5;transition:opacity 0.2s;
+}
+#est-timer-back:active{opacity:1;}
+#est-timer-ring-wrap{
+  position:relative;
+  width:min(72vw,280px);height:min(72vw,280px);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:40px;
+}
+#est-ring-svg{position:absolute;inset:0;width:100%;height:100%;}
+#est-ring-arc{transition:stroke-dashoffset 1s linear;}
+#est-timer-center{display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;position:relative;}
+#est-timer-disp{
+  font-family:var(--mono);font-size:clamp(32px,9vw,44px);font-weight:300;
+  letter-spacing:-0.03em;color:rgba(255,255,255,0.85);line-height:1;
+}
+#est-timer-disp.running{color:#fff;}
+#est-timer-sub{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.2);text-transform:uppercase;
+  cursor:pointer;pointer-events:all;
+  border-bottom:1px solid transparent;transition:color 0.2s,border-color 0.2s;
+}
+#est-timer-sub:hover{color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.12);}
+#est-timer-sub-input{display:none;}
+/* painel de meta */
+#est-goal-panel{
+  position:absolute;
+  bottom:calc(100% + 10px);
+  left:50%;transform:translateX(-50%);
+  background:rgba(18,18,18,0.98);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  padding:12px;
+  display:none;
+  z-index:10;
+  min-width:220px;
+}
+#est-goal-panel.open{display:block;}
+.est-goal-opts{
+  display:flex;flex-wrap:wrap;gap:6px;justify-content:center;
+}
+.est-goal-opt{
+  padding:7px 14px;border-radius:99px;
+  border:1px solid rgba(255,255,255,0.1);background:none;
+  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
+  color:rgba(255,255,255,0.4);cursor:pointer;
+  transition:all 0.15s;white-space:nowrap;
+}
+.est-goal-opt:active{background:rgba(255,255,255,0.1);}
+.est-goal-opt.sel{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.35);color:rgba(255,255,255,0.9);}
+.est-goal-clear{color:rgba(255,100,100,0.5);border-color:rgba(255,100,100,0.15);}
+.est-goal-clear:active{background:rgba(255,100,100,0.08);}
+
+#est-timer-btns{display:flex;gap:10px;}
+#est-timer-btn-start{
+  padding:12px 32px;border-radius:99px;
+  background:#fff;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
+  color:rgba(0,0,0,0.5);text-transform:uppercase;transition:all 0.15s;
+}
+#est-timer-btn-start.running{background:rgba(255,255,255,0.08);color:rgba(255,100,100,0.7);}
+#est-timer-btn-reset{
+  padding:12px 18px;border-radius:99px;
+  border:1px solid rgba(255,255,255,0.1);background:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
+  color:rgba(255,255,255,0.25);text-transform:uppercase;transition:all 0.15s;
+}
+#est-timer-btn-reset:active{background:rgba(255,255,255,0.06);}
 #est-list{padding:0;}
 .est-item{
   display:flex;align-items:center;gap:14px;
@@ -2745,14 +2919,71 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
 
     <div id="sec-estudos" class="section">
-      <div id="est-header">
-        <div id="est-title">estudos</div>
-        <div class="tr-add-btn-wrap">
-          <button id="est-add-btn" onclick="_estToggleAdd()">+ adicionar</button>
+      <!-- modo lista (padrão) -->
+      <div id="est-list-mode">
+        <div id="est-header">
+          <div id="est-title">estudos</div>
+          <div class="tr-add-btn-wrap">
+            <button id="est-add-btn" onclick="_estToggleAdd()">+ adicionar</button>
+          </div>
+        </div>
+        <div id="est-list"></div>
+      </div>
+      <!-- modo anotações -->
+      <div id="est-notes-mode">
+        <div id="est-notes-hdr">
+          <input id="est-notes-title-input" placeholder="título da anotação…" maxlength="60">
+          <div id="est-notes-actions">
+            <button id="est-notes-back" onclick="_estNotesClose()">fechar</button>
+            <button id="est-notes-save" onclick="_estNotesSave()">salvar</button>
+          </div>
+        </div>
+        <div id="est-notes-sep"></div>
+        <div id="est-notes-body">
+          <textarea id="est-notes-textarea" placeholder="comece a escrever…"></textarea>
+        </div>
+        <div id="est-notes-list-wrap">
+          <div id="est-notes-list-label">anotações salvas</div>
+          <div id="est-notes-list"></div>
         </div>
       </div>
-      <div id="est-list"></div>
-    </div>
+      <div id="est-timer-mode">
+        <button id="est-timer-back" onclick="_estTimerClose()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <polyline points="10 3 5 8 10 13" stroke="rgba(255,255,255,0.3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div id="est-timer-ring-wrap">
+          <svg id="est-ring-svg" viewBox="0 0 200 200">
+            <circle id="est-ring-track" cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"/>
+            <circle id="est-ring-arc" cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="3"
+              stroke-dasharray="552.9" stroke-dashoffset="552.9"
+              stroke-linecap="round" transform="rotate(-90 100 100)"/>
+          </svg>
+          <div id="est-timer-center">
+            <div id="est-timer-disp">00:00:00</div>
+            <div id="est-timer-sub" onclick="_estTimerEditSub()">definir meta</div>
+          </div>
+          <!-- painel de seleção de meta -->
+          <div id="est-goal-panel">
+            <div class="est-goal-opts">
+              <button class="est-goal-opt" data-mins="15" onclick="_estGoalSelect(15)">15min</button>
+              <button class="est-goal-opt" data-mins="25" onclick="_estGoalSelect(25)">25min</button>
+              <button class="est-goal-opt" data-mins="30" onclick="_estGoalSelect(30)">30min</button>
+              <button class="est-goal-opt" data-mins="45" onclick="_estGoalSelect(45)">45min</button>
+              <button class="est-goal-opt" data-mins="60" onclick="_estGoalSelect(60)">1h</button>
+              <button class="est-goal-opt" data-mins="90" onclick="_estGoalSelect(90)">1h30</button>
+              <button class="est-goal-opt" data-mins="120" onclick="_estGoalSelect(120)">2h</button>
+              <button class="est-goal-opt est-goal-clear" onclick="_estGoalClear()">limpar</button>
+            </div>
+          </div>
+        </div><!-- fim est-timer-ring-wrap -->
+        <div id="est-timer-btns">
+          <button id="est-timer-btn-start" onclick="_estTimerToggle()">iniciar</button>
+          <button id="est-timer-btn-reset" onclick="_estTimerReset()">zerar</button>
+        </div>
+      </div><!-- fim est-timer-mode -->
+    </div><!-- fim sec-estudos -->
 
   </div>
 </div>
@@ -2780,6 +3011,18 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <polyline points="12 9 12 13 14.5 15.5"/>
           <line x1="9.5" y1="2.5" x2="14.5" y2="2.5"/>
           <line x1="12" y1="2.5" x2="12" y2="5"/>
+        </svg>
+      </button>
+      <button class="qa-item" onclick="_qaNotes()" title="anotações">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.45)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </button>
+      <button class="qa-item" onclick="_estTimerClose()" title="lista">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.45)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+          <polyline points="9 21 9 12 15 12 15 21"/>
         </svg>
       </button>
     </div>
@@ -2957,11 +3200,14 @@ function setTab(name,dir){
     overlay?.classList.remove('open');
     renderTreino();
   }
-  else if(name==='estudos'){renderEstudos();}
+  else if(name==='estudos'){
+    document.getElementById('sec-estudos')?.classList.remove('timer-mode','notes-mode');
+    renderEstudos();
+  }
   // qa-bubble só na aba estudos
   const qaBubble=document.getElementById('qa-bubble');
   if(qaBubble){
-    qaBubble.style.display=name==='estudos'?'':'none';
+    qaBubble.style.display=name==='estudos'?'flex':'none';
     if(name!=='estudos') document.getElementById('qa-box')?.classList.remove('open');
   }
   // fechar sheet do treino ao sair da aba
@@ -5638,69 +5884,193 @@ function _qaToggle(e){
 let _timerRunning=false, _timerStart=0, _timerElapsed=0, _timerTick=null;
 
 function _qaTimer(){
-  _qaShowTimer();
+  document.getElementById('qa-box')?.classList.remove('open');
+  const sec=document.getElementById('sec-estudos');
+  sec?.classList.remove('notes-mode');
+  sec?.classList.add('timer-mode');
+  _estTimerUpdateDisplay();
 }
 
-function _qaShowTimer(){
-  let modal=document.getElementById('qa-timer-modal');
-  if(!modal){
-    modal=document.createElement('div');
-    modal.id='qa-timer-modal';
-    modal.style.cssText='position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML=`
-      <div onclick="_qaCloseTimer()" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);"></div>
-      <div style="position:relative;background:rgba(12,12,12,0.98);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:32px 28px 28px;width:calc(100% - 48px);max-width:320px;box-sizing:border-box;text-align:center;">
-        <button onclick="_qaCloseTimer()" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:0.12em;color:rgba(255,255,255,0.2);text-transform:uppercase;">fechar</button>
-        <div id="qa-timer-display" style="font-family:var(--mono);font-size:clamp(42px,12vw,56px);font-weight:300;letter-spacing:-0.03em;color:rgba(255,255,255,0.85);line-height:1;margin-bottom:28px;">00:00:00</div>
-        <div style="display:flex;gap:10px;">
-          <button id="qa-timer-start" onclick="_qaTimerToggle()" style="flex:1;padding:12px;border-radius:99px;background:#fff;border:none;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;color:rgba(0,0,0,0.5);text-transform:uppercase;transition:background 0.15s;">iniciar</button>
-          <button onclick="_qaTimerReset()" style="padding:12px 18px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:none;cursor:pointer;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;color:rgba(255,255,255,0.25);text-transform:uppercase;">zerar</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
+function _qaNotes(){
+  document.getElementById('qa-box')?.classList.remove('open');
+  const sec=document.getElementById('sec-estudos');
+  sec?.classList.remove('timer-mode');
+  sec?.classList.add('notes-mode');
+  _estNotesRenderList();
+  // nova anotação em branco
+  document.getElementById('est-notes-title-input').value='';
+  document.getElementById('est-notes-textarea').value='';
+  setTimeout(()=>document.getElementById('est-notes-textarea').focus(),100);
+}
+
+function _estTimerClose(){
+  document.getElementById('sec-estudos')?.classList.remove('timer-mode');
+  document.getElementById('sec-estudos')?.classList.remove('notes-mode');
+  document.getElementById('qa-box')?.classList.remove('open');
+}
+
+function _estNotesClose(){
+  document.getElementById('sec-estudos')?.classList.remove('notes-mode');
+  document.getElementById('qa-box')?.classList.remove('open');
+}
+
+function _estNotesEnsure(){
+  if(!S.estudos) S.estudos={items:[]};
+  if(!S.estudos.notes) S.estudos.notes=[];
+}
+
+function _estNotesSave(){
+  _estNotesEnsure();
+  const title=document.getElementById('est-notes-title-input').value.trim();
+  const body=document.getElementById('est-notes-textarea').value.trim();
+  if(!body && !title) return;
+  const date=new Date().toISOString().split('T')[0];
+  S.estudos.notes.unshift({
+    id:Date.now().toString(),
+    title:title||'sem título',
+    body,
+    date
+  });
+  save();
+  document.getElementById('est-notes-title-input').value='';
+  document.getElementById('est-notes-textarea').value='';
+  _estNotesRenderList();
+  if(window.showToast) showToast('anotação salva');
+}
+
+function _estNotesLoad(id){
+  _estNotesEnsure();
+  const note=S.estudos.notes.find(n=>n.id===id);
+  if(!note) return;
+  document.getElementById('est-notes-title-input').value=note.title==='sem título'?'':note.title;
+  document.getElementById('est-notes-textarea').value=note.body;
+  document.getElementById('est-notes-textarea').focus();
+  // remover para re-salvar editado
+  S.estudos.notes=S.estudos.notes.filter(n=>n.id!==id);
+  save();
+  _estNotesRenderList();
+}
+
+function _estNotesDel(id){
+  _estNotesEnsure();
+  S.estudos.notes=S.estudos.notes.filter(n=>n.id!==id);
+  save();
+  _estNotesRenderList();
+}
+
+function _estNotesRenderList(){
+  _estNotesEnsure();
+  const list=document.getElementById('est-notes-list');
+  if(!list) return;
+  const notes=S.estudos.notes;
+  if(!notes.length){
+    list.innerHTML='<div class="est-notes-empty">nenhuma anotação salva</div>';
+    return;
   }
-  modal.style.display='flex';
-  _qaTimerUpdateDisplay();
+  list.innerHTML='';
+  notes.forEach(note=>{
+    const d=new Date(note.date+'T00:00');
+    const today=new Date(); today.setHours(0,0,0,0);
+    const diff=Math.round((today-d)/(1000*60*60*24));
+    const dateLbl=diff===0?'hoje':diff===1?'ontem':d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    const row=document.createElement('div');
+    row.className='est-note-item';
+    row.innerHTML=`
+      <div class="est-note-item-body" onclick="_estNotesLoad('${note.id}')">
+        <div class="est-note-item-title">${note.title}</div>
+        <div class="est-note-item-preview">${note.body.slice(0,60).replace(/\n/g,' ')}</div>
+      </div>
+      <div class="est-note-item-date">${dateLbl}</div>
+      <button class="est-note-del" onclick="_estNotesDel('${note.id}')">×</button>`;
+    list.appendChild(row);
+  });
 }
 
-function _qaCloseTimer(){
-  const m=document.getElementById('qa-timer-modal');
-  if(m) m.style.display='none';
+
+function _estTimerCloseOld(){
+  document.getElementById('sec-estudos')?.classList.remove('timer-mode');
+  document.getElementById('qa-box')?.classList.remove('open');
 }
 
-function _qaTimerFmt(ms){
+let _timerGoalMs = 0; // 0 = sem meta
+
+function _estTimerEditSub(){
+  const panel = document.getElementById('est-goal-panel');
+  if(panel) panel.classList.toggle('open');
+}
+
+function _estGoalSelect(mins){
+  _timerGoalMs = mins * 60 * 1000;
+  const sub = document.getElementById('est-timer-sub');
+  sub.textContent = mins >= 60
+    ? (mins/60) + 'h de meta'
+    : mins + 'min de meta';
+  document.getElementById('est-goal-panel')?.classList.remove('open');
+  // destacar opção selecionada
+  document.querySelectorAll('.est-goal-opt').forEach(b=>{
+    b.classList.toggle('sel', parseInt(b.dataset.mins)===mins);
+  });
+  _estTimerUpdateDisplay();
+}
+
+function _estGoalClear(){
+  _timerGoalMs = 0;
+  document.getElementById('est-timer-sub').textContent = 'definir meta';
+  document.querySelectorAll('.est-goal-opt').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('est-goal-panel')?.classList.remove('open');
+  _estTimerUpdateDisplay();
+}
+
+function _estTimerSubBlur(){}
+
+function _estTimerFmt(ms){
   const s=Math.floor(ms/1000);
   return [Math.floor(s/3600),Math.floor((s%3600)/60),s%60].map(v=>String(v).padStart(2,'0')).join(':');
 }
 
-function _qaTimerUpdateDisplay(){
-  const el=document.getElementById('qa-timer-display');
+function _estTimerUpdateDisplay(){
+  const el=document.getElementById('est-timer-disp');
+  const arc=document.getElementById('est-ring-arc');
   if(!el) return;
   const now=_timerRunning?(Date.now()-_timerStart)+_timerElapsed:_timerElapsed;
-  el.textContent=_qaTimerFmt(now);
+  el.textContent=_estTimerFmt(now);
+  // anel: progresso em relação à meta (ou 1 volta = 60min se sem meta)
+  if(arc){
+    const circ=2*Math.PI*88;
+    const base = _timerGoalMs > 0 ? _timerGoalMs : 60*60*1000;
+    const pct = Math.min(now / base, 1);
+    arc.style.transition=_timerRunning?'stroke-dashoffset 1s linear':'none';
+    arc.setAttribute('stroke-dashoffset',(circ*(1-pct)).toFixed(2));
+    arc.setAttribute('stroke', now>0?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.12)');
+  }
 }
 
-function _qaTimerToggle(){
-  const btn=document.getElementById('qa-timer-start');
+function _estTimerToggle(){
+  const btn=document.getElementById('est-timer-btn-start');
+  const disp=document.getElementById('est-timer-disp');
   if(_timerRunning){
     _timerElapsed+=(Date.now()-_timerStart);
     _timerRunning=false;
     clearInterval(_timerTick);_timerTick=null;
-    if(btn){btn.textContent='continuar';btn.style.color='rgba(0,0,0,0.5)';}
+    if(btn){btn.textContent='continuar';btn.classList.remove('running');}
+    if(disp) disp.classList.remove('running');
   } else {
     _timerStart=Date.now();
     _timerRunning=true;
-    _timerTick=setInterval(_qaTimerUpdateDisplay,500);
-    if(btn){btn.textContent='pausar';btn.style.color='rgba(180,50,50,0.8)';}
+    _timerTick=setInterval(_estTimerUpdateDisplay,1000);
+    if(btn){btn.textContent='pausar';btn.classList.add('running');}
+    if(disp) disp.classList.add('running');
   }
 }
 
-function _qaTimerReset(){
+function _estTimerReset(){
   clearInterval(_timerTick);_timerTick=null;
   _timerRunning=false;_timerElapsed=0;_timerStart=0;
-  const btn=document.getElementById('qa-timer-start');
-  if(btn){btn.textContent='iniciar';btn.style.color='rgba(0,0,0,0.5)';}
-  _qaTimerUpdateDisplay();
+  const btn=document.getElementById('est-timer-btn-start');
+  const disp=document.getElementById('est-timer-disp');
+  if(btn){btn.textContent='iniciar';btn.classList.remove('running');}
+  if(disp) disp.classList.remove('running');
+  _estTimerUpdateDisplay();
 }
 
 
@@ -5823,7 +6193,8 @@ Object.assign(window,{
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
   _toggleHabitStats, _flamesvg, _renderHabBottomChart, _calcStreak,
-  _qaToggle,_qaTimer,_qaCloseTimer,_qaTimerToggle,_qaTimerReset,
+  _qaToggle,_qaTimer,_qaNotes,_estTimerClose,_estNotesClose,_estTimerToggle,_estTimerReset,_estTimerEditSub,_estTimerSubBlur,_estGoalSelect,_estGoalClear,
+  _estNotesSave,_estNotesLoad,_estNotesDel,
   renderEstudos,_estToggleAdd,_estOpenItem,_estCloseSheet,_estSave,_estToggleDone,_estDel,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
 });
