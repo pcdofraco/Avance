@@ -6928,9 +6928,27 @@ function _setFinPeriod(p){
   let transcript  = '';
   let holdTimer   = null;
   let didLongPress = false;
+  let micReady = false;
+
+  // pede permissão do microfone UMA vez ao carregar
+  async function initMic(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      stream.getTracks().forEach(t=>t.stop()); // só pede permissão, não grava
+      micReady = true;
+    } catch(e){
+      console.warn('Microfone negado:', e);
+      micReady = false;
+    }
+  }
+  initMic();
 
   function startVoice(){
     if(isListening) return;
+    if(!micReady){
+      showToast('permita o microfone e recarregue', false, 3000);
+      return;
+    }
 
     // 1) pisca o 3d
     blinkSpiral(()=>{
@@ -6946,7 +6964,7 @@ function _setFinPeriod(p){
 
       rec = new SR();
       rec.lang = 'pt-BR';
-      rec.continuous = true;       // fica ouvindo até parar
+      rec.continuous = true;
       rec.interimResults = true;
       rec.maxAlternatives = 1;
 
@@ -6958,25 +6976,32 @@ function _setFinPeriod(p){
           if(e.results[i].isFinal) final += t;
           else interim += t;
         }
-        if(final)   transcript += final;
+        if(final) transcript += final;
         const display = (transcript + interim).trim();
         if(display) showToast(display, true);
       };
 
       rec.onerror = (e)=>{
-        // 'no-speech' é normal — ignora
         if(e.error === 'no-speech') return;
         console.warn('voice error:', e.error);
+        if(e.error === 'not-allowed'){
+          showToast('microfone bloqueado', false, 2500);
+          isListening = false;
+          animScale(1);
+          ring.classList.remove('active');
+        }
       };
 
       rec.onend = ()=>{
-        // se ainda tiver segurando, reinicia (continuous às vezes para sozinho)
         if(isListening){
           try{ rec.start(); } catch(e){}
         }
       };
 
-      try{ rec.start(); } catch(e){ isListening=false; }
+      try{ rec.start(); } catch(e){
+        console.error('rec.start error:', e);
+        isListening = false;
+      }
     });
   }
 
@@ -6984,14 +7009,14 @@ function _setFinPeriod(p){
     if(!isListening) return;
     isListening = false;
 
-    // para o rec
     if(rec){ try{ rec.stop(); }catch(e){} rec = null; }
 
-    // volta ao normal
     animScale(1);
     ring.classList.remove('active');
 
     const cmd = transcript.trim();
+    console.log('[VOICE] transcript:', cmd);
+
     if(!cmd){
       hideToast();
       return;
@@ -7057,13 +7082,17 @@ Exemplos:
       );
       const data = await res.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      console.log('[GEMINI] resposta bruta:', text);
       const clean = text.replace(/```json|```/g,'').trim();
       let cmd;
-      try{ cmd = JSON.parse(clean); } catch(e){ cmd={action:'unknown'}; }
+      try{ cmd = JSON.parse(clean); } catch(e){
+        console.warn('[GEMINI] JSON inválido:', clean);
+        cmd={action:'unknown'};
+      }
+      console.log('[GEMINI] comando:', cmd);
       executeGeminiCommand(cmd, raw);
     } catch(err){
-      console.warn('Gemini error:', err);
-      // fallback para palavras-chave
+      console.warn('[GEMINI] erro de rede:', err);
       executeCommand(raw);
     }
   }
