@@ -6998,7 +6998,138 @@ function _setFinPeriod(p){
     }
 
     showToast('processando…', false);
-    setTimeout(()=>{ executeCommand(cmd); }, 150);
+    setTimeout(()=>{ processWithGemini(cmd); }, 150);
+  }
+
+  // ── chave Gemini (gratuita) ──
+  const GEMINI_KEY = 'AQ.Ab8RN6LYalSHyp6dyN4Rs_REAS0PW0iDVsXJ5o3RS1-pABDP-A';
+
+  const GEMINI_SYSTEM = `Você é o assistente de voz do app AVANCE, um app de produtividade pessoal em português brasileiro.
+O app tem estas seções: dashboard, habitos, tarefas, financas, treino, estudos.
+
+Estrutura de dados:
+- Hábitos (S.habits): id, name, tag, repeat(daily/weekly/custom/once), days(array 0=dom..6=sab), color, done(objeto data:bool)
+- Tarefas (S.tasks): id, name, tag, priority(normal/baixa/media/alta/urgente), due(YYYY-MM-DD ou null), done
+- Transações (S.transactions): id, name, amount(número), type(in=entrada/out=saída), cat, date
+
+Categorias de finanças válidas: alimentação, transporte, moradia, saúde, lazer, educação, investimento, trabalho, outros
+
+Interprete o comando do usuário e retorne APENAS um JSON válido, sem markdown, sem explicação.
+
+Ações possíveis:
+{"action":"addHabit","name":"...","tag":"...","repeat":"daily|weekly|custom|once","days":[0,1,2,3,4,5,6]}
+{"action":"checkHabit","search":"nome parcial do hábito"}
+{"action":"addTask","name":"...","priority":"normal|baixa|media|alta|urgente","due":"YYYY-MM-DD ou null","tag":"..."}
+{"action":"addFinanceOut","name":"...","amount":0,"cat":"categoria"}
+{"action":"addFinanceIn","name":"...","amount":0,"cat":"categoria"}
+{"action":"navigate","tab":"dashboard|habitos|tarefas|financas|treino|estudos"}
+{"action":"unknown","reason":"motivo"}
+
+Dias da semana: 0=domingo,1=segunda,2=terça,3=quarta,4=quinta,5=sexta,6=sábado
+Data de hoje: ${new Date().toISOString().split('T')[0]}
+
+Exemplos:
+"cria hábito de beber água todo dia" → {"action":"addHabit","name":"beber água","tag":"nutricao","repeat":"daily","days":[0,1,2,3,4,5,6]}
+"adiciona hábito academia segunda quarta e sexta" → {"action":"addHabit","name":"academia","tag":"treino","repeat":"custom","days":[1,3,5]}
+"marcar hábito de corrida" → {"action":"checkHabit","search":"corrida"}
+"adicionar tarefa reunião amanhã prioridade alta" → {"action":"addTask","name":"reunião","priority":"alta","due":"${new Date(Date.now()+86400000).toISOString().split('T')[0]}","tag":""}
+"gastei 50 reais no uber" → {"action":"addFinanceOut","name":"uber","amount":50,"cat":"transporte"}
+"recebi salário 3000" → {"action":"addFinanceIn","name":"salário","amount":3000,"cat":"trabalho"}
+"abre finanças" → {"action":"navigate","tab":"financas"}`;
+
+  async function processWithGemini(raw){
+    // sem chave → usa palavras-chave direto
+    if(!GEMINI_KEY || GEMINI_KEY === 'SUA_CHAVE_AQUI'){
+      executeCommand(raw); return;
+    }
+    try{
+      const res = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            system_instruction:{parts:[{text: GEMINI_SYSTEM}]},
+            contents:[{parts:[{text: raw}]}],
+            generationConfig:{temperature:0.1, maxOutputTokens:200}
+          })
+        }
+      );
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const clean = text.replace(/```json|```/g,'').trim();
+      let cmd;
+      try{ cmd = JSON.parse(clean); } catch(e){ cmd={action:'unknown'}; }
+      executeGeminiCommand(cmd, raw);
+    } catch(err){
+      console.warn('Gemini error:', err);
+      // fallback para palavras-chave
+      executeCommand(raw);
+    }
+  }
+
+  function executeGeminiCommand(cmd, raw){
+    const today = new Date().toDateString();
+    switch(cmd.action){
+
+      case 'addHabit':
+        S.habits.push({id:Date.now(),name:cmd.name||raw,desc:'',tag:cmd.tag||'',cat:'',
+          color:TAG_COLORS[1],repeat:cmd.repeat||'daily',style:'check',
+          streakTarget:1,days:cmd.days||[0,1,2,3,4,5,6],streak:0,done:{}});
+        save();renderHabits();updateRing();
+        const rl={daily:'todo dia',weekly:'toda semana',custom:'dias específicos',once:'uma vez'}[cmd.repeat]||'todo dia';
+        showToast('✓ hábito "'+cmd.name+'" — '+rl,false,2800);
+        break;
+
+      case 'checkHabit':{
+        const busca=(cmd.search||'').toLowerCase();
+        const h=S.habits.find(h=>h.name.toLowerCase().includes(busca)||busca.includes(h.name.toLowerCase().split(' ')[0]));
+        if(h){
+          if(!h.done)h.done={};
+          h.done[today]=true;
+          save();renderHabits();updateRing();
+          showToast('✓ "'+h.name+'" marcado!',false,2500);
+        } else {
+          const nomes=S.habits.map(h=>h.name).join(', ')||'nenhum';
+          showToast('hábito não achado. existem: '+nomes,false,3500);
+        }
+        break;
+      }
+
+      case 'addTask':
+        S.tasks.push({id:Date.now(),name:cmd.name||raw,desc:'',tag:cmd.tag||'',cat:'',
+          color:TAG_COLORS[0],priority:cmd.priority||'normal',
+          due:cmd.due||null,repeat:'once',days:[],done:false,doneByDate:{}});
+        save();renderTasks();updateRing();
+        showToast('✓ tarefa "'+cmd.name+'"'+(cmd.due?' para '+cmd.due:''),false,2800);
+        setTab('tarefas');
+        break;
+
+      case 'addFinanceOut':
+        S.transactions.push({id:Date.now(),name:cmd.name||'despesa',
+          amount:cmd.amount||0,type:'out',cat:cmd.cat||'outros',
+          recur:'once',date:new Date().toLocaleDateString('pt-BR')});
+        save();renderFinance(true);updateRing();
+        showToast('✓ saída R$ '+(cmd.amount||0)+' — '+cmd.name,false,2800);
+        break;
+
+      case 'addFinanceIn':
+        S.transactions.push({id:Date.now(),name:cmd.name||'receita',
+          amount:cmd.amount||0,type:'in',cat:cmd.cat||'outros',
+          recur:'once',date:new Date().toLocaleDateString('pt-BR')});
+        save();renderFinance(true);updateRing();
+        showToast('✓ entrada R$ '+(cmd.amount||0)+' — '+cmd.name,false,2800);
+        break;
+
+      case 'navigate':
+        setTab(cmd.tab||'dashboard');
+        showToast('→ '+(cmd.tab||'dashboard'),false,1600);
+        break;
+
+      default:
+        // fallback para palavras-chave
+        executeCommand(raw);
+    }
   }
 
   // ── hold: pressiona 600ms para ativar ──
@@ -7223,10 +7354,33 @@ function _setFinPeriod(p){
       return;
     }
 
-    // ── HÁBITO ──
-    if(/(habito|rotina|todo dia|toda semana|sempre|diariamente)/.test(s)){
-      const stopwords=['adicionar','adiciona','novo','nova','habito','rotina','criar','quero','comecar','iniciar'];
+    // ── MARCAR HÁBITO ──
+    if(/(marcar|completar|concluir|fiz|fiz o|fiz a|completei|conclui|done)/.test(s)&&/(habito|rotina)/.test(s)){
+      const stopwords=['marcar','completar','concluir','fiz','completei','conclui','done','habito','rotina','o','a','meu','minha'];
+      const busca=cleanName(raw,stopwords).toLowerCase();
+      const today=new Date().toDateString();
+      const dow=new Date().getDay();
+      // procura hábito pelo nome (busca parcial)
+      const found=S.habits.find(h=>h.name.toLowerCase().includes(busca)||busca.includes(h.name.toLowerCase().split(' ')[0]));
+      if(found){
+        if(!found.done) found.done={};
+        found.done[today]=true;
+        save();renderHabits();updateRing();
+        showToast('✓ hábito "'+found.name+'" marcado!',false,2500);
+      } else {
+        // lista os hábitos de hoje para o usuário saber o nome
+        const dow2=new Date().getDay();
+        const hoje=S.habits.filter(h=>!h.days||h.days.includes(dow2)).map(h=>h.name).join(', ');
+        showToast('hábito não encontrado. hoje: '+(hoje||'nenhum'),false,3500);
+      }
+      return;
+    }
+
+    // ── CRIAR HÁBITO ──
+    if(/(habito|rotina|todo dia|toda semana|sempre|diariamente|adiciona habito|novo habito|cria habito|criar habito)/.test(s)){
+      const stopwords=['adicionar','adiciona','adicione','novo','nova','habito','rotina','criar','cria','quero','comecar','iniciar','um','uma','de','que','para','com'];
       let name=cleanName(raw,stopwords)||raw.trim();
+      if(!name||name.length<2) name=raw.trim();
       const {repeat,days}=extractRepeat(s);
       const tag=extractTag(s);
       const repLabel={daily:'todo dia',weekly:'toda semana',custom:'dias específicos',once:'uma vez'}[repeat]||'todo dia';
