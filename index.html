@@ -7040,92 +7040,228 @@ function _setFinPeriod(p){
     return r.replace(/\s+/g,' ').trim();
   }
 
+  function extractDue(s){
+    const n=normalize(s), today=new Date();
+    if(/amanha/.test(n)){const d=new Date(today);d.setDate(d.getDate()+1);return d.toISOString().split('T')[0];}
+    if(/depois de amanha/.test(n)){const d=new Date(today);d.setDate(d.getDate()+2);return d.toISOString().split('T')[0];}
+    if(/semana que vem|proxima semana/.test(n)){const d=new Date(today);d.setDate(d.getDate()+7);return d.toISOString().split('T')[0];}
+    const wdays={segunda:1,terca:2,quarta:3,quinta:4,sexta:5,sabado:6,domingo:0};
+    for(const[nm,dow] of Object.entries(wdays)){
+      if(n.includes(nm)){const d=new Date(today);const diff=(dow-d.getDay()+7)%7||7;d.setDate(d.getDate()+diff);return d.toISOString().split('T')[0];}
+    }
+    const mDay=n.match(/dia (\d{1,2})/);
+    if(mDay){const d=new Date(today);d.setDate(parseInt(mDay[1]));if(d<today)d.setMonth(d.getMonth()+1);return d.toISOString().split('T')[0];}
+    const mSlash=n.match(/(\d{1,2})[\/\-](\d{1,2})/);
+    if(mSlash){return today.getFullYear()+'-'+mSlash[2].padStart(2,'0')+'-'+mSlash[1].padStart(2,'0');}
+    return null;
+  }
+
+  function extractRepeat(s){
+    const n=normalize(s);
+
+    // diário
+    if(/todo dia|todos os dias|diariamente|diario|cada dia/.test(n))
+      return {repeat:'daily',days:[0,1,2,3,4,5,6]};
+
+    // uma vez só
+    if(/uma vez|so hoje|so uma vez|apenas hoje/.test(n))
+      return {repeat:'once',days:[]};
+
+    // dias da semana — aceita variações: "seg", "segunda", "segunda-feira"
+    const wdays={
+      domingo:[0,'domingo','dom'],
+      segunda:[1,'segunda','seg','segunda feira','segunda-feira'],
+      terca:  [2,'terca','ter','terca feira','terca-feira','terca feira'],
+      quarta: [3,'quarta','qua','quarta feira','quarta-feira'],
+      quinta: [4,'quinta','qui','quinta feira','quinta-feira'],
+      sexta:  [5,'sexta','sex','sexta feira','sexta-feira'],
+      sabado: [6,'sabado','sab','sabado'],
+    };
+    const found=[];
+    for(const[,info] of Object.entries(wdays)){
+      const [dow,...aliases]=info;
+      if(aliases.some(a=>n.includes(a))) found.push(dow);
+    }
+    // se encontrou dias específicos → custom
+    if(found.length===7) return {repeat:'daily',days:[0,1,2,3,4,5,6]};
+    if(found.length>0)   return {repeat:'custom',days:[...new Set(found)].sort()};
+
+    // toda semana (sem especificar dia) → weekly no dia atual
+    if(/toda semana|semanalmente|toda semana/.test(n))
+      return {repeat:'weekly',days:[new Date().getDay()]};
+
+    // padrões comuns de academia
+    if(/dias de semana|dias uteis/.test(n))
+      return {repeat:'custom',days:[1,2,3,4,5]};
+    if(/fim de semana|final de semana/.test(n))
+      return {repeat:'custom',days:[0,6]};
+
+    return {repeat:'daily',days:[0,1,2,3,4,5,6]};
+  }
+
+  function extractTag(s){
+    const n=normalize(s);
+    const tagMap={
+      'saude':['saude','saúde','medico','remedio','exercicio','academia'],
+      'treino':['treino','musculacao','corrida','crossfit','academia'],
+      'mente':['mente','meditacao','ansiedade','estresse','mental'],
+      'foco':['foco','trabalho','produtividade','concentracao'],
+      'estudo':['estudo','faculdade','curso','prova','aula'],
+      'sono':['sono','dormir','descanso'],
+      'nutricao':['nutricao','dieta','alimentacao','comida','agua'],
+      'financas':['conta','pagar','boleto','financa'],
+    };
+    for(const[tag,keys] of Object.entries(tagMap)){
+      if(keys.some(k=>n.includes(k))) return tag;
+    }
+    return '';
+  }
+
+  function extractFinCat(s){
+    const n=normalize(s);
+    const cats=[
+      ['alimentação', [
+        'mercado','supermercado','feira','hortifruti','acougue','padaria','mercearia',
+        'ifood','rappi','delivery','lanche','almoco','jantar','cafe','cafezinho',
+        'pizza','hamburguer','sushi','comida','alimento','restaurante','lanchonete',
+        'mc donalds','burger king','subway','frango','carne','pao','leite','agua mineral',
+      ]],
+      ['transporte', [
+        'uber','99','taxi','cabify','onibus','metro','trem','passagem','combustivel',
+        'gasolina','etanol','alcool','diesel','posto','estacionamento','pedagio',
+        'mecanico','oficina','carro','moto','transporte','aplicativo','corrida',
+        'bicicleta','patinete','van','lotacao',
+      ]],
+      ['moradia', [
+        'aluguel','condominio','iptu','agua','luz','energia','conta de luz',
+        'internet','wifi','telefone','celular','tim','claro','vivo','oi','net',
+        'sky','gás','gas','empregada','faxina','reforma','conserto','manutencao',
+        'material de construcao','tinta','encanador','eletricista',
+      ]],
+      ['saúde', [
+        'farmacia','drogaria','remedio','medicamento','medico','consulta','hospital',
+        'clinica','dentista','ortopedista','cardiologista','exame','laboratorio',
+        'plano de saude','convenio','academia','suplemento','proteina','vitamina',
+        'fisioterapia','psicólogo','psicologo','terapia','cirurgia','internacao',
+      ]],
+      ['lazer', [
+        'netflix','amazon prime','disney','hbo','max','globoplay','streaming',
+        'spotify','apple music','deezer','show','cinema','teatro','ingresso',
+        'bar','balada','festa','aniversario','viagem','hotel','pousada','airbnb',
+        'passeio','parque','jogo','videogame','playstation','xbox','steam',
+        'livro','revista','jornal','roupa','sapato','tenis','vestuario','presente',
+      ]],
+      ['educação', [
+        'curso','aula','faculdade','universidade','escola','colegio','mensalidade',
+        'material escolar','caderno','caneta','mochila','livro didatico',
+        'udemy','alura','coursera','idioma','ingles','espanhol','certificado',
+      ]],
+      ['receita', [
+        'salario','salário','freelance','freela','servico prestado','pagamento',
+        'transferencia recebida','pix recebido','boleto recebido','dividendo',
+        'aluguel recebido','renda','ganho','bonus','comissao','gorjeta',
+      ]],
+      ['investimento', [
+        'investimento','acao','fundo','tesouro','cdb','lci','lca','cripto',
+        'bitcoin','ethereum','poupanca','aplicacao','renda fixa','renda variavel',
+      ]],
+    ];
+    for(const[cat,words] of cats){
+      if(words.some(w=>n.includes(normalize(w)))) return cat;
+    }
+    return 'outros';
+  }
+
+  function cleanName(raw, stopwords){
+    // remove stopwords
+    let r=raw;
+    stopwords.forEach(w=>{r=r.replace(new RegExp('\\b'+w+'\\b','gi'),' ');});
+    // remove valores monetários e palavras de data/prioridade
+    r=r.replace(/\b(amanha|depois de amanha|hoje|segunda|terca|quarta|quinta|sexta|sabado|domingo|semana que vem|proxima semana|dia \d+|\d+\/\d+)\b/gi,' ');
+    r=r.replace(/\b(urgente|importante|prioridade alta|prioridade baixa|prioridade media|alta|baixa|media)\b/gi,' ');
+    r=r.replace(/\b(todo dia|toda semana|todos os dias|diariamente|semanalmente|uma vez)\b/gi,' ');
+    r=r.replace(/\b(r\$|reais|real)\b/gi,' ');
+    r=r.replace(/\b\d+([.,]\d+)?\b/g,' ');
+    return r.replace(/\s+/g,' ').trim();
+  }
+
   function executeCommand(raw){
-    const s = normalize(raw);
+    const s=normalize(raw);
 
     // ── NAVEGAÇÃO ──
-    const navMap = {
-      'dashboard':  ['dashboard','inicio','home','voltar'],
-      'habitos':    ['habito','habitos','rotina'],
-      'tarefas':    ['tarefa','tarefas','lista'],
-      'financas':   ['financa','financas','dinheiro','gasto','receita','saldo'],
-      'treino':     ['treino','treinos','academia','exercicio','exercicios','workout'],
-      'estudos':    ['estudo','estudos','materia','materias'],
+    const navMap={
+      dashboard:['dashboard','inicio','home','voltar'],
+      habitos:['habito','habitos','rotina'],
+      tarefas:['tarefa','tarefas','lista'],
+      financas:['financa','financas','dinheiro','gasto','receita','saldo'],
+      treino:['treino','treinos','academia','exercicio','workout'],
+      estudos:['estudo','estudos','materia'],
     };
-    for(const [tab, keys] of Object.entries(navMap)){
-      if(keys.some(k=> s.includes('ir para '+k) || s.includes('abrir '+k) || s.includes('mostrar '+k) || s==='ir para '+k)){
+    for(const[tab,keys] of Object.entries(navMap)){
+      if(keys.some(k=>s.includes('ir para '+k)||s.includes('abrir '+k)||s.includes('mostrar '+k))){
         setTab(tab);
-        showToast('→ ' + tab, false, 1600);
+        showToast('→ '+tab,false,1600);
         return;
       }
     }
 
     // ── TAREFA ──
-    const isTask = /(tarefa|lembrar|lembrete|fazer|todo|anotar)/.test(s);
-    if(isTask){
-      let name = extractName(raw, ['adicionar','adiciona','nova','novo','tarefa','lembrar','lembrete','de','um','uma','fazer','todo','anotar']);
-      if(!name) name = raw.trim();
-      let priority = 'normal';
-      if(/(urgente)/.test(s))       priority = 'urgente';
-      else if(/(alta|importante)/.test(s)) priority = 'alta';
-      else if(/(baixa)/.test(s))    priority = 'baixa';
-      S.tasks.push({
-        id:Date.now(), name, desc:'', tag:'', cat:'',
-        color: TAG_COLORS[0], priority, due:null,
-        repeat:'once', days:[], done:false, doneByDate:{}
-      });
-      save(); renderTasks(); updateRing();
-      showToast('✓ tarefa "' + name + '"', false, 2500);
+    if(/(tarefa|lembrar|lembrete|fazer|anotar)/.test(s)){
+      const stopwords=['adicionar','adiciona','nova','novo','tarefa','lembrar','lembrete','fazer','anotar','uma','um','de','que','para','com','prioridade'];
+      let name=cleanName(raw,stopwords)||raw.trim();
+      let priority='normal';
+      if(/urgente/.test(s)) priority='urgente';
+      else if(/(alta|importante)/.test(s)) priority='alta';
+      else if(/baixa/.test(s)) priority='baixa';
+      else if(/media/.test(s)) priority='media';
+      const due=extractDue(s);
+      const tag=extractTag(s);
+      const dueConfirm=due?' para '+due:'';
+      S.tasks.push({id:Date.now(),name,desc:'',tag,cat:'',color:TAG_COLORS[0],priority,due,repeat:'once',days:[],done:false,doneByDate:{}});
+      save();renderTasks();updateRing();
+      showToast('✓ "'+name+'"'+dueConfirm,false,2800);
       return;
     }
 
     // ── HÁBITO ──
-    const isHabit = /(habito|rotina|todo dia|toda semana|sempre)/.test(s);
-    if(isHabit){
-      let name = extractName(raw, ['adicionar','adiciona','novo','nova','habito','rotina','todo dia','toda semana','sempre','criar','quero']);
-      if(!name) name = raw.trim();
-      S.habits.push({
-        id:Date.now(), name, desc:'', tag:'', cat:'',
-        color: TAG_COLORS[1], repeat:'daily', style:'check',
-        streakTarget:1, days:[0,1,2,3,4,5,6], streak:0, done:{}
-      });
-      save(); renderHabits(); updateRing();
-      showToast('✓ hábito "' + name + '"', false, 2500);
+    if(/(habito|rotina|todo dia|toda semana|sempre|diariamente)/.test(s)){
+      const stopwords=['adicionar','adiciona','novo','nova','habito','rotina','criar','quero','comecar','iniciar'];
+      let name=cleanName(raw,stopwords)||raw.trim();
+      const {repeat,days}=extractRepeat(s);
+      const tag=extractTag(s);
+      const repLabel={daily:'todo dia',weekly:'toda semana',custom:'dias específicos',once:'uma vez'}[repeat]||'todo dia';
+      S.habits.push({id:Date.now(),name,desc:'',tag,cat:'',color:TAG_COLORS[1],repeat,style:'check',streakTarget:1,days,streak:0,done:{}});
+      save();renderHabits();updateRing();
+      showToast('✓ "'+name+'" — '+repLabel,false,2800);
       return;
     }
 
     // ── FINANÇAS SAÍDA ──
-    const isOut = /(gastei|gasto|paguei|pagar|saida|saiu|comprei|compra|despesa)/.test(s);
-    if(isOut){
-      const amount = extractAmount(raw);
-      let name = extractName(raw, ['gastei','gasto','paguei','pagar','saida','saiu','comprei','compra','despesa','reais','real','r$']);
-      if(!name) name = 'despesa';
-      S.transactions.push({
-        id:Date.now(), name, amount, type:'out', cat:'outros',
-        recur:'once', date: new Date().toLocaleDateString('pt-BR')
-      });
-      save(); renderFinance(true); updateRing();
-      showToast('✓ saída R$ ' + amount + ' — ' + name, false, 2500);
+    if(/(gastei|gasto|paguei|pagar|saida|saiu|comprei|compra|despesa|conta)/.test(s)){
+      const amount=extractAmount(raw);
+      const cat=extractFinCat(s);
+      const stopwords=['gastei','gasto','paguei','pagar','saida','saiu','comprei','compra','despesa','conta','reais','real','r$'];
+      let name=cleanName(raw,stopwords)||'despesa';
+      S.transactions.push({id:Date.now(),name,amount,type:'out',cat,recur:'once',date:new Date().toLocaleDateString('pt-BR')});
+      save();renderFinance(true);updateRing();
+      showToast('✓ saída R$ '+amount+' — '+name,false,2800);
       return;
     }
 
     // ── FINANÇAS ENTRADA ──
-    const isIn = /(recebi|salario|salário|entrada|renda|ganho|ganhei)/.test(s);
-    if(isIn){
-      const amount = extractAmount(raw);
-      let name = extractName(raw, ['recebi','salario','salário','entrada','renda','ganho','ganhei','reais','real','r$']);
-      if(!name) name = 'receita';
-      S.transactions.push({
-        id:Date.now(), name, amount, type:'in', cat:'outros',
-        recur:'once', date: new Date().toLocaleDateString('pt-BR')
-      });
-      save(); renderFinance(true); updateRing();
-      showToast('✓ entrada R$ ' + amount + ' — ' + name, false, 2500);
+    if(/(recebi|salario|entrada|renda|ganho|ganhei|freelance|freela)/.test(s)){
+      const amount=extractAmount(raw);
+      const cat=extractFinCat(s);
+      const stopwords=['recebi','salario','entrada','renda','ganho','ganhei','freelance','freela','reais','real','r$'];
+      let name=cleanName(raw,stopwords)||'receita';
+      S.transactions.push({id:Date.now(),name,amount,type:'in',cat,recur:'once',date:new Date().toLocaleDateString('pt-BR')});
+      save();renderFinance(true);updateRing();
+      showToast('✓ entrada R$ '+amount+' — '+name,false,2800);
       return;
     }
 
     // ── não entendeu ──
-    showToast('não entendi: "' + raw.slice(0,40) + '"', false, 2500);
+    showToast('não entendi: "'+raw.slice(0,38)+'"',false,2500);
   }
 
 })();
