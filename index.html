@@ -27,7 +27,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=block" rel="stylesheet">
 <style>
 /* bloqueia qualquer flash — tudo preto até JS liberar */
 html{background:#0d0d0d;}
@@ -40,7 +40,7 @@ body.fonts-ready{visibility:visible;}
   --b1:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.16);
   --t1:#fff;--t2:rgba(255,255,255,0.6);--t3:rgba(255,255,255,0.3);--t4:rgba(255,255,255,0.12);
   --sep:rgba(255,255,255,0.07);
-  --mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif;
+  --mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;
   --r:14px;--r2:10px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
@@ -483,7 +483,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── NAV PILL ── */
 #nav-pill-wrap{
   position:fixed;
-  bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  bottom:calc(42px + env(safe-area-inset-bottom,0px));
   left:50%;transform:translateX(-50%);
   z-index:300;display:none;
   align-items:center;justify-content:center;
@@ -1134,7 +1134,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   flex-direction:column;
   align-items:stretch;
   position:relative;
-  padding-top:0!important;
+  padding-top:32px!important;
   overflow-y:auto;
   height:auto;
 }
@@ -1143,35 +1143,40 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #dv-header{padding:6px 0 4px;}
 #dv-title{font-size:22px;font-weight:600;color:#fff;letter-spacing:-0.01em;margin-bottom:2px;}
 #dv-sub{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:10px;}
-#dv-tabs{display:flex;gap:16px;}
-.dv-tab{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;color:rgba(255,255,255,0.3);cursor:pointer;padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color 0.15s,border-color 0.15s;}
-.dv-tab.active{color:rgba(255,255,255,0.85);border-bottom-color:rgba(255,255,255,0.5);}
+#dv-tabs{display:flex;align-items:center;gap:8px;}
+.dv-tab-arrow{background:none;border:none;color:rgba(255,255,255,0.25);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1;transition:color 0.15s;}
+.dv-tab-arrow:hover{color:rgba(255,255,255,0.6);}
+#dv-tab-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);transition:opacity 0.15s,filter 0.15s;min-width:60px;text-align:center;}
+#dv-tab-label.changing{opacity:0;filter:blur(6px);}
+#dv-chart-canvas{transition:none;}
 
+
+#dv-graph-block{position:relative;transition:filter 0.3s,opacity 0.3s;}
+#dv-graph-block.no-data{filter:blur(3px);opacity:0.3;}
+#dv-no-data-overlay{pointer-events:none;}
 #dv-month-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:8px 0 4px;}
-.dv-month-btn{background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
-#dv-month-lbl{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.65);letter-spacing:0.06em;min-width:80px;text-align:center;}
+.dv-month-btn{background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;transition:color 0.15s,opacity 0.15s;}
+.dv-month-btn:disabled{opacity:0.15;cursor:default;}
+#dv-month-lbl{font-family:var(--sans);font-size:10px;font-weight:500;color:rgba(255,255,255,0.65);letter-spacing:0.06em;min-width:80px;text-align:center;transition:opacity 0.18s;}
 
-#dv-chart-wrap{position:relative;margin:6px 0 0;overflow:hidden;}
-#dv-week-lbls{display:flex;justify-content:space-around;padding:0 4px;margin-bottom:2px;}
+#dv-chart-wrap{position:relative;margin:6px 0 0;overflow:hidden;display:flex;align-items:flex-end;}
+#dv-chart-offset{min-width:134px;flex-shrink:0;}
+#dv-chart-canvas{flex:1;display:block;min-width:0;width:100%;}
+#dv-week-lbls{display:flex;justify-content:space-around;margin-bottom:2px;}
 .dv-week-lbl{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.25);letter-spacing:0.05em;text-align:center;flex:1;}
-#dv-chart-canvas{width:100%;display:block;}
 
 #dv-consist-lbl{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.1em;margin:12px 0 6px;}
 
-#dv-days-header{display:flex;align-items:center;gap:0;margin-bottom:6px;overflow:hidden;min-width:0;}
-.dv-day-num{width:16px;min-width:16px;text-align:center;font-family:var(--mono);font-size:8px;color:rgba(255,255,255,0.25);flex-shrink:0;}
-.dv-day-num.today{color:rgba(100,200,140,0.9);font-weight:700;}
+#dv-days-header{display:none;}
 
-#dv-habits-list{display:flex;flex-direction:column;gap:8px;}
-.dv-hab-row{display:flex;align-items:center;gap:4px;overflow:hidden;min-width:0;}
-.dv-hab-name{min-width:100px;max-width:100px;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
-.dv-hab-pct{min-width:28px;font-family:var(--mono);font-size:10px;font-weight:600;margin-right:2px;flex-shrink:0;text-align:right;}
-.dv-hab-dots{display:flex;flex:1;gap:2px;align-items:center;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
-.dv-hab-dots::-webkit-scrollbar{display:none;}
-.dv-dot{width:16px;height:16px;min-width:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.18);background:transparent;flex-shrink:0;}
-.dv-dot.done{background:#4caf80;border-color:#4caf80;}
-.dv-dot.partial{background:#e08040;border-color:#e08040;}
-.dv-dot.off{border-color:rgba(255,255,255,0.06);}
+#dv-habits-list{display:flex;flex-direction:column;gap:12px;}
+.dv-hab-row{display:flex;align-items:center;gap:8px;}
+.dv-hab-name{min-width:100px;max-width:100px;font-size:12px;color:rgba(255,255,255,0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.dv-hab-pct{min-width:30px;font-family:var(--mono);font-size:10px;font-weight:600;flex-shrink:0;text-align:right;}
+.dv-hab-pills{display:flex;flex:1;gap:6px;align-items:center;}
+.dv-pill-wrap{flex:1;height:10px;border-radius:5px;overflow:hidden;position:relative;background:rgba(255,255,255,0.07);}
+.dv-pill-bg{position:absolute;inset:0;border-radius:5px;}
+.dv-pill-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px;transition:width 0.6s cubic-bezier(0.34,1.2,0.64,1);min-width:0;}
 
 #dv-add-habit{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);margin-top:16px;cursor:pointer;letter-spacing:0.04em;padding:4px 0;}
 #dv-add-habit:active{opacity:0.5;}
@@ -2665,9 +2670,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <div id="dv-title">Visão geral</div>
           <div id="dv-sub">Visualize seus hábitos, padrões e dados.</div>
           <div id="dv-tabs">
-            <span class="dv-tab active">TRACKER</span>
-            <span class="dv-tab">SÉRIE DE DADOS</span>
-            <span class="dv-tab">SAÚDE</span>
+            <button class="dv-tab-arrow" onclick="dvChartPrev()">&#8249;</button>
+            <span id="dv-tab-label">HÁBITOS</span>
+            <button class="dv-tab-arrow" onclick="dvChartNext()">&#8250;</button>
           </div>
         </div>
       </div>
@@ -2679,23 +2684,34 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <button class="dv-month-btn" onclick="dvNextMonth()">&#8250;</button>
       </div>
 
-      <!-- gráfico de consistência mensal -->
-      <div id="dv-chart-wrap">
-        <div id="dv-week-lbls"></div>
-        <canvas id="dv-chart-canvas"></canvas>
+      <!-- wrapper relativo para overlay ficar acima do blur -->
+      <div id="dv-graph-outer" style="position:relative;">
+        <!-- gráfico + conteúdo abaixo (blur together on no-data) -->
+        <div id="dv-graph-block">
+          <!-- gráfico de consistência mensal -->
+          <div id="dv-chart-wrap">
+            <div id="dv-chart-offset"></div>
+            <div style="flex:1;min-width:0;">
+              <div id="dv-week-lbls"></div>
+              <canvas id="dv-chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- consistência label -->
+          <div id="dv-consist-lbl">CONSISTÊNCIA</div>
+
+          <!-- cabeçalho dias (números) -->
+          <div id="dv-days-header"></div>
+
+          <!-- lista de hábitos + pílulas -->
+          <div id="dv-habits-list"></div>
+        </div>
+
+        <!-- overlay SEM DADOS: fora do blur, posicionado na altura do gráfico -->
+        <div id="dv-no-data-overlay" style="display:none;position:absolute;pointer-events:none;z-index:10;align-items:center;justify-content:center;">
+          <span style="font-size:11px;letter-spacing:0.14em;color:rgba(255,255,255,0.55);font-family:var(--sans);font-weight:500;">SEM DADOS</span>
+        </div>
       </div>
-
-      <!-- consistência label -->
-      <div id="dv-consist-lbl">CONSISTÊNCIA</div>
-
-      <!-- cabeçalho dias (números) -->
-      <div id="dv-days-header"></div>
-
-      <!-- lista de hábitos + bolinhas -->
-      <div id="dv-habits-list"></div>
-
-      <!-- adicionar hábito -->
-      <div id="dv-add-habit" onclick="openModal('habit',null)">+ Adicionar hábito</div>
 
       <div id="dsp-streak-best" style="display:none"></div>
       <div id="dsp-streak-num" style="display:none"></div>
@@ -4085,7 +4101,7 @@ function drawChart(svgId,lblId,data,labels,suffix){
   svg.innerHTML=`
     <path d="${path}" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.8" stroke-linecap="round"/>
     <circle cx="${last.x}" cy="${last.y}" r="3.8" fill="#0d0d0d" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
-    <text x="${last.x+8}" y="${last.y+4}" font-family="Space Mono,monospace" font-size="8" fill="rgba(255,255,255,0.42)">${data[last.i]!==null?data[last.i]+suffix:''}</text>`;
+    <text x="${last.x+8}" y="${last.y+4}" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(255,255,255,0.42)">${data[last.i]!==null?data[last.i]+suffix:''}</text>`;
   const step=curPd==='week'?1:curPd==='month'?5:30;
   lblEl.innerHTML=labels.map((l,i)=>`<span class="chart-xlbl">${i%step===0||i===data.length-1?l:''}</span>`).join('');
 }
@@ -4978,17 +4994,101 @@ function fabAction(){
 /* ── DASHBOARD ── */
 let dvCurrentMonth=new Date().getMonth();
 let dvCurrentYear=new Date().getFullYear();
+let dvChartSrc='habitos';
 
-function dvPrevMonth(){dvCurrentMonth--;if(dvCurrentMonth<0){dvCurrentMonth=11;dvCurrentYear--;}renderDashboard();}
-function dvNextMonth(){dvCurrentMonth++;if(dvCurrentMonth>11){dvCurrentMonth=0;dvCurrentYear++;}renderDashboard();}
+function _dvHasDataForMonth(m,y){
+  const MESES_CHECK=['habitos','tarefas','financas','treino','estudos'];
+  // check habitos
+  if((S.habits||[]).some(h=>h.done&&Object.keys(h.done).some(k=>{const d=new Date(k);return d.getMonth()===m&&d.getFullYear()===y;})))return true;
+  // check tasks
+  if((S.tasks||[]).some(t=>{
+    const dk=t.doneDate||'';const kk=new Date(y,m,1).toDateString().slice(4,8);
+    return dk&&(new Date(dk).getMonth()===m&&new Date(dk).getFullYear()===y);
+  }))return true;
+  // check transactions
+  if((S.transactions||[]).some(t=>{
+    if(!t.date)return false;
+    const td=t.date.includes('/')?t.date.split('/').reverse().join('-'):t.date;
+    const d=new Date(td);return d.getMonth()===m&&d.getFullYear()===y;
+  }))return true;
+  // check treino log
+  if(((S.treino&&S.treino.log)||[]).some(l=>{
+    const d=new Date(l.date+'T00:00');return d.getMonth()===m&&d.getFullYear()===y;
+  }))return true;
+  // check estudos
+  if(((S.estudos&&S.estudos.items)||[]).some(it=>it.done&&(()=>{const d=new Date(it.date);return d.getMonth()===m&&d.getFullYear()===y;})()))return true;
+  return false;
+}
+function _dvAnimateMonth(dir,cb){
+  const block=document.getElementById('dv-graph-block');
+  const lbl=document.getElementById('dv-month-lbl');
+  // fade out only — no translateX to avoid triggering browser scrollbar
+  if(block){block.style.transition='opacity 0.15s';block.style.opacity='0';}
+  if(lbl){lbl.style.transition='opacity 0.12s';lbl.style.opacity='0';}
+  setTimeout(()=>{
+    cb();
+    if(block){requestAnimationFrame(()=>{block.style.opacity='1';});}
+    if(lbl){requestAnimationFrame(()=>{lbl.style.opacity='1';});}
+  },160);
+}
+function dvPrevMonth(){
+  const curYear=new Date().getFullYear();
+  if(dvCurrentMonth===0)return; // janeiro = limite
+  _dvAnimateMonth(-1,()=>{dvCurrentMonth--;renderDashboard();});
+}
+const DV_SRCS=['habitos','tarefas','financas','treino','estudos'];
+const DV_LABELS={'habitos':'Hábitos','tarefas':'Tarefas','financas':'Finanças','treino':'Treino','estudos':'Estudos'};
+function _dvAnimateChart(dir){
+  const block=document.getElementById('dv-graph-block');
+  const lbl=document.getElementById('dv-tab-label');
+  if(block){block.style.transition='opacity 0.15s';block.style.opacity='0';}
+  if(lbl) lbl.classList.add('changing');
+}
+function _dvUpdateLabel(){
+  const lbl=document.getElementById('dv-tab-label');
+  if(lbl){
+    lbl.textContent=DV_LABELS[dvChartSrc]||dvChartSrc;
+    requestAnimationFrame(()=>{lbl.classList.remove('changing');});
+  }
+}
+function setDvChartSrc(src,dir){
+  _dvAnimateChart(dir||1);
+  setTimeout(()=>{
+    dvChartSrc=src;
+    _dvUpdateLabel();
+    renderDashboard();
+    const cv=document.getElementById('dv-chart-canvas');
+    if(cv){cv.style.transform='translateX('+(dir>0?'-10px':'10px')+')';requestAnimationFrame(()=>{cv.classList.remove('changing');cv.style.transform='';}); }
+  },160);
+}
+function dvChartNext(){
+  const i=DV_SRCS.indexOf(dvChartSrc);
+  setDvChartSrc(DV_SRCS[(i+1)%DV_SRCS.length],1);
+}
+function dvChartPrev(){
+  const i=DV_SRCS.indexOf(dvChartSrc);
+  setDvChartSrc(DV_SRCS[(i-1+DV_SRCS.length)%DV_SRCS.length],-1);
+}
+function dvNextMonth(){
+  if(dvCurrentMonth===11)return; // dezembro = limite
+  _dvAnimateMonth(1,()=>{dvCurrentMonth++;renderDashboard();});
+}
 
 function renderDashboard(){
   _navPillShow();
   const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
+  // atualiza label da aba ativa
+  _dvUpdateLabel();
   // nav mês
   const monthLbl=document.getElementById('dv-month-lbl');
-  if(monthLbl)monthLbl.textContent=MESES[dvCurrentMonth]+' '+dvCurrentYear;
+  const curYear=new Date().getFullYear();
+  if(monthLbl)monthLbl.textContent=MESES[dvCurrentMonth];
+  // desabilita botões nos limites (jan e dez do ano atual)
+  const btnPrev=document.querySelector('#dv-month-nav .dv-month-btn:first-child');
+  const btnNext=document.querySelector('#dv-month-nav .dv-month-btn:last-child');
+  if(btnPrev)btnPrev.disabled=(dvCurrentMonth===0);
+  if(btnNext)btnNext.disabled=(dvCurrentMonth===11);
 
   // dias do mês
   const daysInMonth=new Date(dvCurrentYear,dvCurrentMonth+1,0).getDate();
@@ -5001,16 +5101,84 @@ function renderDashboard(){
     weekLbls.innerHTML=wHtml;
   }
 
-  // dados por dia: pct de hábitos concluídos
+  // dados por dia conforme seção selecionada
   const dayData=[];
   for(let d=1;d<=daysInMonth;d++){
     const dt=new Date(dvCurrentYear,dvCurrentMonth,d);
-    const key=dt.toDateString();const dow=dt.getDay();
-    const dayH=S.habits.filter(hb=>!hb.days||hb.days.includes(dow));
-    const done=dayH.filter(hb=>hb.done&&hb.done[key]).length;
-    dayData.push({d,pct:dayH.length?done/dayH.length:0,total:dayH.length,done});
+    const key=dt.toDateString();
+    const dow=dt.getDay();
+    const isoKey=dt.toISOString().split('T')[0]; // YYYY-MM-DD
+    let pct=0;
+    if(dvChartSrc==='habitos'){
+      const dayH=(S.habits||[]).filter(hb=>!hb.days||hb.days.includes(dow));
+      const done=dayH.filter(hb=>hb.done&&hb.done[key]).length;
+      pct=dayH.length?done/dayH.length:0;
+    } else if(dvChartSrc==='tarefas'){
+      // tarefas concluídas naquele dia (doneDate ou doneByDate)
+      const all=(S.tasks||[]);
+      const done=all.filter(t=>{
+        if(t.doneByDate&&t.doneByDate[key]) return true;
+        if(t.done&&t.doneDate===key) return true;
+        if(t.done&&t.doneDate===isoKey) return true;
+        return false;
+      }).length;
+      pct=done>0?Math.min(done/Math.max((S.tasks||[]).length,1),1):0;
+    } else if(dvChartSrc==='financas'){
+      // saldo do dia: entradas - saídas (normalizado)
+      const txDay=(S.transactions||[]).filter(t=>{
+        if(!t.date) return false;
+        const td=t.date.includes('/')?t.date.split('/').reverse().join('-'):t.date;
+        return td===isoKey;
+      });
+      const ins=txDay.filter(t=>t.type==='in').reduce((a,t)=>a+(t.amount||0),0);
+      const outs=txDay.filter(t=>t.type==='out').reduce((a,t)=>a+(t.amount||0),0);
+      const allAmounts=(S.transactions||[]).map(t=>t.amount||0);
+      const maxRef=allAmounts.length?Math.max(...allAmounts)*2:1000;
+      pct=txDay.length?Math.min(Math.max((ins-outs+maxRef/2)/maxRef,0),1):0;
+    } else if(dvChartSrc==='treino'){
+      const log=((S.treino&&S.treino.log)||[]);
+      const done=log.filter(l=>l.date===isoKey||l.date===key).length;
+      pct=done>0?Math.min(done/2,1):0;
+    } else if(dvChartSrc==='estudos'){
+      const items=(S.estudos&&S.estudos.items)||[];
+      const doneItems=items.filter(it=>it.done&&(it.date===isoKey||it.date===key)).length;
+      const totalItems=items.filter(it=>it.date===isoKey||it.date===key).length;
+      pct=totalItems?doneItems/totalItems:0;
+    }
+    dayData.push({d,pct,total:0,done:0});
   }
 
+  // verifica se há dados no mês
+  const hasData=dayData.some(d=>d.pct>0);
+  const block=document.getElementById('dv-graph-block');
+  const overlay=document.getElementById('dv-no-data-overlay');
+  if(block){block.classList.toggle('no-data',!hasData);}
+  if(overlay){
+    overlay.style.display=hasData?'none':'flex';
+    if(!hasData){
+      requestAnimationFrame(()=>{
+        const outer=document.getElementById('dv-graph-outer');
+        const cv=document.getElementById('dv-chart-canvas');
+        const weekLbls=document.getElementById('dv-week-lbls');
+        if(!outer||!cv||!weekLbls)return;
+        const outerRect=outer.getBoundingClientRect();
+        const cvRect=cv.getBoundingClientRect();
+        const weekRect=weekLbls.getBoundingClientRect();
+        // X: centralizado apenas na área do canvas (excluindo offset)
+        const left=cvRect.left-outerRect.left;
+        const right=outerRect.right-cvRect.right;
+        // Y: meio entre bottom das semanas e meio do canvas
+        const weekBottom=weekRect.bottom-outerRect.top;
+        const canvasMid=(cvRect.top-outerRect.top)+(cvRect.height/2);
+        const midY=(weekBottom+canvasMid)/2;
+        overlay.style.left=left+'px';
+        overlay.style.right=right+'px';
+        overlay.style.top=(midY-8)+'px';
+        overlay.style.height='16px';
+        overlay.style.width='auto';
+      });
+    }
+  }
   // gráfico de linha mensal
   drawDvChart(dayData,daysInMonth);
 
@@ -5025,87 +5193,123 @@ function renderDashboard(){
       }).join('');
   }
 
-  // lista de hábitos + bolinhas
+  // lista de hábitos + pílulas semanais
   const habList=document.getElementById('dv-habits-list');
   if(habList){
     if(!S.habits.length){
       habList.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,0.25);padding:8px 0;">Nenhum hábito ainda</div>';
     } else {
+      // calcular semanas do mês
+      const weeks=[];
+      for(let d=1;d<=daysInMonth;){
+        const startDay=d;
+        const startDow=new Date(dvCurrentYear,dvCurrentMonth,d).getDay();
+        // semana vai de d até o próximo domingo (ou fim do mês)
+        let endDay=d;
+        while(endDay<daysInMonth && new Date(dvCurrentYear,dvCurrentMonth,endDay).getDay()!==6) endDay++;
+        weeks.push({from:startDay,to:Math.min(endDay,daysInMonth)});
+        d=endDay+1;
+      }
+
       habList.innerHTML=S.habits.map(hb=>{
-        // calcular consistência do mês
+        // consistência total do mês
         let total=0,done=0;
         for(let d=1;d<=daysInMonth;d++){
-          const dt=new Date(dvCurrentYear,dvCurrentMonth,d);
-          const dow=dt.getDay();
+          const dt=new Date(dvCurrentYear,dvCurrentMonth,d);const dow=dt.getDay();
           if(!hb.days||hb.days.includes(dow)){total++;if(hb.done&&hb.done[dt.toDateString()])done++;}
         }
         const pct=total?Math.round(done/total*100):0;
         const pctColor=pct>=70?'#4caf80':pct>=30?'#e08040':'rgba(255,255,255,0.4)';
 
-        let dotsHtml='';
-        for(let d=1;d<=daysInMonth;d++){
-          const dt=new Date(dvCurrentYear,dvCurrentMonth,d);
-          const key=dt.toDateString();const dow=dt.getDay();
-          const active=!hb.days||hb.days.includes(dow);
-          const isDone=hb.done&&hb.done[key];
-          let cls='dv-dot';
-          if(!active)cls+=' off';
-          else if(isDone)cls+=' done';
-          dotsHtml+=`<div class="${cls}"></div>`;
-        }
+        // pílulas semanais
+        const pillsHtml=weeks.map(wk=>{
+          let wTotal=0,wDone=0;
+          for(let d=wk.from;d<=wk.to;d++){
+            const dt=new Date(dvCurrentYear,dvCurrentMonth,d);const dow=dt.getDay();
+            if(!hb.days||hb.days.includes(dow)){wTotal++;if(hb.done&&hb.done[dt.toDateString()])wDone++;}
+          }
+          const wPct=wTotal?wDone/wTotal:0;
+          const fillColor=wPct>=0.7?'#4caf80':wPct>0?'#e08040':'transparent';
+          return `<div class="dv-pill-wrap">
+            <div class="dv-pill-bg"></div>
+            <div class="dv-pill-fill" style="width:${Math.round(wPct*100)}%;background:${fillColor};"></div>
+          </div>`;
+        }).join('');
+
         return `<div class="dv-hab-row">
           <div class="dv-hab-name">${hb.name||hb.title||'hábito'}</div>
           <div class="dv-hab-pct" style="color:${pctColor}">${pct}%</div>
-          <div class="dv-hab-dots">${dotsHtml}</div>
+          <div class="dv-hab-pills">${pillsHtml}</div>
         </div>`;
       }).join('');
     }
   }
 }
 
+let _dvChartRaf=null;
 function drawDvChart(dayData,n){
   const cv=document.getElementById('dv-chart-canvas');
   if(!cv)return;
+  cv.style.filter='';cv.style.opacity='1';
+  cancelAnimationFrame(_dvChartRaf);
   const dpr=window.devicePixelRatio||1;
   const rect=cv.getBoundingClientRect();
   const W=rect.width||360,H=120;
   cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';
-  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
   const padX=0,padY=12;
   const xs=i=>padX+(W-2*padX)*(i/(n-1));
   const ys=p=>H-padY-(H-2*padY)*p;
-  // área
-  ctx.beginPath();
-  dayData.forEach((t,i)=>{
-    const x=xs(i),y=ys(t.pct);
-    if(i===0)ctx.moveTo(x,y);
-    else{const px=xs(i-1),py=ys(dayData[i-1].pct);const cx=(px+x)/2;ctx.bezierCurveTo(cx,py,cx,y,x,y);}
-  });
-  ctx.lineTo(xs(n-1),H);ctx.lineTo(xs(0),H);ctx.closePath();
-  const grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,'rgba(100,180,130,0.25)');grad.addColorStop(1,'rgba(100,180,130,0)');
-  ctx.fillStyle=grad;ctx.fill();
-  // linha
-  ctx.beginPath();
-  dayData.forEach((t,i)=>{
-    const x=xs(i),y=ys(t.pct);
-    if(i===0)ctx.moveTo(x,y);
-    else{const px=xs(i-1),py=ys(dayData[i-1].pct);const cx=(px+x)/2;ctx.bezierCurveTo(cx,py,cx,y,x,y);}
-  });
-  ctx.strokeStyle='rgba(120,200,150,0.9)';ctx.lineWidth=2;ctx.stroke();
-  // pontos nas interseções de semana
-  const today=new Date();
-  const isTM=today.getMonth()===dvCurrentMonth&&today.getFullYear()===dvCurrentYear;
-  dayData.forEach((t,i)=>{
-    const isWeekStart=(i===0)||((i+1)%7===1);
-    const isToday=isTM&&(i+1)===today.getDate();
-    if(isWeekStart||isToday){
-      ctx.beginPath();ctx.arc(xs(i),ys(t.pct),isToday?4:3,0,Math.PI*2);
-      ctx.fillStyle=isToday?'rgba(160,230,180,1)':'rgba(120,200,150,0.8)';
-      if(!isToday){ctx.strokeStyle='rgba(120,200,150,0.9)';ctx.lineWidth=1.5;ctx.stroke();}
-      else ctx.fill();
+  // grow animation: progress 0→1
+  const dur=520;const start=performance.now();
+  function frame(now){
+    const t=Math.min((now-start)/dur,1);
+    const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; // easeInOutQuad
+    ctx.clearRect(0,0,W,H);
+    // grow: escala pct pelo ease
+    const yse=p=>H-padY-(H-2*padY)*p*ease;
+    // área
+    ctx.beginPath();
+    dayData.forEach((d,i)=>{
+      const x=xs(i),y=yse(d.pct);
+      if(i===0)ctx.moveTo(x,y);
+      else{const px=xs(i-1),py=yse(dayData[i-1].pct);const cx=(px+x)/2;ctx.bezierCurveTo(cx,py,cx,y,x,y);}
+    });
+    ctx.lineTo(xs(n-1),H);ctx.lineTo(xs(0),H);ctx.closePath();
+    const grad=ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,'rgba(100,180,130,'+(0.25*ease)+')');grad.addColorStop(1,'rgba(100,180,130,0)');
+    ctx.fillStyle=grad;ctx.fill();
+    // linha
+    ctx.beginPath();
+    dayData.forEach((d,i)=>{
+      const x=xs(i),y=yse(d.pct);
+      if(i===0)ctx.moveTo(x,y);
+      else{const px=xs(i-1),py=yse(dayData[i-1].pct);const cx=(px+x)/2;ctx.bezierCurveTo(cx,py,cx,y,x,y);}
+    });
+    ctx.strokeStyle='rgba(120,200,150,'+(0.9*ease)+')';ctx.lineWidth=2;ctx.stroke();
+    // marcadores apenas quando animação quase completa
+    if(ease>0.85&&n>2){
+      const deltas=dayData.map((d,i)=>{
+        if(i===0||i===n-1)return 0;
+        return Math.abs((dayData[i].pct-dayData[i-1].pct)+(dayData[i].pct-dayData[i+1].pct));
+      });
+      const maxD=Math.max(...deltas);const threshold=maxD*0.45;
+      let lastMarked=-8;
+      deltas.forEach((dv,i)=>{
+        if(i<1||i>=n-1||dv<threshold||dv<0.08||i-lastMarked<5)return;
+        lastMarked=i;
+        const x=xs(i),y=yse(dayData[i].pct);
+        const spike=dayData[i].pct>dayData[i-1].pct&&dayData[i].pct>dayData[i+1].pct;
+        const drop=dayData[i].pct<dayData[i-1].pct&&dayData[i].pct<dayData[i+1].pct;
+        const color=spike?'rgba(160,230,180,1)':drop?'rgba(230,120,100,0.9)':'rgba(200,200,160,0.9)';
+        ctx.beginPath();ctx.arc(x,y,5.5,0,Math.PI*2);ctx.fillStyle='rgba(14,18,16,1)';ctx.fill();
+        ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);ctx.fillStyle='rgba(14,18,16,1)';ctx.fill();
+        ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
+      });
     }
-  });
+    if(t<1)_dvChartRaf=requestAnimationFrame(frame);
+  }
+  _dvChartRaf=requestAnimationFrame(frame);
 }
 
 
@@ -6367,6 +6571,7 @@ function _estSave(){
 
 
 Object.assign(window,{
+  dvChartNext,dvChartPrev,setDvChartSrc,dvPrevMonth,dvNextMonth,
   toggleDrawer,closeDrawer,setTab,openModal,closeModal,overlayClose,
   onFabClick,fabAction,updateFab,
   saveHabit,saveTask,saveFinance,selectRecur,toggleInvest,deleteItem,deleteTransaction,
