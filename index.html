@@ -734,49 +734,19 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #est-timer-sub:hover{color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.12);}
 #est-timer-sub-input{display:none;}
 /* painel de meta */
-#est-goal-panel{
-  position:absolute;
-  bottom:calc(100% + 10px);
-  left:50%;transform:translateX(-50%);
-  background:rgba(18,18,18,0.98);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:16px;
-  padding:12px;
-  display:none;
-  z-index:10;
-  min-width:220px;
-}
-#est-goal-panel.open{display:block;}
-.est-goal-opts{
-  display:flex;flex-wrap:wrap;gap:6px;justify-content:center;
-}
-.est-goal-opt{
-  padding:7px 14px;border-radius:99px;
-  border:1px solid rgba(255,255,255,0.1);background:none;
-  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
-  color:rgba(255,255,255,0.4);cursor:pointer;
-  transition:all 0.15s;white-space:nowrap;
-}
-.est-goal-opt:active{background:rgba(255,255,255,0.1);}
-.est-goal-opt.sel{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.35);color:rgba(255,255,255,0.9);}
-.est-goal-clear{color:rgba(255,100,100,0.5);border-color:rgba(255,100,100,0.15);}
-.est-goal-clear:active{background:rgba(255,100,100,0.08);}
 
-#est-timer-btns{display:flex;gap:10px;}
-#est-timer-btn-start{
-  padding:12px 32px;border-radius:99px;
-  background:#fff;border:none;cursor:pointer;
-  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
-  color:rgba(0,0,0,0.5);text-transform:uppercase;transition:all 0.15s;
-}
-#est-timer-btn-start.running{background:rgba(255,255,255,0.08);color:rgba(255,100,100,0.7);}
-#est-timer-btn-reset{
-  padding:12px 18px;border-radius:99px;
-  border:1px solid rgba(255,255,255,0.1);background:none;cursor:pointer;
-  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;
-  color:rgba(255,255,255,0.25);text-transform:uppercase;transition:all 0.15s;
-}
-#est-timer-btn-reset:active{background:rgba(255,255,255,0.06);}
+
+/* ring clickable */
+#est-timer-ring-wrap{cursor:pointer;}
+#est-timer-ring-wrap:active{opacity:0.8;}
+/* music player */
+#est-music-controls{display:flex;align-items:center;gap:20px;}
+.est-music-btn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.25);padding:6px;display:flex;align-items:center;justify-content:center;transition:color 0.15s;}
+.est-music-btn:active{color:rgba(255,255,255,0.7);}
+.est-music-play{color:rgba(255,255,255,0.5);}
+.est-music-play.playing{color:rgba(255,255,255,0.85);}
+#est-music-label{font-family:var(--sans);font-size:10px;letter-spacing:0.08em;color:rgba(255,255,255,0.2);min-height:14px;text-align:center;}
+/* sound selector */
 #est-list{padding:0;}
 .est-item{
   display:flex;align-items:center;gap:14px;
@@ -1151,9 +1121,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #dv-chart-canvas{transition:none;}
 
 
-#dv-graph-block{position:relative;transition:filter 0.3s,opacity 0.3s;}
-#dv-graph-block.no-data{filter:blur(3px);opacity:0.3;}
-#dv-no-data-overlay{pointer-events:none;}
+#dv-graph-block{position:relative;transition:filter 0.3s;}
 #dv-month-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:8px 0 4px;}
 .dv-month-btn{background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;transition:color 0.15s,opacity 0.15s;}
 .dv-month-btn:disabled{opacity:0.15;cursor:default;}
@@ -2229,8 +2197,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* ── FAB FLUTUANTE ── */
 #fab-wrap{
   position:fixed;
-  bottom:calc(28px + env(safe-area-inset-bottom,0px));
-  left:50%;transform:translateX(-50%);
+  bottom:calc(100px + env(safe-area-inset-bottom,0px));
+  right:20px;
+  left:auto;
+  transform:none;
   z-index:100;
   pointer-events:none;
 }
@@ -2456,6 +2426,25 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 @keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
 /* google icon svg inline */
 .g-icon{width:18px;height:18px;flex-shrink:0;}
+/* ── TIMER GOAL PICKER ── */
+.est-picker-drum{
+  height:132px;overflow:hidden;position:relative;width:100%;cursor:grab;user-select:none;-webkit-user-select:none;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 30%,black 70%,transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0%,black 30%,black 70%,transparent 100%);
+}
+.est-picker-drum:active{cursor:grabbing;}
+.est-picker-track{
+  display:flex;flex-direction:column;align-items:center;will-change:transform;
+}
+.est-picker-item{
+  height:44px;min-height:44px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--sans);font-size:30px;font-weight:300;
+  color:rgba(255,255,255,0.12);
+  width:100%;flex-shrink:0;box-sizing:border-box;transition:color 0.1s;
+}
+.est-picker-item.center{color:rgba(255,255,255,0.92);font-weight:400;}
+.est-picker-item.near{color:rgba(255,255,255,0.32);}
+
 </style>
 <style>
 #app{opacity:0;}
@@ -2686,7 +2675,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
       <!-- wrapper relativo para overlay ficar acima do blur -->
       <div id="dv-graph-outer" style="position:relative;">
-        <!-- gráfico + conteúdo abaixo (blur together on no-data) -->
+
         <div id="dv-graph-block">
           <!-- gráfico de consistência mensal -->
           <div id="dv-chart-wrap">
@@ -2707,10 +2696,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <div id="dv-habits-list"></div>
         </div>
 
-        <!-- overlay SEM DADOS: fora do blur, posicionado na altura do gráfico -->
-        <div id="dv-no-data-overlay" style="display:none;position:absolute;pointer-events:none;z-index:10;align-items:center;justify-content:center;">
-          <span style="font-size:11px;letter-spacing:0.14em;color:rgba(255,255,255,0.55);font-family:var(--sans);font-weight:500;">SEM DADOS</span>
-        </div>
+
       </div>
 
       <div id="dsp-streak-best" style="display:none"></div>
@@ -2933,7 +2919,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <polyline points="10 3 5 8 10 13" stroke="rgba(255,255,255,0.3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <div id="est-timer-ring-wrap">
+        <div id="est-timer-ring-wrap" id="est-ring-clickable">
           <svg id="est-ring-svg" viewBox="0 0 200 200">
             <circle id="est-ring-track" cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"/>
             <circle id="est-ring-arc" cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="3"
@@ -2944,24 +2930,30 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <div id="est-timer-disp">00:00:00</div>
             <div id="est-timer-sub" onclick="_estTimerEditSub()">definir meta</div>
           </div>
-          <!-- painel de seleção de meta -->
-          <div id="est-goal-panel">
-            <div class="est-goal-opts">
-              <button class="est-goal-opt" data-mins="15" onclick="_estGoalSelect(15)">15min</button>
-              <button class="est-goal-opt" data-mins="25" onclick="_estGoalSelect(25)">25min</button>
-              <button class="est-goal-opt" data-mins="30" onclick="_estGoalSelect(30)">30min</button>
-              <button class="est-goal-opt" data-mins="45" onclick="_estGoalSelect(45)">45min</button>
-              <button class="est-goal-opt" data-mins="60" onclick="_estGoalSelect(60)">1h</button>
-              <button class="est-goal-opt" data-mins="90" onclick="_estGoalSelect(90)">1h30</button>
-              <button class="est-goal-opt" data-mins="120" onclick="_estGoalSelect(120)">2h</button>
-              <button class="est-goal-opt est-goal-clear" onclick="_estGoalClear()">limpar</button>
-            </div>
-          </div>
         </div><!-- fim est-timer-ring-wrap -->
-        <div id="est-timer-btns">
-          <button id="est-timer-btn-start" onclick="_estTimerToggle()">iniciar</button>
-          <button id="est-timer-btn-reset" onclick="_estTimerReset()">zerar</button>
+
+        <!-- controles prev / play / next -->
+        <div id="est-music-controls">
+          <button class="est-music-btn" onclick="_musicPrev()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="4" x2="5" y2="20"/>
+            </svg>
+          </button>
+          <button class="est-music-btn est-music-play" id="est-music-play-btn" onclick="_musicToggle()">
+            <svg id="est-music-icon-play" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <svg id="est-music-icon-pause" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <line x1="10" y1="4" x2="10" y2="20"/><line x1="14" y1="4" x2="14" y2="20"/>
+            </svg>
+          </button>
+          <button class="est-music-btn" onclick="_musicNext()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="4" x2="19" y2="20"/>
+            </svg>
+          </button>
         </div>
+        <div id="est-music-label"></div>
       </div><!-- fim est-timer-mode -->
     </div><!-- fim sec-estudos -->
 
@@ -3215,25 +3207,7 @@ function setTab(name,dir){
   updateFab();
 }
 
-/* SWIPE NAVIGATION */
-(function(){
-  let sx=0,sy=0,sw=false;
-  const THRESHOLD=52,RATIO=1.4;
-  document.getElementById('content').addEventListener('touchstart',e=>{
-    // não interfere com drag de tarefas
-    if(e.target.closest('.task-list-wrap'))return;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;sw=true;
-  },{passive:true});
-  document.getElementById('content').addEventListener('touchend',e=>{
-    if(!sw)return;sw=false;
-    const dx=e.changedTouches[0].clientX-sx;
-    const dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<THRESHOLD||Math.abs(dy/dx)>1/RATIO)return;
-    const idx=TAB_ORDER.indexOf(curTab);
-    if(dx<0&&idx<TAB_ORDER.length-1)setTab(TAB_ORDER[idx+1],'right');
-    else if(dx>0&&idx>0)setTab(TAB_ORDER[idx-1],'left');
-  },{passive:true});
-})();
+
 
 /* XP */
 function addXP(n,el){
@@ -4975,21 +4949,17 @@ function _trDeleteFicha(){
 function onFabClick(){
   if(curTab==='habitos')openModal('habit',null);
   else if(curTab==='tarefas')openModal('task',null);
-}
+  else if(curTab==='financas')openModal('finance',null);
 
+  else if(curTab==='treino')openModal('workout',null);
+}
 function updateFab(){
   const fab=document.getElementById('fab-wrap');
   if(!fab)return;
-  if(curTab==='habitos'){fab.classList.add('hidden');return;}
-  if(curTab==='habitos'){fab.classList.remove('hidden');}
-  else{fab.classList.add('hidden');}
-  const lbl=document.getElementById('fab-label');
-  if(lbl)lbl.textContent='+ novo hábito';
+  if(['tarefas','financas','treino'].includes(curTab))fab.classList.remove('hidden');
+  else fab.classList.add('hidden');
 }
-function fabAction(){
-  if(curTab==='habitos')openModal('habit',null);
-  else if(curTab==='tarefas')openModal('task',null);
-}
+function fabAction(){onFabClick();}
 
 /* ── DASHBOARD ── */
 let dvCurrentMonth=new Date().getMonth();
@@ -5019,17 +4989,21 @@ function _dvHasDataForMonth(m,y){
   if(((S.estudos&&S.estudos.items)||[]).some(it=>it.done&&(()=>{const d=new Date(it.date);return d.getMonth()===m&&d.getFullYear()===y;})()))return true;
   return false;
 }
+function _dvFadeCanvas(out,cb){
+  const cv=document.getElementById('dv-chart-canvas');
+  if(!cv){if(cb)cb();return;}
+  cv.style.transition=out?'opacity 0.13s':'opacity 0.22s';
+  cv.style.opacity=out?'0':'1';
+  if(cb)setTimeout(cb,out?130:220);
+}
 function _dvAnimateMonth(dir,cb){
-  const block=document.getElementById('dv-graph-block');
   const lbl=document.getElementById('dv-month-lbl');
-  // fade out only — no translateX to avoid triggering browser scrollbar
-  if(block){block.style.transition='opacity 0.15s';block.style.opacity='0';}
   if(lbl){lbl.style.transition='opacity 0.12s';lbl.style.opacity='0';}
-  setTimeout(()=>{
+  _dvFadeCanvas(true,()=>{
     cb();
-    if(block){requestAnimationFrame(()=>{block.style.opacity='1';});}
-    if(lbl){requestAnimationFrame(()=>{lbl.style.opacity='1';});}
-  },160);
+    if(lbl)requestAnimationFrame(()=>{lbl.style.opacity='1';});
+    _dvFadeCanvas(false);
+  });
 }
 function dvPrevMonth(){
   const curYear=new Date().getFullYear();
@@ -5039,10 +5013,9 @@ function dvPrevMonth(){
 const DV_SRCS=['habitos','tarefas','financas','treino','estudos'];
 const DV_LABELS={'habitos':'Hábitos','tarefas':'Tarefas','financas':'Finanças','treino':'Treino','estudos':'Estudos'};
 function _dvAnimateChart(dir){
-  const block=document.getElementById('dv-graph-block');
   const lbl=document.getElementById('dv-tab-label');
-  if(block){block.style.transition='opacity 0.15s';block.style.opacity='0';}
-  if(lbl) lbl.classList.add('changing');
+  if(lbl)lbl.classList.add('changing');
+  _dvFadeCanvas(true);
 }
 function _dvUpdateLabel(){
   const lbl=document.getElementById('dv-tab-label');
@@ -5057,9 +5030,10 @@ function setDvChartSrc(src,dir){
     dvChartSrc=src;
     _dvUpdateLabel();
     renderDashboard();
-    const cv=document.getElementById('dv-chart-canvas');
-    if(cv){cv.style.transform='translateX('+(dir>0?'-10px':'10px')+')';requestAnimationFrame(()=>{cv.classList.remove('changing');cv.style.transform='';}); }
-  },160);
+    const lbl=document.getElementById('dv-tab-label');
+    if(lbl)lbl.classList.remove('changing');
+    _dvFadeCanvas(false);
+  },140);
 }
 function dvChartNext(){
   const i=DV_SRCS.indexOf(dvChartSrc);
@@ -5151,34 +5125,6 @@ function renderDashboard(){
   // verifica se há dados no mês
   const hasData=dayData.some(d=>d.pct>0);
   const block=document.getElementById('dv-graph-block');
-  const overlay=document.getElementById('dv-no-data-overlay');
-  if(block){block.classList.toggle('no-data',!hasData);}
-  if(overlay){
-    overlay.style.display=hasData?'none':'flex';
-    if(!hasData){
-      requestAnimationFrame(()=>{
-        const outer=document.getElementById('dv-graph-outer');
-        const cv=document.getElementById('dv-chart-canvas');
-        const weekLbls=document.getElementById('dv-week-lbls');
-        if(!outer||!cv||!weekLbls)return;
-        const outerRect=outer.getBoundingClientRect();
-        const cvRect=cv.getBoundingClientRect();
-        const weekRect=weekLbls.getBoundingClientRect();
-        // X: centralizado apenas na área do canvas (excluindo offset)
-        const left=cvRect.left-outerRect.left;
-        const right=outerRect.right-cvRect.right;
-        // Y: meio entre bottom das semanas e meio do canvas
-        const weekBottom=weekRect.bottom-outerRect.top;
-        const canvasMid=(cvRect.top-outerRect.top)+(cvRect.height/2);
-        const midY=(weekBottom+canvasMid)/2;
-        overlay.style.left=left+'px';
-        overlay.style.right=right+'px';
-        overlay.style.top=(midY-8)+'px';
-        overlay.style.height='16px';
-        overlay.style.width='auto';
-      });
-    }
-  }
   // gráfico de linha mensal
   drawDvChart(dayData,daysInMonth);
 
@@ -5193,55 +5139,100 @@ function renderDashboard(){
       }).join('');
   }
 
-  // lista de hábitos + pílulas semanais
+  // label de seção abaixo do gráfico
+  const consistLbl=document.getElementById('dv-consist-lbl');
+  const SECTION_LABELS={habitos:'CONSISTÊNCIA',tarefas:'CONCLUSÕES',financas:'BALANÇO',treino:'TREINOS',estudos:'PROGRESSO'};
+  if(consistLbl)consistLbl.textContent=SECTION_LABELS[dvChartSrc]||'CONSISTÊNCIA';
+
+  // calcular semanas do mês (compartilhado)
+  const weeks=[];
+  for(let d=1;d<=daysInMonth;){
+    let endDay=d;
+    while(endDay<daysInMonth&&new Date(dvCurrentYear,dvCurrentMonth,endDay).getDay()!==6)endDay++;
+    weeks.push({from:d,to:Math.min(endDay,daysInMonth)});
+    d=endDay+1;
+  }
+
   const habList=document.getElementById('dv-habits-list');
-  if(habList){
-    if(!S.habits.length){
-      habList.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,0.25);padding:8px 0;">Nenhum hábito ainda</div>';
-    } else {
-      // calcular semanas do mês
-      const weeks=[];
-      for(let d=1;d<=daysInMonth;){
-        const startDay=d;
-        const startDow=new Date(dvCurrentYear,dvCurrentMonth,d).getDay();
-        // semana vai de d até o próximo domingo (ou fim do mês)
-        let endDay=d;
-        while(endDay<daysInMonth && new Date(dvCurrentYear,dvCurrentMonth,endDay).getDay()!==6) endDay++;
-        weeks.push({from:startDay,to:Math.min(endDay,daysInMonth)});
-        d=endDay+1;
-      }
+  if(!habList)return;
 
+  function pillsFor(wkPcts){
+    return wkPcts.map(wPct=>{
+      const fillColor=wPct>=0.7?'#4caf80':wPct>0?'#e08040':'transparent';
+      return `<div class="dv-pill-wrap"><div class="dv-pill-bg"></div><div class="dv-pill-fill" style="width:${Math.round(wPct*100)}%;background:${fillColor};"></div></div>`;
+    }).join('');
+  }
+  function row(name,pct,pillsHtml){
+    const pctColor=pct>=70?'#4caf80':pct>=30?'#e08040':'rgba(255,255,255,0.4)';
+    return `<div class="dv-hab-row"><div class="dv-hab-name">${name}</div><div class="dv-hab-pct" style="color:${pctColor}">${pct}%</div><div class="dv-hab-pills">${pillsHtml}</div></div>`;
+  }
+  function emptyMsg(txt){habList.innerHTML=`<div style="font-size:12px;color:rgba(255,255,255,0.25);padding:8px 0;">${txt}</div>`;}
+
+  if(dvChartSrc==='habitos'){
+    if(!S.habits.length){emptyMsg('Nenhum hábito ainda');}
+    else{
       habList.innerHTML=S.habits.map(hb=>{
-        // consistência total do mês
         let total=0,done=0;
-        for(let d=1;d<=daysInMonth;d++){
-          const dt=new Date(dvCurrentYear,dvCurrentMonth,d);const dow=dt.getDay();
-          if(!hb.days||hb.days.includes(dow)){total++;if(hb.done&&hb.done[dt.toDateString()])done++;}
-        }
+        for(let d=1;d<=daysInMonth;d++){const dt=new Date(dvCurrentYear,dvCurrentMonth,d);const dow=dt.getDay();if(!hb.days||hb.days.includes(dow)){total++;if(hb.done&&hb.done[dt.toDateString()])done++;}}
         const pct=total?Math.round(done/total*100):0;
-        const pctColor=pct>=70?'#4caf80':pct>=30?'#e08040':'rgba(255,255,255,0.4)';
-
-        // pílulas semanais
-        const pillsHtml=weeks.map(wk=>{
-          let wTotal=0,wDone=0;
-          for(let d=wk.from;d<=wk.to;d++){
-            const dt=new Date(dvCurrentYear,dvCurrentMonth,d);const dow=dt.getDay();
-            if(!hb.days||hb.days.includes(dow)){wTotal++;if(hb.done&&hb.done[dt.toDateString()])wDone++;}
-          }
-          const wPct=wTotal?wDone/wTotal:0;
-          const fillColor=wPct>=0.7?'#4caf80':wPct>0?'#e08040':'transparent';
-          return `<div class="dv-pill-wrap">
-            <div class="dv-pill-bg"></div>
-            <div class="dv-pill-fill" style="width:${Math.round(wPct*100)}%;background:${fillColor};"></div>
-          </div>`;
-        }).join('');
-
-        return `<div class="dv-hab-row">
-          <div class="dv-hab-name">${hb.name||hb.title||'hábito'}</div>
-          <div class="dv-hab-pct" style="color:${pctColor}">${pct}%</div>
-          <div class="dv-hab-pills">${pillsHtml}</div>
-        </div>`;
+        const wkPcts=weeks.map(wk=>{let wT=0,wD=0;for(let d=wk.from;d<=wk.to;d++){const dt=new Date(dvCurrentYear,dvCurrentMonth,d);const dow=dt.getDay();if(!hb.days||hb.days.includes(dow)){wT++;if(hb.done&&hb.done[dt.toDateString()])wD++;}}return wT?wD/wT:0;});
+        return row(hb.name||hb.title||'hábito',pct,pillsFor(wkPcts));
       }).join('');
+    }
+  } else if(dvChartSrc==='tarefas'){
+    const tasks=S.tasks||[];
+    if(!tasks.length){emptyMsg('Nenhuma tarefa ainda');}
+    else{
+      // agrupar por categoria/tag
+      const cats=[...new Set(tasks.map(t=>t.category||t.tag||t.list||'Geral'))];
+      habList.innerHTML=cats.map(cat=>{
+        const catTasks=tasks.filter(t=>(t.category||t.tag||t.list||'Geral')===cat);
+        const done=catTasks.filter(t=>t.done).length;
+        const pct=Math.round(done/catTasks.length*100);
+        const wkPcts=weeks.map(wk=>{
+          const wDone=catTasks.filter(t=>{if(!t.done)return false;const dk=t.doneDate||'';const d=new Date(dk);return d.getMonth()===dvCurrentMonth&&d.getFullYear()===dvCurrentYear&&d.getDate()>=wk.from&&d.getDate()<=wk.to;}).length;
+          return catTasks.length?wDone/catTasks.length:0;
+        });
+        return row(cat,pct,pillsFor(wkPcts));
+      }).join('');
+    }
+  } else if(dvChartSrc==='financas'){
+    const txs=S.transactions||[];
+    const monthTxs=txs.filter(t=>{if(!t.date)return false;const td=t.date.includes('/')?t.date.split('/').reverse().join('-'):t.date;const d=new Date(td);return d.getMonth()===dvCurrentMonth&&d.getFullYear()===dvCurrentYear;});
+    if(!monthTxs.length){emptyMsg('Sem transações neste mês');}
+    else{
+      const totalIn=monthTxs.filter(t=>t.type==='in').reduce((a,t)=>a+(t.amount||0),0);
+      const totalOut=monthTxs.filter(t=>t.type==='out').reduce((a,t)=>a+(t.amount||0),0);
+      const balance=totalIn-totalOut;
+      const balPct=totalIn?Math.min(Math.round((balance/totalIn)*100),100):0;
+      // pílulas: saldo positivo por semana
+      const wkPcts=weeks.map(wk=>{
+        const wIn=monthTxs.filter(t=>{const d=new Date((t.date||'').includes('/')?t.date.split('/').reverse().join('-'):t.date);return t.type==='in'&&d.getDate()>=wk.from&&d.getDate()<=wk.to;}).reduce((a,t)=>a+(t.amount||0),0);
+        const wOut=monthTxs.filter(t=>{const d=new Date((t.date||'').includes('/')?t.date.split('/').reverse().join('-'):t.date);return t.type==='out'&&d.getDate()>=wk.from&&d.getDate()<=wk.to;}).reduce((a,t)=>a+(t.amount||0),0);
+        return wIn>0?Math.min((wIn-wOut)/wIn,1):0;
+      });
+      habList.innerHTML=row('Entradas',totalIn?100:0,pillsFor(wkPcts))+row('Saídas',totalOut&&totalIn?Math.round((totalOut/totalIn)*100):0,pillsFor(wkPcts.map(p=>1-p)));
+    }
+  } else if(dvChartSrc==='treino'){
+    const log=((S.treino&&S.treino.log)||[]).filter(l=>{const d=new Date(l.date+'T00:00');return d.getMonth()===dvCurrentMonth&&d.getFullYear()===dvCurrentYear;});
+    if(!log.length){emptyMsg('Nenhum treino neste mês');}
+    else{
+      const tipos=[...new Set(log.map(l=>l.type||l.name||'Treino'))];
+      habList.innerHTML=tipos.map(tp=>{
+        const tpLog=log.filter(l=>(l.type||l.name||'Treino')===tp);
+        const wkPcts=weeks.map(wk=>tpLog.filter(l=>{const d=new Date(l.date+'T00:00');return d.getDate()>=wk.from&&d.getDate()<=wk.to;}).length>0?1:0);
+        const pct=Math.round(tpLog.length/weeks.length*100);
+        return row(tp,Math.min(pct,100),pillsFor(wkPcts));
+      }).join('');
+    }
+  } else if(dvChartSrc==='estudos'){
+    const items=(S.estudos&&S.estudos.items)||[];
+    if(!items.length){emptyMsg('Nenhum item de estudo ainda');}
+    else{
+      const done=items.filter(it=>it.done).length;
+      const pct=Math.round(done/items.length*100);
+      const wkPcts=weeks.map(()=>pct/100);
+      habList.innerHTML=row('Itens concluídos',pct,pillsFor(wkPcts));
     }
   }
 }
@@ -6391,32 +6382,148 @@ function _estTimerCloseOld(){
 
 let _timerGoalMs = 0; // 0 = sem meta
 
-function _estTimerEditSub(){
-  const panel = document.getElementById('est-goal-panel');
-  if(panel) panel.classList.toggle('open');
-}
+let _pickerH=0,_pickerM=0;
+const _PICKER_ITEM_H=44;
 
-function _estGoalSelect(mins){
-  _timerGoalMs = mins * 60 * 1000;
-  const sub = document.getElementById('est-timer-sub');
-  sub.textContent = mins >= 60
-    ? (mins/60) + 'h de meta'
-    : mins + 'min de meta';
-  document.getElementById('est-goal-panel')?.classList.remove('open');
-  // destacar opção selecionada
-  document.querySelectorAll('.est-goal-opt').forEach(b=>{
-    b.classList.toggle('sel', parseInt(b.dataset.mins)===mins);
+function _estTimerEditSub(){_estPickerOpen();}
+
+function _estPickerOpen(){
+  const ov=document.getElementById('est-picker-overlay');
+  const modal=document.getElementById('est-picker-modal');
+  const btns=document.getElementById('est-picker-btns');
+  if(!ov||!modal)return;
+  ov.style.display='block'; modal.style.display='block';
+  if(btns)btns.style.display='block';
+  // init values from current goal
+  const curH=Math.floor(_timerGoalMs/3600000);
+  const curM=Math.floor((_timerGoalMs%3600000)/60000);
+  _pickerH=curH; _pickerM=curM;
+  _pickerBuildDrum('est-picker-h',24,_pickerH);
+  _pickerBuildDrum('est-picker-m',60,_pickerM);
+  // position buttons 12px below modal
+  requestAnimationFrame(()=>{
+    const r=modal.getBoundingClientRect();
+    if(btns){btns.style.top=(r.bottom+12)+'px';}
   });
+}
+
+function _estPickerClose(){
+  document.getElementById('est-picker-overlay').style.display='none';
+  document.getElementById('est-picker-modal').style.display='none';
+  const b=document.getElementById('est-picker-btns');if(b)b.style.display='none';
+}
+
+function _pickerBuildDrum(id,count,selected){
+  const drum=document.getElementById(id);
+  if(!drum)return;
+  drum.innerHTML='';
+  const track=document.createElement('div');
+  track.className='est-picker-track';
+  // padding items (2 above and below for centering)
+  for(let i=0;i<2;i++){const p=document.createElement('div');p.className='est-picker-item';p.innerHTML='&nbsp;';track.appendChild(p);}
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div');
+    el.className='est-picker-item';
+    el.textContent=String(i).padStart(2,'0');
+    track.appendChild(el);
+  }
+  for(let i=0;i<2;i++){const p=document.createElement('div');p.className='est-picker-item';p.innerHTML='&nbsp;';track.appendChild(p);}
+  drum.appendChild(track);
+  _pickerScrollTo(drum,selected,false);
+  _pickerBindDrag(drum,count);
+}
+
+function _pickerScrollTo(drum,val,animate){
+  const track=drum.querySelector('.est-picker-track');
+  if(!track)return;
+  // drum height=176, center=88. item[val] is at index (2+val) in track.
+  // item center = (2+val)*44 + 22. offset = 88 - itemCenter = 66 - (2+val)*44
+  const offset=44-(2+val)*_PICKER_ITEM_H;
+  if(!animate)track.style.transition='none';
+  else track.style.transition='transform 0.18s cubic-bezier(0.25,1,0.5,1)';
+  track.style.transform='translateY('+offset+'px)';
+  _pickerUpdateClasses(drum,val);
+}
+
+function _pickerUpdateClasses(drum,val){
+  const items=drum.querySelectorAll('.est-picker-item');
+  items.forEach((el,i)=>{
+    const realIdx=i-2;
+    el.classList.remove('center','near');
+    if(realIdx===val)el.classList.add('center');
+    else if(Math.abs(realIdx-val)===1)el.classList.add('near');
+  });
+}
+
+function _pickerBindDrag(drum,count){
+  const track=drum.querySelector('.est-picker-track');
+  let startY=0,startVal=0,dragging=false,curVal=0;
+  const type=drum.dataset.type;
+  curVal=type==='h'?_pickerH:_pickerM;
+
+  function getVal(){return type==='h'?_pickerH:_pickerM;}
+  function setVal(v){
+    v=Math.max(0,Math.min(count-1,Math.round(v)));
+    if(type==='h')_pickerH=v; else _pickerM=v;
+    return v;
+  }
+
+  function onStart(e){
+    dragging=true;startY=e.touches?e.touches[0].clientY:e.clientY;
+    startVal=getVal();track.style.transition='none';
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging)return;
+    const y=e.touches?e.touches[0].clientY:e.clientY;
+    const dy=startY-y;
+    const rawVal=startVal+dy/_PICKER_ITEM_H;
+    const clampedVal=Math.max(0,Math.min(count-1,rawVal));
+    const offset=44-(2+clampedVal)*_PICKER_ITEM_H;
+    track.style.transform='translateY('+offset+'px)';
+    _pickerUpdateClasses(drum,Math.round(clampedVal));
+    e.preventDefault();
+  }
+  function onEnd(e){
+    if(!dragging)return; dragging=false;
+    const y=e.changedTouches?e.changedTouches[0].clientY:e.clientY;
+    const dy=startY-y;
+    const rawVal=startVal+dy/_PICKER_ITEM_H;
+    const snapped=setVal(rawVal);
+    _pickerScrollTo(drum,snapped,true);
+  }
+  drum.addEventListener('touchstart',onStart,{passive:false});
+  drum.addEventListener('touchmove',onMove,{passive:false});
+  drum.addEventListener('touchend',onEnd);
+  drum.addEventListener('mousedown',onStart);
+  window.addEventListener('mousemove',onMove);
+  window.addEventListener('mouseup',onEnd);
+}
+
+function _estPickerConfirm(){
+  const mins=_pickerH*60+_pickerM;
+  if(mins<=0){_estPickerClose();return;}
+  _timerGoalMs=mins*60*1000;
+  const sub=document.getElementById('est-timer-sub');
+  sub.textContent=_pickerH>0&&_pickerM>0?_pickerH+'h '+_pickerM+'min de meta':_pickerH>0?_pickerH+'h de meta':_pickerM+'min de meta';
+  _estPickerClose();
   _estTimerUpdateDisplay();
 }
 
-function _estGoalClear(){
-  _timerGoalMs = 0;
-  document.getElementById('est-timer-sub').textContent = 'definir meta';
-  document.querySelectorAll('.est-goal-opt').forEach(b=>b.classList.remove('sel'));
-  document.getElementById('est-goal-panel')?.classList.remove('open');
+function _estPickerClear(){
+  _timerGoalMs=0;_pickerH=0;_pickerM=0;
+  document.getElementById('est-timer-sub').textContent='definir meta';
+  _estPickerClose();
   _estTimerUpdateDisplay();
 }
+
+function _estGoalInput(){}
+function _estGoalConfirm(){}
+function _estGoalSelect(mins){
+  _timerGoalMs=mins*60*1000;
+  _estTimerUpdateDisplay();
+}
+function _estGoalClear(){_estPickerClear();}
 
 function _estTimerSubBlur(){}
 
@@ -6443,32 +6550,114 @@ function _estTimerUpdateDisplay(){
 }
 
 function _estTimerToggle(){
-  const btn=document.getElementById('est-timer-btn-start');
   const disp=document.getElementById('est-timer-disp');
   if(_timerRunning){
     _timerElapsed+=(Date.now()-_timerStart);
     _timerRunning=false;
     clearInterval(_timerTick);_timerTick=null;
-    if(btn){btn.textContent='continuar';btn.classList.remove('running');}
-    if(disp) disp.classList.remove('running');
+    if(disp)disp.classList.remove('running');
   } else {
     _timerStart=Date.now();
     _timerRunning=true;
     _timerTick=setInterval(_estTimerUpdateDisplay,1000);
-    if(btn){btn.textContent='pausar';btn.classList.add('running');}
-    if(disp) disp.classList.add('running');
+    if(disp)disp.classList.add('running');
   }
+  _estTimerUpdateDisplay();
 }
 
 function _estTimerReset(){
   clearInterval(_timerTick);_timerTick=null;
   _timerRunning=false;_timerElapsed=0;_timerStart=0;
-  const btn=document.getElementById('est-timer-btn-start');
   const disp=document.getElementById('est-timer-disp');
-  if(btn){btn.textContent='iniciar';btn.classList.remove('running');}
-  if(disp) disp.classList.remove('running');
+  if(disp)disp.classList.remove('running');
   _estTimerUpdateDisplay();
 }
+
+// ring click/hold
+(function(){
+  let _holdTimer=null;
+  function _ringInit(){
+    const ring=document.getElementById('est-timer-ring-wrap');
+    if(!ring||ring._bound)return;
+    ring._bound=true;
+    ring.addEventListener('pointerdown',()=>{
+      _holdTimer=setTimeout(()=>{_holdTimer=null;_ringHeld();},600);
+    });
+    ring.addEventListener('pointerup',()=>{
+      if(_holdTimer){clearTimeout(_holdTimer);_holdTimer=null;_estTimerToggle();}
+    });
+    ring.addEventListener('pointercancel',()=>{clearTimeout(_holdTimer);_holdTimer=null;});
+  }
+  function _ringHeld(){
+    if(_timerElapsed===0&&!_timerRunning)return;
+    // vibrate feedback
+    if(navigator.vibrate)navigator.vibrate(40);
+    _estTimerReset();
+  }
+  // init after DOM ready
+  document.addEventListener('DOMContentLoaded',_ringInit);
+  setTimeout(_ringInit,800);
+  window._ringInit=_ringInit;
+})();
+
+// ── MUSIC PLAYER ──
+const _TRACKS=[
+  {name:'chuva leve',url:'chuva_leve.mp3',orb:'chuva'},
+  {name:'chuva forte',url:'chuva_forte.mp3',orb:'chuva'},
+  {name:'chuva e trovão',url:'chuva_trovão.mp3',orb:'chuva'},
+  {name:'floresta',url:'floresta.mp3',orb:'floresta'},
+  {name:'rio',url:'rio.mp3',orb:'rio'},
+  {name:'noite',url:'noite.mp3',orb:'noite'},
+];
+let _musicIdx=0,_musicAudio=null,_musicPlaying=false;
+
+function _musicEnsureAudio(){
+  if(!_musicAudio||_musicAudio._src!==_TRACKS[_musicIdx].url){
+    if(_musicAudio){_musicAudio.pause();_musicAudio=null;}
+    _musicAudio=new Audio(_TRACKS[_musicIdx].url);
+    _musicAudio._src=_TRACKS[_musicIdx].url;
+    _musicAudio.loop=true;
+    _musicAudio.volume=0.55;
+  }
+}
+function _musicToggle(){
+  _musicEnsureAudio();
+  if(_musicPlaying){
+    _musicAudio.pause();_musicPlaying=false;
+  } else {
+    _musicAudio.play().catch(()=>{});_musicPlaying=true;
+  }
+  _musicUpdateUI();
+}
+function _musicUpdateUI(){
+  // play/pause icon
+  const iconPlay=document.getElementById('est-music-icon-play');
+  const iconPause=document.getElementById('est-music-icon-pause');
+  const btn=document.getElementById('est-music-play-btn');
+  if(iconPlay)iconPlay.style.display=_musicPlaying?'none':'';
+  if(iconPause)iconPause.style.display=_musicPlaying?'':'none';
+  if(btn){if(_musicPlaying)btn.classList.add('playing');else btn.classList.remove('playing');}
+  // label
+  const lbl=document.getElementById('est-music-label');
+  if(lbl)lbl.textContent=_musicPlaying?_TRACKS[_musicIdx].name:'';
+
+}
+function _musicNext(){
+  const wasPlaying=_musicPlaying;
+  if(_musicAudio){_musicAudio.pause();_musicAudio=null;}_musicPlaying=false;
+  _musicIdx=(_musicIdx+1)%_TRACKS.length;
+  if(wasPlaying){_musicEnsureAudio();_musicAudio.play().catch(()=>{});_musicPlaying=true;}
+  _musicUpdateUI();
+}
+function _musicPrev(){
+  const wasPlaying=_musicPlaying;
+  if(_musicAudio){_musicAudio.pause();_musicAudio=null;}_musicPlaying=false;
+  _musicIdx=(_musicIdx-1+_TRACKS.length)%_TRACKS.length;
+  if(wasPlaying){_musicEnsureAudio();_musicAudio.play().catch(()=>{});_musicPlaying=true;}
+  _musicUpdateUI();
+}
+function _musicUpdateLabel(){_musicUpdateUI();}
+function _musicUpdateIcon(){_musicUpdateUI();}
 
 
 function _estEnsure(){
@@ -6591,7 +6780,7 @@ Object.assign(window,{
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
   _toggleHabitStats, _flamesvg, _renderHabBottomChart, _calcStreak,
-  _navPillInit,_navPillShow,_navPillHide,_navPillUpdate,_qaNotes,_estTimerClose,_estNotesClose,_estTimerToggle,_estTimerReset,_estTimerEditSub,_estTimerSubBlur,_estGoalSelect,_estGoalClear,
+  _navPillInit,_navPillShow,_navPillHide,_navPillUpdate,_qaToggle,_qaTimer,_qaNotes,_estTimerClose,_estNotesClose,_estTimerToggle,_estTimerReset,_musicToggle,_musicNext,_musicPrev,_estTimerEditSub,_estTimerSubBlur,_estGoalSelect,_estGoalClear,_estGoalConfirm,_estGoalInput,_estPickerOpen,_estPickerClose,_estPickerConfirm,_estPickerClear,
   _estNoteNew,_estNoteBack,_estNoteDone,_estNoteOpen,_estNoteInput,_estNoteKeydown,_estNotesDel,
   renderEstudos,_estToggleAdd,_estOpenItem,_estCloseSheet,_estSave,_estToggleDone,_estDel,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
@@ -7179,5 +7368,23 @@ function _setFinPeriod(p){
     <button class="fin-add-opt" onclick="_toggleTransTipo(true);_setTransFilter('out',null)">saídas</button>
   </div>
 
+
+  <!-- TIMER GOAL PICKER -->
+  <div id="est-picker-overlay" onclick="_estPickerClose()" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,0.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);"></div>
+  <div id="est-picker-modal" style="display:none;position:fixed;z-index:801;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(18,18,18,0.98);border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden;width:200px;">
+    <div style="display:flex;align-items:center;position:relative;">
+      <div style="position:absolute;top:50%;left:6px;right:6px;height:44px;transform:translateY(-50%);background:rgba(255,255,255,0.06);border-radius:10px;pointer-events:none;z-index:1;"></div>
+      <div id="est-picker-h" class="est-picker-drum" data-type="h" style="flex:1;"></div>
+      <div style="font-size:24px;font-weight:200;color:rgba(255,255,255,0.25);flex-shrink:0;width:16px;text-align:center;position:relative;z-index:2;">:</div>
+      <div id="est-picker-m" class="est-picker-drum" data-type="m" style="flex:1;"></div>
+    </div>
+  </div>
+  <!-- botões flutuando abaixo -->
+  <div id="est-picker-btns" style="display:none;position:fixed;z-index:801;left:50%;transform:translateX(-50%);width:200px;">
+    <div style="display:flex;gap:8px;">
+      <button onclick="_estPickerClear()" style="padding:11px 14px;border-radius:99px;border:1px solid rgba(255,80,80,0.2);background:rgba(18,18,18,0.95);font-family:var(--sans);font-size:11px;color:rgba(255,100,100,0.6);cursor:pointer;">limpar</button>
+      <button onclick="_estPickerConfirm()" style="flex:1;padding:11px 0;border-radius:99px;border:none;background:rgba(255,255,255,0.92);font-family:var(--sans);font-size:13px;font-weight:600;color:#0d0d0d;cursor:pointer;">confirmar</button>
+    </div>
+  </div>
 </body>
 </html>
