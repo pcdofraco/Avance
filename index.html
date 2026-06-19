@@ -6602,30 +6602,46 @@ function _estTimerReset(){
 
 // ── MUSIC PLAYER ──
 const _TRACKS=[
-  {name:'chuva leve',url:'chuva_leve.mp3',orb:'chuva'},
-  {name:'chuva forte',url:'chuva_forte.mp3',orb:'chuva'},
-  {name:'chuva e trovão',url:'chuva_trovão.mp3',orb:'chuva'},
-  {name:'floresta',url:'floresta.mp3',orb:'floresta'},
-  {name:'rio',url:'rio.mp3',orb:'rio'},
-  {name:'noite',url:'noite.mp3',orb:'noite'},
+  {name:'chuva leve',url:'sounds/chuva_leve.mp3'},
+  {name:'chuva forte',url:'sounds/chuva_forte.mp3'},
+  {name:'chuva e trovão',url:'sounds/chuva_trovão.mp3'},
+  {name:'floresta',url:'sounds/floresta.mp3'},
+  {name:'rio',url:'sounds/rio.mp3'},
+  {name:'noite',url:'sounds/noite.mp3'},
 ];
 let _musicIdx=0,_musicAudio=null,_musicPlaying=false;
 
+let _musicFadeRaf=null;
 function _musicEnsureAudio(){
   if(!_musicAudio||_musicAudio._src!==_TRACKS[_musicIdx].url){
     if(_musicAudio){_musicAudio.pause();_musicAudio=null;}
     _musicAudio=new Audio(_TRACKS[_musicIdx].url);
     _musicAudio._src=_TRACKS[_musicIdx].url;
     _musicAudio.loop=true;
-    _musicAudio.volume=0.55;
+    _musicAudio.volume=0;
   }
+}
+function _musicFadeIn(audio,target,dur){
+  cancelAnimationFrame(_musicFadeRaf);
+  const start=performance.now();
+  const from=audio.volume;
+  function step(now){
+    const t=Math.min((now-start)/dur,1);
+    const ease=1-Math.pow(1-t,3);
+    audio.volume=from+(target-from)*ease;
+    if(t<1)_musicFadeRaf=requestAnimationFrame(step);
+  }
+  _musicFadeRaf=requestAnimationFrame(step);
 }
 function _musicToggle(){
   _musicEnsureAudio();
   if(_musicPlaying){
     _musicAudio.pause();_musicPlaying=false;
   } else {
-    _musicAudio.play().catch(()=>{});_musicPlaying=true;
+    _musicAudio.volume=0;
+    _musicAudio.play().catch(()=>{});
+    _musicFadeIn(_musicAudio,0.55,1800);
+    _musicPlaying=true;
   }
   _musicUpdateUI();
 }
@@ -6646,14 +6662,14 @@ function _musicNext(){
   const wasPlaying=_musicPlaying;
   if(_musicAudio){_musicAudio.pause();_musicAudio=null;}_musicPlaying=false;
   _musicIdx=(_musicIdx+1)%_TRACKS.length;
-  if(wasPlaying){_musicEnsureAudio();_musicAudio.play().catch(()=>{});_musicPlaying=true;}
+  if(wasPlaying){_musicEnsureAudio();_musicAudio.volume=0;_musicAudio.play().catch(()=>{});_musicFadeIn(_musicAudio,0.55,1800);_musicPlaying=true;}
   _musicUpdateUI();
 }
 function _musicPrev(){
   const wasPlaying=_musicPlaying;
   if(_musicAudio){_musicAudio.pause();_musicAudio=null;}_musicPlaying=false;
   _musicIdx=(_musicIdx-1+_TRACKS.length)%_TRACKS.length;
-  if(wasPlaying){_musicEnsureAudio();_musicAudio.play().catch(()=>{});_musicPlaying=true;}
+  if(wasPlaying){_musicEnsureAudio();_musicAudio.volume=0;_musicAudio.play().catch(()=>{});_musicFadeIn(_musicAudio,0.55,1800);_musicPlaying=true;}
   _musicUpdateUI();
 }
 function _musicUpdateLabel(){_musicUpdateUI();}
