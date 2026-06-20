@@ -16,6 +16,7 @@
   function show(){document.body&&document.body.classList.add('fonts-ready');}
   // aplicar tema salvo o quanto antes para evitar flash
   try{if(localStorage.getItem('avance_theme')==='light')document.documentElement.classList.add('light-theme');}catch(_){}
+  console.log('[AVANCE] script head executou');
   // bloquear menu de contexto (long-press / clique direito) globalmente
   document.addEventListener('contextmenu',function(e){
     // permitir em inputs para colar/selecionar
@@ -7682,40 +7683,37 @@ Object.assign(window,{
 });
 
 /* ── AUTH STATE ── */
-// fallback: se Firebase não responder em 6s, mostra login
+// fallback: se Firebase não responder em 2s, mostra login
 let authResolved=false;
+console.log('[AVANCE] auth block iniciou, auth=', !!auth);
 
 if(!auth){
-  console.warn('Firebase indisponível — entrando em modo local');
+  console.warn('[AVANCE] Firebase indisponível — modo local');
   authResolved=true;
   currentUser=null;
   load();
   document.getElementById('login-screen')?.classList.add('gone');
   bootApp();
 }else{
+  console.log('[AVANCE] Firebase OK, aguardando onAuthStateChanged...');
   setTimeout(()=>{
+    console.log('[AVANCE] timeout 2s — authResolved=', authResolved);
     if(!authResolved){
       const ls=document.getElementById('login-screen');
+      console.log('[AVANCE] forçando login-screen, ls=', !!ls, ls?.className);
       if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
     }
   },2000);
 
-  // captura resultado do redirect do Google ao voltar à página (mobile)
   getRedirectResult(auth).then(result=>{
-    if(result&&result.user){
-      // login via redirect concluído — onAuthStateChanged cuida do resto
-    }
+    console.log('[AVANCE] getRedirectResult ok, user=', !!(result&&result.user));
   }).catch(e=>{
-    if(e.code&&e.code!=='auth/no-auth-event'){
-      console.warn('getRedirectResult',e);
-    }
+    console.warn('[AVANCE] getRedirectResult erro:', e.code, e.message);
   });
 
-  // ── Verificação de e-mail ──
   function _checkVerifyBanner(user){
     const banner=document.getElementById('verify-banner');
     if(!banner)return;
-    // mostrar só para contas e-mail não verificadas (Google já é verificado)
     const needsVerify=user&&!user.isAnonymous&&user.providerData&&
       user.providerData.some(p=>p.providerId==='password')&&
       !user.emailVerified;
@@ -7727,16 +7725,20 @@ if(!auth){
   }
 
   onAuthStateChanged(auth,async(user)=>{
+    console.log('[AVANCE] onAuthStateChanged disparou, user=', !!user);
     authResolved=true;
     if(!user){
+      console.log('[AVANCE] sem usuário — exibindo login-screen');
       const ls=document.getElementById('login-screen');
       const is=document.getElementById('intro-screen');
       const ap=document.getElementById('app');
+      console.log('[AVANCE] ls=', !!ls, 'is=', !!is, 'ap=', !!ap);
       if(is)is.classList.add('gone');
       if(ap)ap.style.opacity='0';
       if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
       return;
     }
+    console.log('[AVANCE] usuário logado uid=', user.uid);
     currentUser=user;
     const ap=document.getElementById('app');
     if(ap)ap.style.opacity='';
@@ -7749,7 +7751,6 @@ if(!auth){
     hideLoginScreen();
     bootApp();
     _checkVerifyBanner(user);
-    // mostrar termos como modal se ainda não aceitou
     if(!_termsCheck()) setTimeout(()=>_termsShow(), 800);
   });
 }
