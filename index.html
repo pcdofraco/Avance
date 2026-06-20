@@ -7735,7 +7735,25 @@ if(!auth){
       console.log('[AVANCE] ls=', !!ls, 'is=', !!is, 'ap=', !!ap);
       if(is)is.classList.add('gone');
       if(ap)ap.style.opacity='0';
-      if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
+      if(ls){
+        ls.classList.remove('out','gone');
+        ls.style.display='flex';
+        setTimeout(()=>{
+          ls.classList.add('visible');
+          const rect=ls.getBoundingClientRect();
+          const computed=window.getComputedStyle(ls);
+          console.log('[AVANCE] login-screen depois de visible:',
+            'opacity=',computed.opacity,
+            'display=',computed.display,
+            'visibility=',computed.visibility,
+            'zIndex=',computed.zIndex,
+            'rect=',rect.width+'x'+rect.height
+          );
+          // verificar se algo está na frente
+          const elAtCenter=document.elementFromPoint(window.innerWidth/2, window.innerHeight/2);
+          console.log('[AVANCE] elemento no centro da tela:', elAtCenter?.id||elAtCenter?.className||elAtCenter?.tagName);
+        },100);
+      }
       return;
     }
     console.log('[AVANCE] usuário logado uid=', user.uid);
