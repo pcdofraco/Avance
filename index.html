@@ -2973,7 +2973,7 @@ html.light-theme .chk-s{
   </div>
 </div>
 
-<div id="login-screen">
+<div id="login-screen" class="visible">
   <div class="login-inner">
     <div class="login-logo">avance</div>
     <div class="login-title" id="login-title">Bem-vindo</div>
@@ -7697,9 +7697,9 @@ if(!auth){
   setTimeout(()=>{
     if(!authResolved){
       const ls=document.getElementById('login-screen');
-      if(ls){ls.classList.remove('out','gone');ls.classList.add('visible');}
+      if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
     }
-  },6000);
+  },2000);
 
   // captura resultado do redirect do Google ao voltar à página (mobile)
   getRedirectResult(auth).then(result=>{
