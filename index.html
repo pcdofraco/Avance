@@ -14,6 +14,13 @@
 // libera visibilidade assim que fontes carregam (ou após 800ms no máximo)
 (function(){
   function show(){document.body&&document.body.classList.add('fonts-ready');}
+  // bloquear menu de contexto (long-press / clique direito) globalmente
+  document.addEventListener('contextmenu',function(e){
+    // permitir em inputs para colar/selecionar
+    const t=e.target;
+    if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+    e.preventDefault();
+  },{passive:false});
   if(document.fonts&&document.fonts.ready){
     document.fonts.ready.then(show);
   }
@@ -36,7 +43,23 @@
 html{background:#0d0d0d;}
 body{visibility:hidden;background:#0d0d0d;}
 body.fonts-ready{visibility:visible;}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{
+  margin:0;padding:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
+/* permitir seleção/edição apenas em campos de texto */
+input,textarea,[contenteditable="true"]{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+}
 :root{
   --bg:#0d0d0d;
   --g1:rgba(255,255,255,0.04);
@@ -1529,30 +1552,23 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 #profile-xp-track{width:100%;height:1px;background:rgba(255,255,255,0.07);border-radius:1px;margin-bottom:22px;}
 #profile-xp-fill{height:100%;background:rgba(255,255,255,0.3);border-radius:1px;transition:width 0.5s ease;width:0%;}
 
-/* stats row */
-#profile-stats-row2{
-  display:flex;border-top:1px solid rgba(255,255,255,0.05);
-  margin-top:0;
-}
-#profile-streak-row{
-  display:flex;gap:0;
-  border-top:1px solid rgba(255,255,255,0.05);
-  padding-top:16px;margin-bottom:20px;
-}
-.p-stat-item{flex:1;text-align:center;}
-.p-stat-item+.p-stat-item{border-left:1px solid rgba(255,255,255,0.05);}
-.p-stat-lbl{font-family:var(--mono);font-size:7px;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;display:block;margin-bottom:4px;}
-.p-stat-val{font-family:var(--mono);font-size:18px;font-weight:300;color:rgba(255,255,255,0.5);display:block;letter-spacing:-0.02em;}
+
 
 /* logout */
 #profile-logout{
-  width:100%;background:none;border:none;
-  font-family:var(--mono);font-size:8px;letter-spacing:0.16em;
-  color:rgba(255,80,70,0.3);text-transform:uppercase;cursor:pointer;
-  padding:8px 0;text-align:center;
-  transition:color 0.2s;
+  width:100%;padding:14px;border-radius:var(--r2);
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.07);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);cursor:pointer;
+  transition:all 0.15s;margin-top:20px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
-#profile-logout:active{color:rgba(255,80,70,0.7);}
+#profile-logout:active{
+  background:rgba(255,70,60,0.1);
+  color:rgba(255,100,90,0.8);
+  border-color:rgba(255,70,60,0.15);
+}
 
 /* ── AVATAR PICKER ── */
 #avatar-picker{
@@ -2824,7 +2840,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
     <div class="terms-section-title">Termos de Uso — Resumo</div>
 
-    <p class="terms-text">O <strong>AVANCE</strong> é um aplicativo de gestão pessoal por assinatura mensal, desenvolvido por <strong>Guilherme Araújo Vilela de Lima</strong>, CPF 141.043.614-45, com sede em Estrela de Alagoas — AL.</p>
+    <p class="terms-text">O <strong>AVANCE</strong> é um aplicativo de gestão pessoal por assinatura mensal. Para informações sobre o responsável, acesse a <span class="terms-link" onclick="window.open('politica-de-privacidade.html','_blank')">Política de Privacidade</span> completa.</p>
 
     <div class="terms-section-title">Assinatura e Cobrança</div>
     <p class="terms-text">O serviço funciona no modelo de <strong>assinatura mensal recorrente</strong>. A cobrança é realizada automaticamente todo mês na mesma data e horário da contratação. <strong>Não há parcelamento</strong> — o valor é cobrado integralmente a cada ciclo.</p>
@@ -2985,37 +3001,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
       <div id="profile-xp-track"><div id="profile-xp-fill"></div></div>
 
-      <!-- stats -->
-      <div id="profile-streak-row">
-        <div class="p-stat-item">
-          <span class="p-stat-lbl">streak</span>
-          <span class="p-stat-val" id="p-streak">0</span>
-        </div>
-        <div class="p-stat-item">
-          <span class="p-stat-lbl">xp total</span>
-          <span class="p-stat-val" id="p-xp-total">0</span>
-        </div>
-        <div class="p-stat-item">
-          <span class="p-stat-lbl">hábitos</span>
-          <span class="p-stat-val" id="p-hab-count">0</span>
-        </div>
-      </div>
-      <div id="profile-stats-row2">
-        <div class="p-stat-item">
-          <span class="p-stat-lbl">tarefas feitas</span>
-          <span class="p-stat-val" id="p-task-count">0</span>
-        </div>
-        <div class="p-stat-item">
-          <span class="p-stat-lbl">treinos</span>
-          <span class="p-stat-val" id="p-treino-count">0</span>
-        </div>
-        <div class="p-stat-item">
-          <span class="p-stat-lbl">estudos</span>
-          <span class="p-stat-val" id="p-estudo-count">0</span>
-        </div>
-      </div>
-
-      <button id="profile-logout" onclick="doLogout()">sair da conta</button>
+      <button id="profile-logout" onclick="doLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        sair da conta
+      </button>
     </div>
   </div>
 
@@ -3452,7 +3441,7 @@ let auth=null,db=null,GoogleAuthProvider=null,signInWithPopup=null,createUserWit
     fsDoc=null,getDoc=null,setDoc=null;
 
 async function initFirebase(){
-  const[{initializeApp},{getAuth,GoogleAuthProvider:GAP,signInWithPopup:SWP,getRedirectResult:GRR,createUserWithEmailAndPassword:CUEP,signInWithEmailAndPassword:SIEP,sendPasswordResetEmail:SPRE,sendEmailVerification:SEV,signOut:SO,onAuthStateChanged:OAC},{getFirestore,doc:D,getDoc:GD,setDoc:SD}]=await Promise.all([
+  const[{initializeApp},{getAuth,GoogleAuthProvider:GAP,signInWithPopup:SWP,signInWithRedirect:SWR,getRedirectResult:GRR,createUserWithEmailAndPassword:CUEP,signInWithEmailAndPassword:SIEP,sendPasswordResetEmail:SPRE,sendEmailVerification:SEV,signOut:SO,onAuthStateChanged:OAC},{getFirestore,doc:D,getDoc:GD,setDoc:SD}]=await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js'),
@@ -3466,7 +3455,7 @@ async function initFirebase(){
     appId:"1:522859049222:web:75a983573798b21ce0ae87"
   });
   auth=getAuth(_app);db=getFirestore(_app);
-  GoogleAuthProvider=GAP;signInWithPopup=SWP;getRedirectResult=GRR;createUserWithEmailAndPassword=CUEP;signInWithEmailAndPassword=SIEP;sendPasswordResetEmail=SPRE;sendEmailVerification=SEV;
+  GoogleAuthProvider=GAP;signInWithPopup=SWP;signInWithRedirect=SWR;getRedirectResult=GRR;createUserWithEmailAndPassword=CUEP;signInWithEmailAndPassword=SIEP;sendPasswordResetEmail=SPRE;sendEmailVerification=SEV;
   signOut=SO;onAuthStateChanged=OAC;
   fsDoc=D;getDoc=GD;setDoc=SD;
 }
@@ -4511,7 +4500,7 @@ function _renderTransList(){
   else if(_transFilter==='out') allItems=allItems.filter(t=>t.type==='out'||t.type==='invest');
   if(!allItems.length){tl.innerHTML=`<div class="empty-state">
       <div class="empty-state-desc">registre entradas e saídas<br>e controle seu dinheiro</div>
-      <button class="empty-state-cta" onclick="document.getElementById('fin-add-btn')?.click()">+ adicionar transação</button>
+      
     </div>`;return;}
   tl.innerHTML='';
   allItems.forEach(t=>{
@@ -5092,7 +5081,7 @@ function renderTreino(){
     ${fichaDoDia.length === 0
       ? `<div class="empty-state">
       <div class="empty-state-desc">adicione um treino ou<br>cardio para hoje</div>
-      <button class="empty-state-cta" onclick="document.getElementById('tr-add-ficha-btn')?.click()">+ adicionar</button>
+      
     </div>`
       : fichaDoDia.map(f=>{
           const letter = LETTERS[S.treino.fichas.indexOf(f) % 26];
@@ -5321,7 +5310,7 @@ function _trRenderWorkout(f){
   const exs = f.exercises||[];
   if(!exs.length){list.innerHTML=`<div class="empty-state">
       <div class="empty-state-desc">adicione exercícios<br>a esta ficha</div>
-      <button class="empty-state-cta" onclick="_trAddExercise()">+ exercício</button>
+      
     </div>`;return;}
   list.innerHTML = exs.map((ex,ei)=>{
     const parts = (ex.sets||'').toLowerCase().split('x');
@@ -6325,16 +6314,18 @@ async function fsLoad(uid){
   }
 }
 let _fsSaveFailCount=0;
+const _appStartTime=Date.now();
 async function fsSave(){
   if(!currentUser||currentUser.isAnonymous)return;
   try{
     await setDoc(fsDoc(db,'users',currentUser.uid),S);
-    _fsSaveFailCount=0; // reset contador de falhas
+    _fsSaveFailCount=0;
   }catch(e){
     console.warn('fsSave',e);
     _fsSaveFailCount++;
-    // avisar o usuário só na primeira falha consecutiva (não a cada save)
-    if(_fsSaveFailCount===1){
+    // avisar só após 2 falhas consecutivas E passados 8s do boot
+    // (evita falso alarme no carregamento inicial)
+    if(_fsSaveFailCount>=2 && Date.now()-_appStartTime>8000){
       showToast('falha ao sincronizar — dados salvos localmente','warn',3500);
     }
   }
@@ -6464,7 +6455,12 @@ async function loginGoogle(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
   try{
-    await signInWithPopup(auth,provider);
+    if(_isMobile()){
+      // mobile: redirect evita bloqueio de popup
+      await signInWithRedirect(auth,provider);
+    } else {
+      await signInWithPopup(auth,provider);
+    }
   }catch(e){
     setLoginLoading(false);
     if(e.code==='auth/network-request-failed'){
@@ -6714,7 +6710,7 @@ function _navPillHide(){
   const overlay=document.getElementById('nav-pill-overlay');
   if(!pill) return;
 
-  let dragging=false, startX=0, currentHover=-1, holdTimer=null;
+  let dragging=false, startX=0, currentHover=-1;
   window._navPillDragging=false;
 
   function getHoveredIdx(clientX){
@@ -6744,13 +6740,14 @@ function _navPillHide(){
       if(sn&&dragging){
         const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',dashboard:''};
         const nm=SEC_NAMES[id]||'';
-        if(sn.textContent!==nm){
+        if((sn.textContent||'')!==nm){
           sn.classList.remove('visible');
           sn.classList.add('changing');
           setTimeout(()=>{
+            if(!sn)return;
             sn.textContent=nm;
             sn.classList.remove('changing');
-            if(nm)requestAnimationFrame(()=>sn.classList.add('visible'));
+            if(nm)requestAnimationFrame(()=>sn&&sn.classList.add('visible'));
           },80);
         }
       }
@@ -6790,35 +6787,42 @@ function _navPillHide(){
     if(ct){ct.classList.remove('nav-blur');ct.classList.add('nav-clear');setTimeout(()=>ct.classList.remove('nav-clear'),380);}
     // esconde nome da seção
     const sn=document.getElementById('h-section-name');
-    if(sn){sn.classList.remove('visible');sn.classList.add('changing');setTimeout(()=>sn.classList.remove('changing'),200);}
+    if(sn){sn.classList.remove('visible');sn.classList.add('changing');setTimeout(()=>{if(sn)sn.classList.remove('changing');},200);}
   }
 
-  // Touch
+  // Touch — ativa imediatamente no toque
   pill.addEventListener('touchstart',e=>{
-    const t=e.touches[0];
-    holdTimer=setTimeout(()=>startDrag(t.clientX),180);
-  },{passive:true});
-
-  pill.addEventListener('touchmove',e=>{
-    clearTimeout(holdTimer);
-    if(!dragging) return;
     e.preventDefault();
-    const t=e.touches[0];
-    setHover(getHoveredIdx(t.clientX));
+    startDrag(e.touches[0].clientX);
   },{passive:false});
 
-  pill.addEventListener('touchend',()=>{clearTimeout(holdTimer);endDrag();});
-  pill.addEventListener('touchcancel',()=>{clearTimeout(holdTimer);endDrag();});
+  pill.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    e.preventDefault();
+    setHover(getHoveredIdx(e.touches[0].clientX));
+  },{passive:false});
+
+  pill.addEventListener('touchend',e=>{
+    try{
+      // tap simples (sem mover): navega para a bolinha tocada
+      if(dragging && currentHover<0 && e.changedTouches.length){
+        const idx=getHoveredIdx(e.changedTouches[0].clientX);
+        if(idx>=0 && NAV_PILL_TABS[idx]) setTab(NAV_PILL_TABS[idx].id);
+      }
+    }catch(_){}
+    endDrag();
+  },{passive:true});
+  pill.addEventListener('touchcancel',()=>endDrag());
 
   // Mouse
   pill.addEventListener('mousedown',e=>{
-    holdTimer=setTimeout(()=>startDrag(e.clientX),180);
+    startDrag(e.clientX);
   });
   window.addEventListener('mousemove',e=>{
     if(!dragging) return;
     setHover(getHoveredIdx(e.clientX));
   });
-  window.addEventListener('mouseup',()=>{clearTimeout(holdTimer);if(dragging)endDrag();});
+  window.addEventListener('mouseup',()=>{if(dragging)endDrag();});
 })();
 
 function _qaToggle(e){
@@ -6998,7 +7002,7 @@ function _estNotesRenderList(){
   if(!notes.length){
     list.innerHTML=`<div class="empty-state">
       <div class="empty-state-desc">escreva o que aprendeu<br>e guarde suas ideias</div>
-      <button class="empty-state-cta" onclick="_estNoteNew()">+ nova anotação</button>
+      
     </div>`;
     return;
   }
@@ -7343,7 +7347,7 @@ function _estRenderList(){
   if(!items.length){
     list.innerHTML=`<div class="empty-state">
       <div class="empty-state-desc">registre suas matérias e<br>acompanhe seu progresso</div>
-      <button class="empty-state-cta" onclick="_estToggleAdd()">+ adicionar atividade</button>
+      
     </div>`;
     return;
   }
@@ -7570,9 +7574,16 @@ if(!auth){
     }
   },6000);
 
-  // captura resultado do redirect do Google ao voltar à página
-  // (signInWithPopup pode cair em redirect no PWA se o popup for bloqueado)
-  getRedirectResult(auth).catch(e=>console.warn('getRedirectResult',e));
+  // captura resultado do redirect do Google ao voltar à página (mobile)
+  getRedirectResult(auth).then(result=>{
+    if(result&&result.user){
+      // login via redirect concluído — onAuthStateChanged cuida do resto
+    }
+  }).catch(e=>{
+    if(e.code&&e.code!=='auth/no-auth-event'){
+      console.warn('getRedirectResult',e);
+    }
+  });
 
   // ── Verificação de e-mail ──
   function _checkVerifyBanner(user){
@@ -7795,6 +7806,7 @@ function closeSettings(){
 function openProfile(){
   const sheet=document.getElementById('profile-sheet');
   sheet.classList.add('open');
+  _navPillHide();
   _applyAvatarUI();
   const nm=S.userName||'';
   document.getElementById('profile-name-display').textContent=nm||'sem nome';
@@ -7820,26 +7832,11 @@ function openProfile(){
   document.getElementById('p-xp-txt').textContent=inLvl+' / '+toNext+' xp';
   document.getElementById('profile-sub-display').textContent='nível '+lvl;
   setTimeout(()=>{document.getElementById('profile-xp-fill').style.width=(inLvl/toNext*100)+'%';},80);
-  // streak
-  let streak=0;
-  const now=new Date();
-  for(let i=0;i<60;i++){
-    const key=new Date(now.getTime()-i*86400000).toDateString();
-    const dow=new Date(now.getTime()-i*86400000).getDay();
-    const dayH=S.habits.filter(h=>!h.days||h.days.includes(dow));
-    if(!dayH.length)continue;
-    if(dayH.every(h=>h.done&&h.done[key]))streak++;
-    else if(i>0)break;
-  }
-  document.getElementById('p-streak').textContent=streak;
-  document.getElementById('p-xp-total').textContent=(S.xp||0)+'xp';
-  document.getElementById('p-hab-count').textContent=S.habits.length;
-  document.getElementById('p-task-count').textContent=S.tasks.filter(t=>t.done).length;
-  document.getElementById('p-treino-count').textContent=((S.treino&&S.treino.log)||[]).length;
-  document.getElementById('p-estudo-count').textContent=((S.estudos&&S.estudos.items)||[]).filter(i=>i.done).length;
+
 }
 function closeProfile(){
   document.getElementById('profile-sheet').classList.remove('open');
+  _navPillShow();
 }
 
 /* ── CHIP PANEL HELPERS ── */
