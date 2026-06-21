@@ -1,4 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0d0d0d">
+<title>AVANCE</title>
+<script>
+// libera visibilidade assim que fontes carregam (ou após 800ms no máximo)
+(function(){
+  function show(){document.body&&document.body.classList.add('fonts-ready');}
+  // aplicar tema salvo o quanto antes para evitar flash
+  try{if(localStorage.getItem('avance_theme')==='light')document.documentElement.classList.add('light-theme');}catch(_){}
+  // bloquear menu de contexto (long-press / clique direito) globalmente
+  document.addEventListener('contextmenu',function(e){
+    // permitir em inputs para colar/selecionar
+    const t=e.target;
+    if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+    e.preventDefault();
+  },{passive:false});
+  if(document.fonts&&document.fonts.ready){
+    document.fonts.ready.then(show);
+  }
+  setTimeout(show,500);
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(show,0);});
+})();
+</script>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Avance">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=block" rel="stylesheet">
+<style>
+/* tema base */
+html{background:#0d0d0d;}
+html.light-theme{background:#f2f2f2;}
+body{background:#0d0d0d;}
+html.light-theme body{background:#f2f2f2;}
+body.fonts-ready{}
+*{
+  margin:0;padding:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
+/* permitir seleção/edição apenas em campos de texto */
+input,textarea,[contenteditable="true"]{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+  -webkit-touch-callout:default;
+}
+:root{
+  /* tema escuro (padrão) — ink=branco, paper=preto */
+  --ink:255,255,255;
+  --paper:0,0,0;
+  --ink-solid:#fff;
+  --paper-solid:#0d0d0d;
+  --bg:#0d0d0d;
+  --surface:18,18,18;
+  --g1:rgba(var(--ink),0.04);
+  --b1:rgba(var(--ink),0.08);--b2:rgba(var(--ink),0.16);
+  --t1:var(--ink-solid);--t2:rgba(var(--ink),0.6);--t3:rgba(var(--ink),0.3);--t4:rgba(var(--ink),0.12);
+  --sep:rgba(var(--ink),0.07);
+  --planos-bg:#0a0a0a;
+  --accent:74,222,128;
+  --accent-solid:#4ade80;
+  --mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;
+  --r:14px;--r2:10px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+}
+/* tema claro — inverte ink e paper, demais cores intactas */
+html.light-theme{
+  --ink:13,13,13;
+  --paper:255,255,255;
+  --ink-solid:#0d0d0d;
+  --paper-solid:#fff;
+  --bg:#f2f2f2;
+  --surface:255,255,255;
+  --planos-bg:#f0f2f5;
+}
+html,body{height:100%;width:100%;background:var(--bg);color:var(--t1);font-family:var(--sans);overflow:hidden;position:fixed;}
+#app{opacity:0;transition:opacity 0.35s ease;}
+#app.ready{opacity:1;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);}
+
+
+/* ── MODAL CHIPS ── */
+.m-chips-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
+.m-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:20px;
+  border:1px solid rgba(var(--ink),0.1);
+  background:rgba(var(--ink),0.04);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
+  color:rgba(var(--ink),0.4);text-transform:uppercase;
+  cursor:pointer;transition:border-color 0.18s,color 0.18s,background 0.18s;
+  white-space:nowrap;user-select:none;
+}
+.m-chip:active{background:rgba(var(--ink),0.08);}
+.m-chip.has-val{border-color:rgba(var(--ink),0.22);color:rgba(var(--ink),0.75);}
+.m-chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.m-chip-lbl{opacity:0.45;margin-right:2px;}
+/* chip sub-panel */
+.m-chip-panel{
+  display:none;margin-top:10px;padding:14px;
+  border-radius:14px;background:rgba(var(--ink),0.03);
+  border:1px solid rgba(var(--ink),0.07);
+}
+.m-chip-panel.open{display:block;}
+/* tag presets */
+.m-tag-presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.m-tag-preset{
+  padding:5px 11px;border-radius:16px;
+  border:1px solid rgba(var(--ink),0.08);background:none;
+  font-family:var(--mono);font-size:9px;color:rgba(var(--ink),0.35);
+  cursor:pointer;transition:all 0.15s;
+}
+.m-tag-preset.sel{background:rgba(var(--ink),0.08);border-color:rgba(var(--ink),0.2);color:rgba(var(--ink),0.8);}
+/* color dots in chip panel */
+.m-chip-colors{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.m-chip-color-dot{
   width:22px;height:22px;border-radius:50%;cursor:pointer;
   border:2px solid transparent;transition:transform 0.15s,border-color 0.15s;
 }
