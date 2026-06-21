@@ -75,6 +75,7 @@ input,textarea,[contenteditable="true"]{
   --b1:rgba(var(--ink),0.08);--b2:rgba(var(--ink),0.16);
   --t1:var(--ink-solid);--t2:rgba(var(--ink),0.6);--t3:rgba(var(--ink),0.3);--t4:rgba(var(--ink),0.12);
   --sep:rgba(var(--ink),0.07);
+  --planos-bg:#0d0f11;
   --accent:74,222,128;
   --accent-solid:#4ade80;
   --mono:'DM Sans',sans-serif;--sans:'DM Sans',sans-serif;
@@ -89,6 +90,7 @@ html.light-theme{
   --paper-solid:#fff;
   --bg:#f2f2f2;
   --surface:255,255,255;
+  --planos-bg:#f0f2f5;
 }
 html,body{height:100%;width:100%;background:var(--bg);color:var(--t1);font-family:var(--sans);overflow:hidden;position:fixed;}
 #app{opacity:0;transition:opacity 0.35s ease;}
@@ -621,6 +623,13 @@ html.light-theme .chk-s{
 
 /* ── ESTUDOS ── */
 #sec-estudos{padding-top:0;display:none;flex-direction:column;height:calc(100vh - var(--st) - 80px);overflow:hidden;box-sizing:border-box;padding-bottom:0!important;position:relative;}
+/* ── PLANOS ── */
+#sec-planos{padding:0!important;margin:0!important;overflow:hidden;position:fixed;top:var(--st);left:0;right:0;bottom:80px;display:none;touch-action:none;}
+#sec-planos.active{display:block;}
+#planos-canvas-wrap{width:100%;height:100%;position:relative;overflow:hidden;background:var(--planos-bg);cursor:grab;}
+#planos-canvas-wrap.grabbing{cursor:grabbing;}
+#planos-grid-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+#planos-world{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;}
 #sec-estudos.active{display:flex!important;}#est-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
 #est-title{font-family:var(--mono);font-size:8px;letter-spacing:0.22em;color:rgba(var(--ink),0.2);text-transform:uppercase;}
 #est-add-btn{
@@ -1710,7 +1719,8 @@ html.light-theme .chk-s{
 .settings-row-lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:rgba(var(--ink),0.35);text-transform:uppercase;}
 .settings-row-val{font-family:var(--mono);font-size:10px;color:rgba(var(--ink),0.18);}
 /* ── THEME TOGGLE ── */
-.settings-row-accent{flex-wrap:wrap;}
+.settings-row-theme{border-bottom:none;}
+.settings-row-accent{flex-wrap:wrap;padding-top:4px;border-top:none;margin-top:-10px;}
 #accent-dots{display:flex;gap:10px;flex-shrink:0;}
 .accent-dot{
   width:24px;height:24px;border-radius:50%;cursor:pointer;
@@ -3131,7 +3141,7 @@ html.light-theme .chk-s{
     <div id="settings-inner">
       <div id="settings-handle"></div>
       <div id="settings-title">configurações</div>
-      <div class="settings-row">
+      <div class="settings-row settings-row-theme">
         <span class="settings-row-lbl">tema</span>
         <button id="theme-toggle" onclick="_toggleTheme()" aria-label="alternar tema">
           <div id="theme-toggle-track">
@@ -3475,6 +3485,14 @@ html.light-theme .chk-s{
       </div><!-- fim est-timer-mode -->
     </div><!-- fim sec-estudos -->
 
+    <!-- PLANOS SECTION -->
+    <div id="sec-planos" class="section">
+      <div id="planos-canvas-wrap">
+        <canvas id="planos-grid-canvas"></canvas>
+        <div id="planos-world"></div>
+      </div>
+    </div><!-- fim sec-planos -->
+
   </div>
 </div>
 
@@ -3709,7 +3727,7 @@ function toggleDrawer(){}
 function closeDrawer(){}
 
 /* TABS */
-const TAB_ORDER=['dashboard','habitos','tarefas','financas','treino','estudos'];
+const TAB_ORDER=['dashboard','habitos','tarefas','financas','treino','estudos','planos'];
 function setTab(name,dir){
   const prev=curTab;
   // salva modo de estudos ao sair
@@ -3774,6 +3792,13 @@ function setTab(name,dir){
     renderEstudos();
     if(_lastEstMode==='timer-mode')_estTimerUpdateDisplay();
     else if(_lastEstMode==='notes-mode'){_estNotesEnsure();_estNotesRenderList();_estShowNotesList();}
+  }
+  else if(name==='planos'){
+    if(typeof planosEnter==='function') planosEnter();
+  }
+  // ao sair de planos — para o loop
+  if(prev==='planos'&&name!=='planos'){
+    if(typeof planosLeave==='function') planosLeave();
   }
   // nav pill — visível em todas as seções
   _navPillShow();
@@ -6603,13 +6628,19 @@ async function loginGoogle(){
   const provider=new GoogleAuthProvider();
   provider.setCustomParameters({prompt:'select_account'});
   try{
-    // popup funciona melhor em navegadores modernos (mobile e desktop);
-    // signInWithRedirect quebra em muitos browsers por bloqueio de storage cross-domain
-    await signInWithPopup(auth,provider);
+    // popup NÃO recarrega a página → a sessão nunca se perde → sem loop de login.
+    // funciona em desktop e na maioria dos navegadores mobile.
+    const r=await signInWithPopup(auth,provider);
+    // sucesso: onAuthStateChanged dispara e abre o app. Garante boot mesmo se demorar.
+    if(r&&r.user){
+      const _ls=document.getElementById('login-screen');
+      if(_ls){_ls.classList.remove('visible','out');_ls.classList.add('gone');_ls.style.display='none';}
+    }
   }catch(e){
-    // se o popup for bloqueado pelo navegador, cai para redirect
-    if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){
+    // popup bloqueado (PWA instalado / webview): cai para redirect
+    if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/cancelled-popup-request'){
       try{
+        try{sessionStorage.setItem('avance_pending_login','1');}catch(_){}
         await signInWithRedirect(auth,provider);
         return;
       }catch(e2){
@@ -6621,7 +6652,9 @@ async function loginGoogle(){
     setLoginLoading(false);
     if(e.code==='auth/network-request-failed'){
       setLoginError('Sem conexão. Verifique sua internet.');
-    } else if(e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request'){
+    } else if(e.code==='auth/unauthorized-domain'){
+      setLoginError('Domínio não autorizado no Firebase.');
+    } else if(e.code!=='auth/popup-closed-by-user'){
       setLoginError('Erro ao entrar com Google. Tente novamente.');
     }
   }
@@ -6828,6 +6861,7 @@ const NAV_PILL_TABS=[
   {id:'financas',  label:'finanças'},
   {id:'treino',    label:'treino'},
   {id:'estudos',   label:'estudos'},
+  {id:'planos',    label:'planos'},
 ];
 
 function _navPillInit(){
@@ -6894,7 +6928,7 @@ function _navPillHide(){
       // atualiza nome no centro da tela em tempo real
       const sn=document.getElementById('h-section-name');
       if(sn&&dragging){
-        const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',dashboard:''};
+        const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',planos:'planos',dashboard:''};
         const nm=SEC_NAMES[id]||'';
         if((sn.textContent||'')!==nm){
           sn.classList.remove('visible');
@@ -6922,7 +6956,7 @@ function _navPillHide(){
     // mostrar nome da seção atual
     const sn=document.getElementById('h-section-name');
     if(sn){
-      const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',dashboard:''};
+      const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',planos:'planos',dashboard:''};
       const nm=SEC_NAMES[curTab]||'';
       sn.textContent=nm;
       if(nm){sn.classList.remove('changing');requestAnimationFrame(()=>sn.classList.add('visible'));}
@@ -7728,20 +7762,42 @@ if(!auth){
   document.getElementById('login-screen')?.classList.add('gone');
   bootApp();
 }else{
+  // detecta se voltamos de um redirect de login (evita mostrar login cedo demais)
+  let _processingRedirect=false;
+  try{_processingRedirect=sessionStorage.getItem('avance_pending_login')==='1';}catch(_){}
+
   setTimeout(()=>{
-    if(!authResolved){
+    if(!authResolved && !_processingRedirect){
       const ls=document.getElementById('login-screen');
       if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
     }
   },2000);
 
   getRedirectResult(auth).then(result=>{
+    try{sessionStorage.removeItem('avance_pending_login');}catch(_){}
+    _processingRedirect=false;
+    // se houve resultado mas onAuthStateChanged demorar, força fallback após resolver
+    if(result&&result.user){
+      // onAuthStateChanged vai disparar com o user — não fazemos nada aqui
+    }else{
+      // sem resultado de redirect: se ainda não resolveu auth, mostra login
+      setTimeout(()=>{
+        if(!authResolved && !auth.currentUser){
+          const ls=document.getElementById('login-screen');
+          if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
+        }
+      },500);
+    }
   }).catch(e=>{
+    try{sessionStorage.removeItem('avance_pending_login');}catch(_){}
+    _processingRedirect=false;
     if(e.code&&e.code!=='auth/no-auth-event')console.warn('getRedirectResult',e);
   });
 
   onAuthStateChanged(auth,async(user)=>{
     authResolved=true;
+    try{sessionStorage.removeItem('avance_pending_login');}catch(_){}
+
     if(!user){
       const ls=document.getElementById('login-screen');
       const is=document.getElementById('intro-screen');
@@ -7751,24 +7807,52 @@ if(!auth){
       if(ls){ls.classList.remove('out','gone');ls.style.display='flex';setTimeout(()=>ls.classList.add('visible'),50);}
       return;
     }
+
     currentUser=user;
+
+    // ESCONDE login e BOOTA o app IMEDIATAMENTE — não espera o Firestore.
+    // Isso garante que o usuário nunca fica preso na tela de login após logar.
     const ap=document.getElementById('app');
     if(ap)ap.style.opacity='';
-    if(!user.isAnonymous){
-      await fsLoad(user.uid);
-      if(!S.userName&&user.displayName){S.userName=user.displayName.split(' ')[0];fsSave();}
-    }else{
-      load();
-    }
+
+    // força a tela de login a sumir de imediato (sem depender de animação/timing)
+    const _ls=document.getElementById('login-screen');
+    if(_ls){_ls.classList.remove('visible','out');_ls.classList.add('gone');_ls.style.display='none';}
+    const _is=document.getElementById('intro-screen');
+    // não esconder intro aqui — bootApp usa a intro para a animação de boas-vindas
+
+    // carrega dados locais primeiro (instantâneo) para a UI ter algo
+    load();
+
     hideLoginScreen();
     bootApp();
     _updateProfileVerify(user);
     if(!_termsCheck()) setTimeout(()=>_termsShow(), 800);
+
+    // depois sincroniza com o Firestore em segundo plano (sem travar a UI)
+    if(!user.isAnonymous){
+      try{
+        await fsLoad(user.uid);
+        if(!S.userName&&user.displayName){S.userName=user.displayName.split(' ')[0];fsSave();}
+        // re-renderiza com os dados da nuvem já carregados
+        try{
+          updateXPBar();updateRing();_applyAvatarUI();
+          renderDashboard();renderHabitFilters();renderTaskFilters();
+          if(typeof renderTreino==='function')renderTreino();
+          if(typeof renderEstudos==='function')renderEstudos();
+        }catch(_){}
+      }catch(e){
+        console.warn('[AUTH] fsLoad falhou:', e);
+      }
+    }
   });
 }
 
 /* ── BOOT APP (after auth) ── */
+var _booted=false;
 function bootApp(){
+  if(_booted)return;
+  _booted=true;
   // pequeno delay para garantir que o DOM está pronto no mobile
   setTimeout(()=>{
     try{
@@ -8071,11 +8155,11 @@ function _updateChip(id,label,hasVal){
 
 
 /* ── SECTIONS / PREFS ── */
-const SECTION_LABELS={dashboard:'Dashboard',habitos:'Hábitos',tarefas:'Tarefas',financas:'Finanças',treino:'Treino',estudos:'Estudos'};
+const SECTION_LABELS={dashboard:'Dashboard',habitos:'Hábitos',tarefas:'Tarefas',financas:'Finanças',treino:'Treino',estudos:'Estudos',planos:'Planos'};
 
 function applyPrefs(){
   if(!S.prefs)return;
-  const all=['dashboard','habitos','tarefas','financas','treino','estudos'];
+  const all=['dashboard','habitos','tarefas','financas','treino','estudos','planos'];
   const active=all.filter(t=>S.prefs.sections[t]!==false);
   if(!active.includes('dashboard'))active.unshift('dashboard');
   TAB_ORDER.length=0;active.forEach(t=>TAB_ORDER.push(t));
@@ -8249,6 +8333,173 @@ function _setFinPeriod(p){
   if(_finAnimRaf){cancelAnimationFrame(_finAnimRaf);_finAnimRaf=null;}
   renderFinance(true);
 }
+
+/* ── PLANOS ENGINE ── */
+(function(){
+  let _px=0,_py=0,_pz=1; // pan x,y e zoom
+  const MIN_Z=0.15, MAX_Z=4, GRID=40;
+  let _dragging=false, _lastX=0,_lastY=0;
+  let _pinching=false,_pinchDist=0;
+  let _raf=null,_dirty=true;
+
+  function _wrap(){return document.getElementById('planos-canvas-wrap');}
+  function _world(){return document.getElementById('planos-world');}
+  function _canvas(){return document.getElementById('planos-grid-canvas');}
+
+  function _applyTransform(){
+    const w=_world();
+    if(w) w.style.transform=`translate(${_px}px,${_py}px) scale(${_pz})`;
+  }
+
+  function _drawGrid(){
+    const cv=_canvas();
+    if(!cv) return;
+    const wrap=_wrap();
+    if(!wrap) return;
+    const W=wrap.clientWidth, H=wrap.clientHeight;
+    if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+    const ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+
+    // cor da grade conforme tema
+    const light=document.documentElement.classList.contains('light-theme');
+    const lineColor=light?'rgba(0,0,0,0.07)':'rgba(255,255,255,0.055)';
+    const dotColor=light?'rgba(0,0,0,0.12)':'rgba(255,255,255,0.1)';
+
+    const step=GRID*_pz;
+    const offX=((_px%step)+step)%step;
+    const offY=((_py%step)+step)%step;
+
+    ctx.strokeStyle=lineColor;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let x=offX;x<W;x+=step){ctx.moveTo(x,0);ctx.lineTo(x,H);}
+    for(let y=offY;y<H;y+=step){ctx.moveTo(0,y);ctx.lineTo(W,y);}
+    ctx.stroke();
+
+    // pontos nos cruzamentos
+    ctx.fillStyle=dotColor;
+    for(let x=offX;x<W;x+=step){
+      for(let y=offY;y<H;y+=step){
+        ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();
+      }
+    }
+  }
+
+  function _tick(){
+    if(_dirty){_drawGrid();_applyTransform();_dirty=false;}
+    _raf=requestAnimationFrame(_tick);
+  }
+
+  function _startLoop(){
+    if(!_raf) _raf=requestAnimationFrame(_tick);
+  }
+  function _stopLoop(){
+    if(_raf){cancelAnimationFrame(_raf);_raf=null;}
+  }
+
+  function _clampZoom(z){return Math.min(MAX_Z,Math.max(MIN_Z,z));}
+
+  function _zoomAt(cx,cy,factor){
+    const nz=_clampZoom(_pz*factor);
+    const ratio=nz/_pz;
+    _px=cx-(cx-_px)*ratio;
+    _py=cy-(cy-_py)*ratio;
+    _pz=nz;
+    _dirty=true;
+  }
+
+  function _onWheel(e){
+    e.preventDefault();
+    const wrap=_wrap();
+    const r=wrap.getBoundingClientRect();
+    const cx=e.clientX-r.left, cy=e.clientY-r.top;
+    const factor=e.deltaY<0?1.1:0.9;
+    _zoomAt(cx,cy,factor);
+  }
+
+  function _onMouseDown(e){
+    if(e.button!==0) return;
+    _dragging=true;_lastX=e.clientX;_lastY=e.clientY;
+    _wrap()?.classList.add('grabbing');
+  }
+  function _onMouseMove(e){
+    if(!_dragging) return;
+    _px+=e.clientX-_lastX;_py+=e.clientY-_lastY;
+    _lastX=e.clientX;_lastY=e.clientY;
+    _dirty=true;
+  }
+  function _onMouseUp(){_dragging=false;_wrap()?.classList.remove('grabbing');}
+
+  function _pinchDist2(t){
+    const dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY;
+    return Math.sqrt(dx*dx+dy*dy);
+  }
+  function _pinchMid(t,r){
+    return {x:((t[0].clientX+t[1].clientX)/2)-r.left,
+            y:((t[0].clientY+t[1].clientY)/2)-r.top};
+  }
+
+  function _onTouchStart(e){
+    if(e.touches.length===2){
+      e.preventDefault();
+      _pinching=true;_dragging=false;
+      _pinchDist=_pinchDist2(e.touches);
+    } else if(e.touches.length===1){
+      _dragging=true;_pinching=false;
+      _lastX=e.touches[0].clientX;_lastY=e.touches[0].clientY;
+    }
+  }
+  function _onTouchMove(e){
+    e.preventDefault();
+    if(_pinching&&e.touches.length===2){
+      const d=_pinchDist2(e.touches);
+      const wrap=_wrap();
+      const r=wrap.getBoundingClientRect();
+      const mid=_pinchMid(e.touches,r);
+      _zoomAt(mid.x,mid.y,d/_pinchDist);
+      _pinchDist=d;
+    } else if(_dragging&&e.touches.length===1){
+      _px+=e.touches[0].clientX-_lastX;
+      _py+=e.touches[0].clientY-_lastY;
+      _lastX=e.touches[0].clientX;_lastY=e.touches[0].clientY;
+      _dirty=true;
+    }
+  }
+  function _onTouchEnd(e){
+    if(e.touches.length<2) _pinching=false;
+    if(e.touches.length===0) _dragging=false;
+  }
+
+  function _onResize(){_dirty=true;}
+
+  function planosInit(){
+    const wrap=_wrap();
+    if(!wrap||wrap._planosInited) return;
+    wrap._planosInited=true;
+    wrap.addEventListener('wheel',_onWheel,{passive:false});
+    wrap.addEventListener('mousedown',_onMouseDown);
+    window.addEventListener('mousemove',_onMouseMove);
+    window.addEventListener('mouseup',_onMouseUp);
+    wrap.addEventListener('touchstart',_onTouchStart,{passive:false});
+    wrap.addEventListener('touchmove',_onTouchMove,{passive:false});
+    wrap.addEventListener('touchend',_onTouchEnd);
+    window.addEventListener('resize',_onResize);
+    _dirty=true;
+    _startLoop();
+  }
+
+  function planosEnter(){
+    planosInit();
+    _dirty=true;
+    _startLoop();
+  }
+
+  function planosLeave(){_stopLoop();}
+
+  window.planosEnter=planosEnter;
+  window.planosLeave=planosLeave;
+})();
 </script>
   <!-- TREINO SHEET (fora de qualquer container para position:fixed funcionar corretamente) -->
   <div id="tr-sheet-overlay" onclick="_trCloseSheet()"></div>
