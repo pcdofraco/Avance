@@ -96,8 +96,8 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--t1);font-famil
 #app{opacity:0;transition:opacity 0.35s ease;}
 #app.ready{opacity:1;}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;}
-#app{position:relative;z-index:10;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);pointer-events:none;}
-#app>*{pointer-events:auto;}
+#app{position:relative;z-index:1;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);}
+
 
 /* ── MODAL CHIPS ── */
 .m-chips-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
@@ -288,7 +288,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   display:flex;align-items:center;justify-content:space-between;
   padding:clamp(14px,3.5vw,24px) clamp(16px,5vw,48px) clamp(10px,2vw,16px);
   flex-shrink:0;gap:12px;
-  position:relative;z-index:20;
+  position:relative;z-index:410;
 }
 .h-center{flex:1;display:flex;align-items:center;justify-content:center;gap:0;}
 /* nome de seção: fixed, centrado na tela */
@@ -627,7 +627,7 @@ html.light-theme .chk-s{
 /* ── ESTUDOS ── */
 #sec-estudos{padding-top:0;display:none;flex-direction:column;height:calc(100vh - var(--st) - 80px);overflow:hidden;box-sizing:border-box;padding-bottom:0!important;position:relative;}
 /* ── PLANOS ── */
-#sec-planos{padding:0!important;margin:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0;display:none;touch-action:none;z-index:5;background:var(--planos-bg);}
+#sec-planos{padding:0!important;margin:0!important;overflow:hidden;position:fixed;inset:0;display:none;touch-action:none;z-index:250;background:var(--planos-bg);}
 #sec-planos.active{display:block;}
 #planos-canvas-wrap{width:100%;height:100%;position:relative;overflow:hidden;background:var(--planos-bg);cursor:grab;}
 #planos-canvas-wrap.grabbing{cursor:grabbing;}
@@ -3202,7 +3202,6 @@ html.light-theme .chk-s{
       <div class="h-app-name">AVANCE</div>
       <div class="h-app-sub">seu sistema de evolução</div>
     </div>
-    <span class="h-section-name" id="h-section-name"></span>
     <!-- placeholder reserva espaço do sininho no header -->
     <div id="notif-placeholder"></div>
   </div>
@@ -3622,10 +3621,11 @@ html.light-theme .chk-s{
     </div><!-- fim sec-estudos -->
 
 
+
   </div>
 </div>
 
-<!-- PLANOS SECTION — fora do #app para que filter:blur no #content não prenda o position:fixed -->
+<!-- PLANOS SECTION — fullscreen, fora do #app (acima dele) -->
 <div id="sec-planos" class="section">
   <div id="planos-canvas-wrap">
     <canvas id="planos-grid-canvas"></canvas>
@@ -3633,6 +3633,8 @@ html.light-theme .chk-s{
     <svg id="planos-overlay-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:20;"></svg>
   </div>
 </div><!-- fim sec-planos -->
+
+<span class="h-section-name" id="h-section-name"></span>
 
 <!-- FILTER PANELS — outside #app so filter:blur on #content doesn't affect them -->
 <div id="habit-tag-panel"></div>
@@ -7091,8 +7093,8 @@ function _navPillHide(){
     // blur no conteúdo
     const ct=document.getElementById('content');
     if(ct){ct.classList.add('nav-blur');ct.classList.remove('nav-clear');}
-    const pl=document.getElementById('planos-canvas-wrap');
-    if(pl&&document.getElementById('sec-planos')?.classList.contains('active')){pl.classList.add('nav-blur');pl.classList.remove('nav-clear');}
+    const pw=document.getElementById('planos-canvas-wrap');
+    if(pw&&document.getElementById('sec-planos')?.classList.contains('active')){pw.classList.add('nav-blur');pw.classList.remove('nav-clear');}
     // mostrar nome da seção atual
     const sn=document.getElementById('h-section-name');
     if(sn){
@@ -7115,8 +7117,8 @@ function _navPillHide(){
     // remove blur do conteúdo
     const ct=document.getElementById('content');
     if(ct){ct.classList.remove('nav-blur');ct.classList.add('nav-clear');setTimeout(()=>ct.classList.remove('nav-clear'),380);}
-    const pl=document.getElementById('planos-canvas-wrap');
-    if(pl){pl.classList.remove('nav-blur');pl.classList.add('nav-clear');setTimeout(()=>pl.classList.remove('nav-clear'),380);}
+    const pw=document.getElementById('planos-canvas-wrap');
+    if(pw){pw.classList.remove('nav-blur');pw.classList.add('nav-clear');setTimeout(()=>pw.classList.remove('nav-clear'),380);}
     // esconde nome da seção
     const sn=document.getElementById('h-section-name');
     if(sn){sn.classList.remove('visible');sn.classList.add('changing');setTimeout(()=>{if(sn)sn.classList.remove('changing');},200);}
@@ -8555,14 +8557,15 @@ function _setFinPeriod(p){
       wMaxY=Math.max(wMaxY, by+bh+PAN_MARGIN);
     });
     // converte bounds do mundo para limites de _px/_py
-    // _px = -wMinX*_pz manteria o extremo esquerdo no pixel 0
-    // queremos que sempre haja ao menos 1 bloco (ou a origem) visível
     const maxPx = -wMinX*_pz;           // pan máximo (borda esquerda do mundo visível)
     const minPx = W - wMaxX*_pz;        // pan mínimo (borda direita do mundo visível)
     const maxPy = -wMinY*_pz;
     const minPy = H - wMaxY*_pz;
-    _px = Math.min(maxPx, Math.max(minPx, _px));
-    _py = Math.min(maxPy, Math.max(minPy, _py));
+    // quando o mundo é menor que a viewport, minX>maxX — usa o intervalo ordenado
+    const loX=Math.min(minPx,maxPx), hiX=Math.max(minPx,maxPx);
+    const loY=Math.min(minPy,maxPy), hiY=Math.max(minPy,maxPy);
+    _px = Math.min(hiX, Math.max(loX, _px));
+    _py = Math.min(hiY, Math.max(loY, _py));
   }
 
   function _zoomAt(cx,cy,factor){
@@ -9057,7 +9060,6 @@ function _setFinPeriod(p){
 
   function planosEnter(){
     planosInit();
-    document.getElementById('app')?.style.setProperty('pointer-events','none');
     const cv=_canvas(),wrap=_wrap();
     if(cv&&wrap){
       void wrap.offsetHeight;
@@ -9067,10 +9069,7 @@ function _setFinPeriod(p){
     _dirty=true;
     _startLoop();
   }
-  function planosLeave(){
-    _stopLoop();
-    document.getElementById('app')?.style.removeProperty('pointer-events');
-  }
+  function planosLeave(){_stopLoop();}
 
   window.planosEnter=planosEnter;
   window.planosLeave=planosLeave;
