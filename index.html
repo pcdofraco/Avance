@@ -269,6 +269,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   transition:color 0.2s;
 }
 .hab-add-btn:active{color:rgba(var(--ink),0.55);}
+.hab-add-btn.locked{color:#c8920a;letter-spacing:0.1em;}
 
 
 /* ── INACTIVE ITEMS (not scheduled today) ── */
@@ -1413,10 +1414,12 @@ html.light-theme .chk-s{
 #dv-habits-list{display:flex;flex-direction:column;gap:12px;}
 /* premium overlay na lista da dashboard */
 #dv-premium-wrap{position:relative;overflow:hidden;}
+#dv-premium-wrap.blurred{height:150px;}
 #dv-premium-wrap.blurred>#dv-habits-list{
   filter:blur(3px);
   -webkit-filter:blur(3px);
   pointer-events:none;
+  min-height:150px;
   -webkit-mask-image:linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0.1) 100%);
   mask-image:linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0.1) 100%);
   -webkit-mask-composite:source-in;
@@ -1436,6 +1439,23 @@ html.light-theme .chk-s{
 #dv-premium-overlay .prem-label{
   font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
   color:rgba(var(--ink),0.5);
+}
+/* ── premium gate reutilizável ── */
+.prem-blur{position:relative;overflow:hidden;}
+.prem-blur>.prem-content{
+  position:relative;
+  filter:blur(5px);-webkit-filter:blur(5px);pointer-events:none;user-select:none;
+  -webkit-mask-image:linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  mask-image:linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+}
+.prem-lock-badge{
+  position:absolute;z-index:5;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;
+}
+.prem-lock-badge svg{width:20px;height:20px;color:#c8920a;filter:drop-shadow(0 1px 4px rgba(200,146,10,0.35));}
+.prem-lock-badge .pl-txt{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(var(--ink),0.45);
 }
 .dv-hab-row{display:flex;align-items:center;gap:8px;}
 .dv-hab-name{min-width:100px;max-width:100px;font-size:12px;color:rgba(var(--ink),0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
@@ -2505,6 +2525,8 @@ html.light-theme .chk-s{
   padding:clamp(11px,2.2vw,14px) 0;
   cursor:pointer;position:relative;
 }
+#task-quick-add.locked .qa-label{color:#c8920a;}
+#task-quick-add.locked .qa-circle{border-color:#c8920a;}
 .qa-circle{
   width:20px;height:20px;border-radius:50%;
   border:1.5px solid rgba(var(--ink),0.18);
@@ -3472,7 +3494,7 @@ html.light-theme .chk-s{
       <!-- scrollable habits area -->
       <div id="hab-scroll-wrap">
         <div id="habits-list"></div>
-        <button class="hab-add-btn" onclick="openModal('habit',null)">+ adicionar hábito</button>
+        <button class="hab-add-btn" id="hab-add-btn" onclick="openModal('habit',null)">+ adicionar hábito</button>
       </div>
 
       <!-- fixed bottom chart -->
@@ -3515,13 +3537,17 @@ html.light-theme .chk-s{
             <div class="fin-pcard-val" id="fp-total">R$ 0</div>
           </div>
         </div>
-        <div class="fin-pcard">
+        <div class="fin-pcard prem-blur" id="fp-receita-gate">
           <div class="fin-pcard-lbl">receita</div>
-          <div class="fin-pcard-val" id="fp-receita">R$ 0</div>
+          <div class="prem-content">
+            <div class="fin-pcard-val" id="fp-receita">R$ 0</div>
+          </div>
         </div>
-        <div class="fin-pcard">
+        <div class="fin-pcard prem-blur" id="fp-save-gate">
           <div class="fin-pcard-lbl">economia</div>
-          <div class="fin-pcard-val" id="fp-save">0%</div>
+          <div class="prem-content">
+            <div class="fin-pcard-val" id="fp-save">0%</div>
+          </div>
         </div>
       </div>
 
@@ -3547,12 +3573,14 @@ html.light-theme .chk-s{
       <div style="height:36px"></div>
 
       <!-- POR CATEGORIA -->
-      <div class="cat-section">
+      <div class="cat-section prem-blur" id="cat-section-gate">
         <div class="cat-section-hdr">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="opacity:.4"><rect x="1" y="7" width="2" height="4" rx="1" fill="currentColor"/><rect x="5" y="4" width="2" height="7" rx="1" fill="currentColor"/><rect x="9" y="1" width="2" height="10" rx="1" fill="currentColor"/></svg>
           <span class="cat-section-lbl">por categoria</span>
         </div>
-        <div id="cat-list"></div>
+        <div class="prem-content">
+          <div id="cat-list"></div>
+        </div>
       </div>
 
       <!-- TRANSAÇÕES -->
@@ -4161,6 +4189,23 @@ function _flamesvg(streak){
 function renderHabits(){
   // recalculate all streaks from history on every render
   S.habits.forEach(h=>{ h.streak=_calcStreak(h); });
+  // botão de adicionar reflete o limite do plano gratuito
+  const _addBtn=document.getElementById('hab-add-btn');
+  if(_addBtn){
+    if(!(S.habits||[]).length){
+      _addBtn.style.display='none';
+    } else {
+      _addBtn.style.display='';
+      const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+      if(!isPremium&&(S.habits||[]).length>=5){
+        _addBtn.classList.add('locked');
+        _addBtn.innerHTML='🔒 limite de 5 hábitos · premium';
+      } else {
+        _addBtn.classList.remove('locked');
+        _addBtn.innerHTML='+ adicionar hábito';
+      }
+    }
+  }
   const el=document.getElementById('habits-list');
   const list=habitFilter==='all'?S.habits:S.habits.filter(h=>h.tag===habitFilter);
   if(!list.length){
@@ -4559,6 +4604,24 @@ function toggleHabit(id,row){
 
 /* TASKS */
 function renderTasks(){
+  // quick-add reflete o limite do plano gratuito
+  const _qa=document.getElementById('task-quick-add');
+  if(_qa){
+    if(!(S.tasks||[]).length){
+      _qa.style.display='none';
+    } else {
+      _qa.style.display='';
+      const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+      const _qaLbl=_qa.querySelector('.qa-label');
+      if(!isPremium&&(S.tasks||[]).length>=5){
+        _qa.classList.add('locked');
+        if(_qaLbl)_qaLbl.innerHTML='🔒 limite de 5 tarefas · premium';
+      } else {
+        _qa.classList.remove('locked');
+        if(_qaLbl)_qaLbl.textContent='Adicionar tarefa…';
+      }
+    }
+  }
   const el=document.getElementById('tasks-list');
   const todayKey=new Date().toDateString();
   const todayDow=new Date().getDay();
@@ -4767,8 +4830,41 @@ function _finAddOutside(e){
   }
 }
 
+function _isPremiumUser(){
+  return (typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+}
+function _setPremGate(elId,locked,small){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  let badge=el.querySelector('.prem-lock-badge');
+  if(locked){
+    el.classList.add('prem-blur');
+    if(!badge){
+      badge=document.createElement('div');
+      badge.className='prem-lock-badge';
+      // cobre a área de dados (abaixo do rótulo), sem borrar o badge
+      badge.style.cssText='left:0;right:0;bottom:0;top:'+(small?'40%':'30%')+';';
+      badge.onclick=()=>{ if(typeof _showHabitLimit==='function')_showHabitLimit(); };
+      const sz=small?16:20;
+      badge.innerHTML=`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="currentColor"><path d="M5 7.5L12 2l7 5.5-2.5 9.5H7.5L5 7.5z" opacity=".9"/><path d="M7.5 17h9l1 3.5a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5L7.5 17z"/></svg>`+(small?'':'<span class="pl-txt">premium</span>');
+      el.appendChild(badge);
+    }
+  } else {
+    el.classList.remove('prem-blur');
+    if(badge)badge.remove();
+  }
+}
+function _applyFinPremiumGate(){
+  const locked=!_isPremiumUser();
+  _setPremGate('fp-receita-gate',locked,true);
+  _setPremGate('fp-save-gate',locked,true);
+  _setPremGate('cat-section-gate',locked,false);
+}
+
 function renderFinance(animate){
   _renderFinGoalsSection();
+  // gate premium em finanças
+  _applyFinPremiumGate();
   const now=Date.now();
   const days={week:7,month:30,year:365}[_finPeriod]||30;
   const cutoff=now-days*24*60*60*1000;
@@ -4972,7 +5068,24 @@ function drawChart(svgId,lblId,data,labels,suffix){
 }
 
 /* MODAL */
+function _showHabitLimit(){
+  // placeholder do upsell premium — depois liga ao fluxo de assinatura
+  if(typeof showToast==='function')showToast('Assine o premium para hábitos ilimitados','lock');
+}
+
 function openModal(type,editId){
+  const isEditing=editId!==null;
+  // limite de 5 itens ativos para não-premium
+  if((type==='habit'||type==='task')&&!isEditing){
+    const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+    const arr=type==='habit'?(S.habits||[]):(S.tasks||[]);
+    if(!isPremium&&arr.length>=5){
+      const lbl=type==='habit'?'hábitos':'tarefas';
+      if(typeof showToast==='function')showToast('Limite de 5 '+lbl+' no plano gratuito','lock');
+      _showHabitLimit();
+      return;
+    }
+  }
   mType=type;mEditId=editId;
   mDays=[0,1,2,3,4,5,6];mColor=TAG_COLORS[0];mRepeat='daily';
   const title=document.getElementById('m-title'),body=document.getElementById('m-body');
@@ -6935,6 +7048,12 @@ let _finGoalType = 'save'; // save | spend | earn
 
 function openFinGoalModal(editId){
   const isEdit = !!editId;
+  // metas financeiras são premium
+  if(!isEdit && !_isPremiumUser()){
+    if(typeof showToast==='function')showToast('Metas financeiras são premium','lock');
+    if(typeof _showHabitLimit==='function')_showHabitLimit();
+    return;
+  }
   const g = isEdit ? (S.finGoals||[]).find(x=>x.id===editId) : null;
   if(g) _finGoalType = g.type||'save';
   else _finGoalType = 'save';
@@ -7093,7 +7212,7 @@ function _renderFinGoalsSection(){
   wrap.innerHTML = `
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:${S.finGoals.length?'10':'0'}px">
       ${S.finGoals.length?'<span style="font-family:var(--mono);font-size:8px;letter-spacing:0.18em;color:rgba(var(--ink),0.18);text-transform:uppercase">metas</span>':''}
-      <button class="dash-fin-add-goal" style="padding:0;margin:0" onclick="openFinGoalModal(null)">+ meta</button>
+      <button class="dash-fin-add-goal" style="padding:0;margin:0" onclick="openFinGoalModal(null)">${_isPremiumUser()?'+ meta':'🔒 meta · premium'}</button>
     </div>
     ${S.finGoals.length?`<div class="dash-fin-goals-wrap">${goalsHtml}</div>`:''}`;
 
