@@ -96,7 +96,8 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--t1);font-famil
 #app{opacity:0;transition:opacity 0.35s ease;}
 #app.ready{opacity:1;}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;z-index:0;}
-#app{position:relative;z-index:1;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);}
+#app{position:relative;z-index:10;height:100%;width:100%;display:flex;flex-direction:column;padding-top:var(--st);pointer-events:none;}
+#app>*{pointer-events:auto;}
 
 /* ── MODAL CHIPS ── */
 .m-chips-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
@@ -287,7 +288,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   display:flex;align-items:center;justify-content:space-between;
   padding:clamp(14px,3.5vw,24px) clamp(16px,5vw,48px) clamp(10px,2vw,16px);
   flex-shrink:0;gap:12px;
-  position:relative;z-index:410;
+  position:relative;z-index:20;
 }
 .h-center{flex:1;display:flex;align-items:center;justify-content:center;gap:0;}
 /* nome de seção: fixed, centrado na tela */
@@ -319,12 +320,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   transition:opacity 0.12s ease, filter 0.12s ease;
 }
 /* desfoque do conteúdo durante navegação na nav pill */
-#content.nav-blur{
+#content.nav-blur,#planos-canvas-wrap.nav-blur{
   filter:blur(4px) brightness(0.8);
   transition:filter 0.2s ease;
   pointer-events:none;
 }
-#content.nav-clear{
+#content.nav-clear,#planos-canvas-wrap.nav-clear{
   filter:blur(0px) brightness(1);
   transition:filter 0.35s ease;
 }
@@ -626,7 +627,7 @@ html.light-theme .chk-s{
 /* ── ESTUDOS ── */
 #sec-estudos{padding-top:0;display:none;flex-direction:column;height:calc(100vh - var(--st) - 80px);overflow:hidden;box-sizing:border-box;padding-bottom:0!important;position:relative;}
 /* ── PLANOS ── */
-#sec-planos{padding:0!important;margin:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0;display:none;touch-action:none;z-index:1;background:var(--planos-bg);}
+#sec-planos{padding:0!important;margin:0!important;overflow:hidden;position:fixed;top:0;left:0;right:0;bottom:0;display:none;touch-action:none;z-index:5;background:var(--planos-bg);}
 #sec-planos.active{display:block;}
 #planos-canvas-wrap{width:100%;height:100%;position:relative;overflow:hidden;background:var(--planos-bg);cursor:grab;}
 #planos-canvas-wrap.grabbing{cursor:grabbing;}
@@ -651,12 +652,30 @@ html.light-theme .chk-s{
 #planos-ctx-menu button:hover,#planos-ctx-menu button:active{
   background:rgba(var(--ink),0.07);
 }
+#planos-ctx-menu .ctx-divider{
+  height:1px;background:rgba(var(--ink),0.08);margin:4px 6px;
+}
+#planos-ctx-menu .ctx-label{
+  padding:4px 14px 2px;font-family:var(--mono);font-size:9px;
+  letter-spacing:0.08em;color:rgba(var(--ink),0.35);text-transform:uppercase;
+}
+#planos-ctx-menu .ctx-colors{
+  display:flex;gap:7px;padding:6px 14px 8px;flex-wrap:wrap;
+}
+#planos-ctx-menu .ctx-color-dot{
+  width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+  transition:transform 0.12s,border-color 0.12s;flex-shrink:0;
+}
+#planos-ctx-menu .ctx-color-dot:hover{transform:scale(1.2);}
+#planos-ctx-menu .ctx-color-dot.selected{border-color:rgba(var(--ink),0.5);}
+#planos-ctx-menu .ctx-delete{color:rgba(220,80,80,0.9)!important;}
+#planos-ctx-menu .ctx-delete:hover{background:rgba(220,80,80,0.1)!important;}
 
 /* ── planos block ── */
 .planos-block{
   position:absolute;
   min-width:200px;max-width:320px;
-  background:rgba(var(--surface),0.96);
+  background:rgb(var(--surface));
   border:1.5px solid rgba(var(--ink),0.1);
   border-radius:12px;
   padding:14px 16px 16px;
@@ -7072,6 +7091,8 @@ function _navPillHide(){
     // blur no conteúdo
     const ct=document.getElementById('content');
     if(ct){ct.classList.add('nav-blur');ct.classList.remove('nav-clear');}
+    const pl=document.getElementById('planos-canvas-wrap');
+    if(pl&&document.getElementById('sec-planos')?.classList.contains('active')){pl.classList.add('nav-blur');pl.classList.remove('nav-clear');}
     // mostrar nome da seção atual
     const sn=document.getElementById('h-section-name');
     if(sn){
@@ -7094,6 +7115,8 @@ function _navPillHide(){
     // remove blur do conteúdo
     const ct=document.getElementById('content');
     if(ct){ct.classList.remove('nav-blur');ct.classList.add('nav-clear');setTimeout(()=>ct.classList.remove('nav-clear'),380);}
+    const pl=document.getElementById('planos-canvas-wrap');
+    if(pl){pl.classList.remove('nav-blur');pl.classList.add('nav-clear');setTimeout(()=>pl.classList.remove('nav-clear'),380);}
     // esconde nome da seção
     const sn=document.getElementById('h-section-name');
     if(sn){sn.classList.remove('visible');sn.classList.add('changing');setTimeout(()=>{if(sn)sn.classList.remove('changing');},200);}
@@ -8512,10 +8535,40 @@ function _setFinPeriod(p){
   function _stopLoop(){if(_raf){cancelAnimationFrame(_raf);_raf=null;}}
   function _clampZoom(z){return Math.min(MAX_Z,Math.max(MIN_Z,z));}
 
+  /* Limita pan para que o mundo nunca suma da tela.
+     Calcula bounds de todos os blocos (+ margem), expande se necessário. */
+  const PAN_MARGIN=320; // px no mundo além do último bloco
+  function _clampPan(){
+    const wrap=_wrap(); if(!wrap) return;
+    const W=wrap.clientWidth, H=wrap.clientHeight;
+    // bounds do mundo: começa com uma área mínima ao redor da origem
+    let wMinX=-PAN_MARGIN, wMinY=-PAN_MARGIN;
+    let wMaxX=PAN_MARGIN,  wMaxY=PAN_MARGIN;
+    document.querySelectorAll('.planos-block').forEach(b=>{
+      const bx=parseFloat(b.style.left)||0;
+      const by=parseFloat(b.style.top)||0;
+      const bw=b.offsetWidth||200;
+      const bh=b.offsetHeight||80;
+      wMinX=Math.min(wMinX, bx-PAN_MARGIN);
+      wMinY=Math.min(wMinY, by-PAN_MARGIN);
+      wMaxX=Math.max(wMaxX, bx+bw+PAN_MARGIN);
+      wMaxY=Math.max(wMaxY, by+bh+PAN_MARGIN);
+    });
+    // converte bounds do mundo para limites de _px/_py
+    // _px = -wMinX*_pz manteria o extremo esquerdo no pixel 0
+    // queremos que sempre haja ao menos 1 bloco (ou a origem) visível
+    const maxPx = -wMinX*_pz;           // pan máximo (borda esquerda do mundo visível)
+    const minPx = W - wMaxX*_pz;        // pan mínimo (borda direita do mundo visível)
+    const maxPy = -wMinY*_pz;
+    const minPy = H - wMaxY*_pz;
+    _px = Math.min(maxPx, Math.max(minPx, _px));
+    _py = Math.min(maxPy, Math.max(minPy, _py));
+  }
+
   function _zoomAt(cx,cy,factor){
     const nz=_clampZoom(_pz*factor);
     const ratio=nz/_pz;
-    _px=cx-(cx-_px)*ratio; _py=cy-(cy-_py)*ratio; _pz=nz; _dirty=true;
+    _px=cx-(cx-_px)*ratio; _py=cy-(cy-_py)*ratio; _pz=nz; _clampPan(); _dirty=true;
   }
 
   /* ── screen → world coords ── */
@@ -8526,27 +8579,71 @@ function _setFinPeriod(p){
   }
 
   /* ── context menu ── */
-  function _showCtxMenu(screenX,screenY,wx,wy){
+  const BLOCK_COLORS=[
+    {label:'padrão', value:''},
+    {label:'cinza',  value:'#3a3a42'},
+    {label:'azul',   value:'#1e3a5f'},
+    {label:'verde',  value:'#1a3d2b'},
+    {label:'roxo',   value:'#2d1f4e'},
+    {label:'laranja',value:'#4a2a0e'},
+    {label:'rosa',   value:'#4a1428'},
+    {label:'amarelo',value:'#3d3210'},
+  ];
+
+  function _showCtxMenu(screenX,screenY,wx,wy,targetBlock){
     _hideCtxMenu();
-    const wrap=_wrap(); if(!wrap) return;
-    const r=wrap.getBoundingClientRect();
     const menu=document.createElement('div');
     menu.id='planos-ctx-menu';
-    menu.innerHTML=`<button id="planos-ctx-bloco">＋ criar bloco</button>`;
-    // posiciona no espaço de tela
-    menu.style.cssText=`position:fixed;left:${screenX}px;top:${screenY}px;`;
-    document.body.appendChild(menu);
+
+    if(targetBlock){
+      // ── menu do bloco ──
+      const curColor=targetBlock.dataset.color||'';
+      let html=`<div class="ctx-label">cor do bloco</div><div class="ctx-colors">`;
+      BLOCK_COLORS.forEach(c=>{
+        const bg=c.value||'rgba(var(--surface),1)';
+        const sel=c.value===curColor?'selected':'';
+        html+=`<div class="ctx-color-dot ${sel}" data-color="${c.value}" style="background:${bg};${!c.value?'border:2px solid rgba(var(--ink),0.2)':''}" title="${c.label}"></div>`;
+      });
+      html+=`</div><div class="ctx-divider"></div>`;
+      html+=`<button class="ctx-delete">🗑 apagar bloco</button>`;
+      menu.innerHTML=html;
+      menu.style.cssText=`position:fixed;left:${screenX}px;top:${screenY}px;`;
+      document.body.appendChild(menu);
+
+      // color dots
+      menu.querySelectorAll('.ctx-color-dot').forEach(dot=>{
+        dot.addEventListener('pointerdown',ev=>{
+          ev.stopPropagation();
+          const c=dot.dataset.color;
+          targetBlock.dataset.color=c;
+          targetBlock.style.background=c||'';
+          menu.querySelectorAll('.ctx-color-dot').forEach(d=>d.classList.remove('selected'));
+          dot.classList.add('selected');
+          setTimeout(()=>_hideCtxMenu(),120);
+        });
+      });
+      // delete
+      menu.querySelector('.ctx-delete').onclick=()=>{
+        _hideCtxMenu();
+        _deleteBlock(targetBlock);
+      };
+    } else {
+      // ── menu do canvas ──
+      menu.innerHTML=`<button id="planos-ctx-bloco">＋ criar bloco</button>`;
+      menu.style.cssText=`position:fixed;left:${screenX}px;top:${screenY}px;`;
+      document.body.appendChild(menu);
+      document.getElementById('planos-ctx-bloco').onclick=()=>{
+        _hideCtxMenu();
+        _createBlock(wx,wy);
+      };
+    }
+
     // ajusta se sair da tela
     requestAnimationFrame(()=>{
       const mr=menu.getBoundingClientRect();
-      if(mr.right>window.innerWidth) menu.style.left=(screenX-mr.width)+'px';
+      if(mr.right>window.innerWidth)  menu.style.left=(screenX-mr.width)+'px';
       if(mr.bottom>window.innerHeight) menu.style.top=(screenY-mr.height)+'px';
     });
-    document.getElementById('planos-ctx-bloco').onclick=()=>{
-      _hideCtxMenu();
-      _createBlock(wx,wy);
-    };
-    // fechar ao clicar fora
     setTimeout(()=>document.addEventListener('pointerdown',_ctxOutside,{once:true}),10);
   }
   function _ctxOutside(e){
@@ -8634,6 +8731,29 @@ function _setFinPeriod(p){
   const _connections=[];
   let _connDrag=null; // {fromBlock, tempPath (no overlay)}
   let _connId=0;
+
+  function _deleteBlock(blockEl){
+    const id=blockEl.id;
+    // remove conexões ligadas a este bloco
+    for(let i=_connections.length-1;i>=0;i--){
+      const c=_connections[i];
+      if(c.fromBlock===id||c.toBlock===id){
+        cancelAnimationFrame(c.animId);
+        c.path?.remove(); c.animCircle?.remove();
+        _connections.splice(i,1);
+        // remove classe connected das bolinhas restantes se não houver mais conexão
+        if(c.fromBlock!==id){
+          const still=_connections.some(x=>x.fromBlock===c.fromBlock);
+          if(!still) document.querySelector(`.pb-dot-out[data-block="${c.fromBlock}"]`)?.classList.remove('connected');
+        }
+        if(c.toBlock!==id){
+          const still=_connections.some(x=>x.toBlock===c.toBlock);
+          if(!still) document.querySelector(`.pb-dot-in[data-block="${c.toBlock}"]`)?.classList.remove('connected');
+        }
+      }
+    }
+    blockEl.remove();
+  }
 
   function _accentColor(){
     const v=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'74,222,128';
@@ -8803,7 +8923,8 @@ function _setFinPeriod(p){
     _holdTimer=setTimeout(()=>{
       if(!_holdMoved){
         const w=_screenToWorld(clientX,clientY);
-        _showCtxMenu(clientX,clientY,w.x,w.y);
+        const tb=document.elementFromPoint(clientX,clientY)?.closest('.planos-block')||null;
+        _showCtxMenu(clientX,clientY,w.x,w.y,tb);
       }
     },HOLD_MS);
   }
@@ -8835,7 +8956,7 @@ function _setFinPeriod(p){
     }
     if(_blockDrag){_blockMoveBy(e.clientX,e.clientY);_updateAllConnections();return;}
     if(!_dragging) return;
-    _px+=e.clientX-_lastX; _py+=e.clientY-_lastY;
+    _px+=e.clientX-_lastX; _py+=e.clientY-_lastY; _clampPan();
     _lastX=e.clientX; _lastY=e.clientY; _dirty=true;
   }
   function _onMouseUp(e){
@@ -8852,7 +8973,8 @@ function _setFinPeriod(p){
   function _onContextMenu(e){
     e.preventDefault();
     const w=_screenToWorld(e.clientX,e.clientY);
-    _showCtxMenu(e.clientX,e.clientY,w.x,w.y);
+    const tb=e.target.closest('.planos-block')||null;
+    _showCtxMenu(e.clientX,e.clientY,w.x,w.y,tb);
   }
 
   /* ── touch ── */
@@ -8891,7 +9013,7 @@ function _setFinPeriod(p){
     } else if(e.touches.length===1&&_dragging){
       const dx=e.touches[0].clientX-_lastX, dy=e.touches[0].clientY-_lastY;
       if(Math.abs(dx)>HOLD_MOVE_THRESH||Math.abs(dy)>HOLD_MOVE_THRESH){_holdMoved=true;_cancelHold();}
-      _px+=dx; _py+=dy;
+      _px+=dx; _py+=dy; _clampPan();
       _lastX=e.touches[0].clientX; _lastY=e.touches[0].clientY; _dirty=true;
     }
   }
@@ -8935,10 +9057,9 @@ function _setFinPeriod(p){
 
   function planosEnter(){
     planosInit();
-    // desenha o grid imediatamente, de forma síncrona, com o tamanho real da seção
+    document.getElementById('app')?.style.setProperty('pointer-events','none');
     const cv=_canvas(),wrap=_wrap();
     if(cv&&wrap){
-      // força layout antes de medir (seção acabou de virar display:block)
       void wrap.offsetHeight;
       const W=wrap.clientWidth, H=wrap.clientHeight;
       if(W>0&&H>0){cv.width=W;cv.height=H;_drawGrid();_applyTransform();}
@@ -8946,7 +9067,10 @@ function _setFinPeriod(p){
     _dirty=true;
     _startLoop();
   }
-  function planosLeave(){_stopLoop();}
+  function planosLeave(){
+    _stopLoop();
+    document.getElementById('app')?.style.removeProperty('pointer-events');
+  }
 
   window.planosEnter=planosEnter;
   window.planosLeave=planosLeave;
