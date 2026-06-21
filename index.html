@@ -1750,6 +1750,16 @@ html.light-theme .chk-s{
   color:rgba(var(--ink),0.22);
   letter-spacing:0.06em;
 }
+#profile-sub-row{display:flex;align-items:center;gap:8px;margin-top:2px;}
+#profile-admin-badge{
+  display:flex;align-items:center;gap:3px;
+  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+  color:#7a5800;background:linear-gradient(135deg,#fff3b0,#ffd700,#e6a800);
+  padding:2px 7px 2px 5px;border-radius:20px;
+  border:1px solid #c8920a;
+  box-shadow:0 1px 4px rgba(180,140,0,0.3);
+  font-weight:700;line-height:1;
+}
 #profile-name-input{
   width:100%;background:transparent;border:none;border-bottom:1px solid rgba(var(--ink),0.1);
   padding:4px 0;color:var(--t1);font-family:var(--sans);font-size:17px;font-weight:600;
@@ -3269,7 +3279,13 @@ html.light-theme .chk-s{
         <div id="profile-name-block">
           <div id="profile-name-display">—</div>
           <input id="profile-name-input" placeholder="seu nome…" maxlength="32" oninput="updateUserName(this.value)">
-          <div id="profile-sub-display">nível 1</div>
+          <div id="profile-sub-row">
+            <div id="profile-sub-display">nível 1</div>
+            <div id="profile-admin-badge" style="display:none">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              admin
+            </div>
+          </div>
         </div>
         <button id="profile-gear-btn" onclick="openSettings()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -6657,6 +6673,14 @@ async function doLogout(){
 window.doLogout=doLogout;
 
 let currentUser=null;
+let isAdmin=false;
+
+async function checkAdmin(uid){
+  try{
+    const snap=await getDoc(fsDoc(db,'admins',uid));
+    isAdmin=snap.exists()&&snap.data()?.role==='admin';
+  }catch(_){isAdmin=false;}
+}
 
 /* ── FIRESTORE SYNC ── */
 async function fsLoad(uid){
@@ -8025,6 +8049,7 @@ if(!auth){
     // depois sincroniza com o Firestore em segundo plano (sem travar a UI)
     if(!user.isAnonymous){
       try{
+        await checkAdmin(user.uid);
         await fsLoad(user.uid);
         if(!S.userName&&user.displayName){S.userName=user.displayName.split(' ')[0];fsSave();}
         // re-renderiza com os dados da nuvem já carregados
@@ -8316,6 +8341,8 @@ function openProfile(){
   document.getElementById('p-xp-lbl').textContent='nível '+lvl;
   document.getElementById('p-xp-txt').textContent=inLvl+' / '+toNext+' xp';
   document.getElementById('profile-sub-display').textContent='nível '+lvl;
+  const badge=document.getElementById('profile-admin-badge');
+  if(badge) badge.style.display=isAdmin?'flex':'none';
   setTimeout(()=>{document.getElementById('profile-xp-fill').style.width=(inLvl/toNext*100)+'%';},80);
 
 }
@@ -8632,14 +8659,15 @@ function _setFinPeriod(p){
 
   /* ── context menu ── */
   const BLOCK_COLORS=[
-    {label:'padrão', value:''},
-    {label:'cinza',  value:'#3a3a42'},
-    {label:'azul',   value:'#1e3a5f'},
-    {label:'verde',  value:'#1a3d2b'},
-    {label:'roxo',   value:'#2d1f4e'},
-    {label:'laranja',value:'#4a2a0e'},
-    {label:'rosa',   value:'#4a1428'},
-    {label:'amarelo',value:'#3d3210'},
+    {label:'padrão',  value:''},
+    {label:'azul',    value:'#2563eb'},
+    {label:'roxo',    value:'#7c3aed'},
+    {label:'rosa',    value:'#db2777'},
+    {label:'vermelho',value:'#dc2626'},
+    {label:'laranja', value:'#ea580c'},
+    {label:'amarelo', value:'#ca8a04'},
+    {label:'verde',   value:'#16a34a'},
+    {label:'ciano',   value:'#0891b2'},
   ];
 
   function _showCtxMenu(screenX,screenY,wx,wy,targetBlock){
@@ -8669,6 +8697,7 @@ function _setFinPeriod(p){
           const c=dot.dataset.color;
           targetBlock.dataset.color=c;
           targetBlock.style.background=c||'';
+          targetBlock.style.color=c?'#fff':'';
           menu.querySelectorAll('.ctx-color-dot').forEach(d=>d.classList.remove('selected'));
           dot.classList.add('selected');
           setTimeout(()=>_hideCtxMenu(),120);
@@ -8681,9 +8710,9 @@ function _setFinPeriod(p){
       };
     } else {
       // ── menu do canvas ──
-      menu.innerHTML=`<button id="planos-ctx-nota">📝 bloco de anotações</button>
-        <button id="planos-ctx-habito">✓ bloco de hábito</button>
-        <button id="planos-ctx-tarefa">☑ bloco de tarefa</button>`;
+      menu.innerHTML=`<button id="planos-ctx-nota">bloco de anotações</button>
+        <button id="planos-ctx-habito">bloco de hábito</button>
+        <button id="planos-ctx-tarefa">bloco de tarefa</button>`;
       menu.style.cssText=`position:fixed;left:${screenX}px;top:${screenY}px;`;
       document.body.appendChild(menu);
       document.getElementById('planos-ctx-nota').onclick=()=>{_hideCtxMenu();_createBlock(wx,wy);};
@@ -8826,14 +8855,11 @@ function _setFinPeriod(p){
       <div class="pb-ref-item" style="display:none">
         <div class="pb-ref-chk"></div>
         <div class="pb-ref-name"></div>
-      </div>
-      <div class="pb-dot-out" data-block="${id}" data-role="out"></div>`;
+      </div>`;
     world.appendChild(div);
     div.addEventListener('mousedown',_blockMouseDown);
     div.addEventListener('touchstart',_blockTouchStart,{passive:false});
-    const dotOut=div.querySelector('.pb-dot-out'), dotIn=div.querySelector('.pb-dot-in');
-    dotOut.addEventListener('mousedown',_connMouseDown);
-    dotOut.addEventListener('touchstart',_connTouchStart,{passive:false});
+    const dotIn=div.querySelector('.pb-dot-in');
     dotIn.addEventListener('mousedown',e=>e.stopPropagation());
     dotIn.addEventListener('touchstart',e=>e.stopPropagation(),{passive:false});
     // seletor de item
