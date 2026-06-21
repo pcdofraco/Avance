@@ -1411,6 +1411,32 @@ html.light-theme .chk-s{
 
 
 #dv-habits-list{display:flex;flex-direction:column;gap:12px;}
+/* premium overlay na lista da dashboard */
+#dv-premium-wrap{position:relative;overflow:hidden;}
+#dv-premium-wrap.blurred>#dv-habits-list{
+  filter:blur(3px);
+  -webkit-filter:blur(3px);
+  pointer-events:none;
+  -webkit-mask-image:linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0.1) 100%);
+  mask-image:linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(to bottom, #000 0%, #000 35%, rgba(0,0,0,0.1) 100%);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+}
+#dv-premium-overlay{
+  position:absolute;inset:0;z-index:10;
+  background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;cursor:pointer;
+}
+#dv-premium-overlay .prem-icon{
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  color:#c8920a;filter:drop-shadow(0 2px 6px rgba(200,146,10,0.35));
+}
+#dv-premium-overlay .prem-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(var(--ink),0.5);
+}
 .dv-hab-row{display:flex;align-items:center;gap:8px;}
 .dv-hab-name{min-width:100px;max-width:100px;font-size:12px;color:rgba(var(--ink),0.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
 .dv-hab-pct{min-width:30px;font-family:var(--mono);font-size:10px;font-weight:600;flex-shrink:0;text-align:right;}
@@ -3419,7 +3445,10 @@ html.light-theme .chk-s{
           <!-- cabeçalho dias (números) -->
 
           <!-- lista de hábitos + pílulas -->
-          <div id="dv-habits-list"></div>
+          <div id="dv-premium-wrap" style="position:relative;">
+            <div id="dv-habits-list"></div>
+            <div id="dv-premium-overlay" style="display:none;"></div>
+          </div>
         </div>
 
 
@@ -6095,6 +6124,21 @@ function renderDashboard(){
       const pct=Math.round(done/items.length*100);
       const wkPcts=weeks.map(()=>pct/100);
       habList.innerHTML=row('Itens concluídos',pct,pillsFor(wkPcts));
+    }
+  }
+
+  // gate premium — embaça lista se não for admin nem assinante
+  const premOverlay=document.getElementById('dv-premium-overlay');
+  const premWrap=document.getElementById('dv-premium-wrap');
+  if(premOverlay){
+    const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+    if(isPremium){
+      premOverlay.style.display='none';
+      if(premWrap)premWrap.classList.remove('blurred');
+    } else {
+      premOverlay.style.display='flex';
+      if(premWrap)premWrap.classList.add('blurred');
+      premOverlay.innerHTML=`<div class="prem-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M5 7.5L12 2l7 5.5-2.5 9.5H7.5L5 7.5z" opacity=".9"/><path d="M7.5 17h9l1 3.5a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5L7.5 17z"/></svg></div><div class="prem-label">recurso premium</div>`;
     }
   }
 }
