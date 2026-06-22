@@ -643,6 +643,35 @@ html.light-theme .chk-s{
 /* ── PLANOS ── */
 #sec-planos{padding:0!important;margin:0!important;overflow:hidden;position:fixed;inset:0;display:none;touch-action:none;z-index:250;background:var(--planos-bg);}
 #sec-planos.active{display:block;}
+/* tela de bloqueio premium do plano mental */
+#planos-premium-lock{
+  display:none;position:absolute;inset:0;z-index:40;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:0 32px;text-align:center;
+  background:var(--planos-bg);
+}
+#sec-planos.locked #planos-premium-lock{display:flex;}
+#planos-premium-lock.nav-blur{
+  filter:blur(5px) brightness(0.85);
+  transition:filter 0.2s ease;
+}
+#sec-planos.locked #planos-canvas-wrap{filter:blur(8px);opacity:0.5;pointer-events:none;}
+#planos-premium-lock .ppl-icon{color:#d4a017;filter:drop-shadow(0 3px 10px rgba(200,146,10,0.4));}
+#planos-premium-lock .ppl-title{
+  font-family:var(--sans);font-size:22px;font-weight:700;
+  color:rgba(var(--ink),0.9);letter-spacing:0.01em;
+}
+#planos-premium-lock .ppl-desc{
+  font-family:var(--sans);font-size:13px;line-height:1.6;
+  color:rgba(var(--ink),0.5);
+}
+#planos-premium-lock .ppl-badge{
+  margin-top:6px;
+  font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;
+  color:#7a5800;background:linear-gradient(135deg,#fff3b0,#ffd700,#e6a800);
+  padding:7px 16px;border-radius:20px;border:1px solid #c8920a;
+  box-shadow:0 2px 8px rgba(180,140,0,0.3);font-weight:700;
+}
 #planos-canvas-wrap{width:100%;height:100%;position:relative;overflow:hidden;background:var(--planos-bg);cursor:grab;}
 #planos-canvas-wrap.grabbing{cursor:grabbing;}
 #planos-grid-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
@@ -1889,7 +1918,7 @@ html.light-theme .chk-s{
 #avatar-picker-inner{
   position:relative;z-index:1;
   width:100%;max-width:480px;
-  background:rgba(14,14,14,0.98);
+  background:rgb(var(--surface));
   border-top:1px solid rgba(var(--ink),0.07);
   border-radius:20px 20px 0 0;
   padding:20px 20px calc(28px + var(--sb));
@@ -1917,15 +1946,73 @@ html.light-theme .chk-s{
 .av-emoji-opt.sel{border-color:rgba(var(--ink),0.3);background:rgba(var(--ink),0.08);}
 #avatar-upload-btn{
   width:100%;padding:13px;border-radius:12px;
-  background:rgba(var(--ink),0.03);border:1px solid rgba(var(--ink),0.08);
+  background:rgba(var(--ink),0.04);border:1px solid rgba(var(--ink),0.12);
   font-family:var(--mono);font-size:9px;letter-spacing:0.14em;
-  color:rgba(var(--ink),0.3);text-transform:uppercase;cursor:pointer;
+  color:rgba(var(--ink),0.6);text-transform:uppercase;cursor:pointer;
   transition:background 0.15s,color 0.15s;
 }
 #avatar-upload-btn:active{background:rgba(var(--ink),0.07);color:rgba(var(--ink),0.7);}
 #avatar-file-input{display:none;}
 
 /* ── SETTINGS SHEET ── */
+.settings-row-report{cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+.settings-row-report .settings-row-lbl{color:rgba(var(--ink),0.5);}
+.settings-row-report:active{opacity:0.6;}
+/* report form sheet */
+#report-sheet{
+  position:fixed;inset:0;z-index:760;
+  display:flex;align-items:flex-end;justify-content:center;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+}
+#report-sheet.open{pointer-events:all;opacity:1;}
+#report-sheet-bg{position:absolute;inset:0;background:rgba(var(--paper),0.5);}
+#report-inner{
+  position:relative;z-index:1;width:100%;max-width:480px;
+  background:rgb(var(--surface));
+  border-top:1px solid rgba(var(--ink),0.07);
+  border-radius:20px 20px 0 0;
+  padding:14px 20px calc(28px + var(--sb));
+  transform:translateY(40px);
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#report-sheet.open #report-inner{transform:translateY(0);}
+#report-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.2em;
+  color:rgba(var(--ink),0.3);text-transform:uppercase;text-align:center;margin-bottom:18px;
+}
+#report-type-row{display:flex;gap:8px;margin-bottom:12px;}
+.report-type-btn{
+  flex:1;padding:11px;border-radius:12px;
+  background:rgba(var(--ink),0.04);border:1px solid rgba(var(--ink),0.1);
+  font-family:var(--sans);font-size:13px;color:rgba(var(--ink),0.5);
+  cursor:pointer;transition:all 0.15s;
+}
+.report-type-btn.active{
+  background:rgba(var(--accent),0.12);border-color:var(--accent-solid);
+  color:rgba(var(--ink),0.9);font-weight:600;
+}
+#report-text{
+  width:100%;min-height:120px;resize:vertical;
+  padding:13px;border-radius:12px;box-sizing:border-box;
+  background:rgba(var(--ink),0.03);border:1px solid rgba(var(--ink),0.1);
+  font-family:var(--sans);font-size:14px;color:rgba(var(--ink),0.9);
+  outline:none;line-height:1.5;
+}
+#report-text:focus{border-color:rgba(var(--ink),0.25);}
+#report-text::placeholder{color:rgba(var(--ink),0.3);}
+#report-send-btn{
+  width:100%;margin-top:12px;padding:14px;border-radius:12px;
+  background:var(--accent-solid);border:none;
+  font-family:var(--sans);font-size:14px;font-weight:600;color:#fff;
+  cursor:pointer;transition:opacity 0.15s;
+}
+#report-send-btn:active{opacity:0.8;}
+#report-send-btn:disabled{opacity:0.4;cursor:default;}
+#report-hint{
+  text-align:center;margin-top:10px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  color:rgba(var(--ink),0.25);text-transform:uppercase;
+}
 #settings-sheet{
   position:fixed;inset:0;z-index:700;
   pointer-events:none;opacity:0;transition:opacity 0.25s;
@@ -1958,8 +2045,7 @@ html.light-theme .chk-s{
 .settings-row-lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:rgba(var(--ink),0.35);text-transform:uppercase;}
 .settings-row-val{font-family:var(--mono);font-size:10px;color:rgba(var(--ink),0.18);}
 /* ── THEME TOGGLE ── */
-.settings-row-theme{border-bottom:none;}
-.settings-row-accent{flex-wrap:wrap;padding-top:4px;border-top:none;margin-top:-10px;}
+.settings-row-theme{border-bottom:none;}.settings-row-accent{flex-wrap:wrap;padding-top:4px;border-top:none;margin-top:-10px;}
 #accent-dots{display:flex;gap:10px;flex-shrink:0;}
 .accent-dot{
   width:24px;height:24px;border-radius:50%;cursor:pointer;
@@ -3420,6 +3506,26 @@ html.light-theme .chk-s{
         <span class="settings-row-lbl">versão</span>
         <span class="settings-row-val">1.0</span>
       </div>
+      <div class="settings-row settings-row-report" onclick="openReportForm()">
+        <span class="settings-row-lbl">reportar bug ou sugestão</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT FORM SHEET -->
+  <div id="report-sheet">
+    <div id="report-sheet-bg" onclick="closeReportForm()"></div>
+    <div id="report-inner">
+      <div id="settings-handle"></div>
+      <div id="report-title">reportar</div>
+      <div id="report-type-row">
+        <button class="report-type-btn active" data-type="bug" onclick="_setReportType('bug')">🐞 bug</button>
+        <button class="report-type-btn" data-type="sugestao" onclick="_setReportType('sugestao')">💡 sugestão</button>
+      </div>
+      <textarea id="report-text" placeholder="descreva o bug ou sua sugestão…" maxlength="2000"></textarea>
+      <button id="report-send-btn" onclick="sendReport()">enviar</button>
+      <div id="report-hint">enviado direto para a equipe</div>
     </div>
   </div>
 
@@ -3751,6 +3857,14 @@ html.light-theme .chk-s{
     <canvas id="planos-grid-canvas"></canvas>
     <div id="planos-world"></div>
     <svg id="planos-overlay-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:20;"></svg>
+  </div>
+  <div id="planos-premium-lock">
+    <div class="ppl-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M5 7.5L12 2l7 5.5-2.5 9.5H7.5L5 7.5z" opacity=".92"/><path d="M7.5 17h9l1 3.5a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5L7.5 17z"/></svg>
+    </div>
+    <div class="ppl-title">Plano Mental</div>
+    <div class="ppl-desc">Mapeie hábitos, tarefas e ideias<br>num canvas visual conectado</div>
+    <div class="ppl-badge">recurso premium</div>
   </div>
 </div><!-- fim sec-planos -->
 
@@ -6139,8 +6253,8 @@ function renderDashboard(){
   // verifica se há dados no mês
   const hasData=dayData.some(d=>d.pct>0);
   const block=document.getElementById('dv-graph-block');
-  // gráfico de linha mensal
-  drawDvChart(dayData,daysInMonth);
+  // gráfico de linha mensal (blindado: erro no gráfico não pode impedir a lista de atualizar)
+  try{ drawDvChart(dayData,daysInMonth); }catch(_e){}
 
 
   // label de seção abaixo do gráfico
@@ -7304,7 +7418,7 @@ function _navPillHide(){
       // atualiza nome no centro da tela em tempo real
       const sn=document.getElementById('h-section-name');
       if(sn&&dragging){
-        const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',planos:'planos',dashboard:''};
+        const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',planos:'plano mental',dashboard:''};
         const nm=SEC_NAMES[id]||'';
         if((sn.textContent||'')!==nm){
           sn.classList.remove('visible');
@@ -7331,10 +7445,12 @@ function _navPillHide(){
     if(ct){ct.classList.add('nav-blur');ct.classList.remove('nav-clear');}
     const pw=document.getElementById('planos-canvas-wrap');
     if(pw&&document.getElementById('sec-planos')?.classList.contains('active')){pw.classList.add('nav-blur');pw.classList.remove('nav-clear');}
+    const ppl=document.getElementById('planos-premium-lock');
+    if(ppl&&document.getElementById('sec-planos')?.classList.contains('active')){ppl.classList.add('nav-blur');}
     // mostrar nome da seção atual
     const sn=document.getElementById('h-section-name');
     if(sn){
-      const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',planos:'planos',dashboard:''};
+      const SEC_NAMES={habitos:'hábitos',tarefas:'tarefas',financas:'finanças',treino:'treino',estudos:'estudos',planos:'plano mental',dashboard:''};
       const nm=SEC_NAMES[curTab]||'';
       sn.textContent=nm;
       if(nm){sn.classList.remove('changing');requestAnimationFrame(()=>sn.classList.add('visible'));}
@@ -7355,6 +7471,8 @@ function _navPillHide(){
     if(ct){ct.classList.remove('nav-blur');ct.classList.add('nav-clear');setTimeout(()=>ct.classList.remove('nav-clear'),380);}
     const pw=document.getElementById('planos-canvas-wrap');
     if(pw){pw.classList.remove('nav-blur');pw.classList.add('nav-clear');setTimeout(()=>pw.classList.remove('nav-clear'),380);}
+    const ppl=document.getElementById('planos-premium-lock');
+    if(ppl)ppl.classList.remove('nav-blur');
     // esconde nome da seção
     const sn=document.getElementById('h-section-name');
     if(sn){sn.classList.remove('visible');sn.classList.add('changing');setTimeout(()=>{if(sn)sn.classList.remove('changing');},200);}
@@ -8114,6 +8232,7 @@ Object.assign(window,{
   renderHabitFilters,renderTaskFilters,
   openProfile,closeProfile,doLogout,
   openAvatarPicker,closeAvatarPicker,_setAvatar,_handleAvatarUpload,
+  openReportForm,closeReportForm,_setReportType,sendReport,
   openSettings,closeSettings,
   toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
   selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,_closeAllFilters,_positionPanel,
@@ -8368,8 +8487,29 @@ function _handleAvatarUpload(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-    S.avatarImg=e.target.result;S.avatar=null;save();
-    _applyAvatarUI();closeAvatarPicker();
+    const img=new Image();
+    img.onload=()=>{
+      // redimensiona para thumbnail quadrado pequeno (evita estourar localStorage/Firestore)
+      const SIZE=160;
+      const canvas=document.createElement('canvas');
+      canvas.width=SIZE;canvas.height=SIZE;
+      const ctx=canvas.getContext('2d');
+      // crop central quadrado
+      const min=Math.min(img.width,img.height);
+      const sx=(img.width-min)/2, sy=(img.height-min)/2;
+      ctx.drawImage(img,sx,sy,min,min,0,0,SIZE,SIZE);
+      const dataUrl=canvas.toDataURL('image/jpeg',0.8);
+      try{
+        S.avatarImg=dataUrl;S.avatar=null;save();
+      }catch(err){
+        // se mesmo assim falhar, ao menos aplica localmente
+        S.avatarImg=dataUrl;
+      }
+      _applyAvatarUI();closeAvatarPicker();
+      input.value=''; // permite reenviar a mesma foto
+    };
+    img.onerror=()=>{ if(typeof showToast==='function')showToast('Não foi possível carregar a imagem','error'); };
+    img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -8394,6 +8534,57 @@ function openAvatarPicker(){
 }
 function closeAvatarPicker(){
   document.getElementById('avatar-picker').classList.remove('open');
+}
+
+/* ── REPORT BUG / SUGESTÃO ── */
+const REPORT_ENDPOINT='https://formspree.io/f/xeebjybb';
+let _reportType='bug';
+function openReportForm(){
+  _reportType='bug';
+  document.querySelectorAll('.report-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type==='bug'));
+  const ta=document.getElementById('report-text'); if(ta)ta.value='';
+  const btn=document.getElementById('report-send-btn'); if(btn){btn.disabled=false;btn.textContent='enviar';}
+  document.getElementById('report-sheet').classList.add('open');
+}
+function closeReportForm(){
+  document.getElementById('report-sheet').classList.remove('open');
+}
+function _setReportType(t){
+  _reportType=t;
+  document.querySelectorAll('.report-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===t));
+}
+async function sendReport(){
+  const ta=document.getElementById('report-text');
+  const msg=(ta&&ta.value||'').trim();
+  if(!msg){ if(typeof showToast==='function')showToast('Escreva sua mensagem','warn'); return; }
+  const btn=document.getElementById('report-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='enviando…';}
+  const tipo=_reportType==='bug'?'Bug':'Sugestão';
+  const nome=(S&&S.userName)||'usuário';
+  const uid=(currentUser&&currentUser.uid)||'-';
+  const email=(currentUser&&currentUser.email)||'-';
+  try{
+    const resp=await fetch(REPORT_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        _subject:`[AVANCE] ${tipo} — ${nome}`,
+        tipo, nome, uid, email,
+        app:'AVANCE v1.0',
+        mensagem:msg
+      })
+    });
+    if(resp.ok){
+      closeReportForm();
+      if(typeof showToast==='function')showToast('Enviado! Obrigado pelo feedback','ok',3000);
+    } else {
+      if(typeof showToast==='function')showToast('Falha ao enviar. Tente novamente','error');
+      if(btn){btn.disabled=false;btn.textContent='enviar';}
+    }
+  }catch(e){
+    if(typeof showToast==='function')showToast('Sem conexão. Tente novamente','error');
+    if(btn){btn.disabled=false;btn.textContent='enviar';}
+  }
 }
 
 /* ── SETTINGS ── */
@@ -8468,10 +8659,14 @@ function _renderAccentDots(){
 
 function openSettings(){
   closeProfile();
-  setTimeout(()=>document.getElementById('settings-sheet').classList.add('open'),120);
+  setTimeout(()=>{
+    document.getElementById('settings-sheet').classList.add('open');
+    _navPillHide();
+  },120);
 }
 function closeSettings(){
   document.getElementById('settings-sheet').classList.remove('open');
+  _navPillShow();
 }
 
 /* ── PROFILE ── */
@@ -9433,6 +9628,10 @@ function _setFinPeriod(p){
   }
 
   function planosEnter(){
+    const sec=document.getElementById('sec-planos');
+    const premium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+    if(sec)sec.classList.toggle('locked',!premium);
+    if(!premium){_stopLoop();return;} // bloqueado: não inicializa o canvas
     planosInit();
     const cv=_canvas(),wrap=_wrap();
     if(cv&&wrap){
