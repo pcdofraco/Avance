@@ -8587,7 +8587,12 @@ function _estSave(){
 
 /* ── INSTALL PWA ── */
 let _installPrompt=null;
+function _registerSW(){
+  if(!('serviceWorker' in navigator))return;
+  navigator.serviceWorker.register('sw.js').catch(()=>{/* silencioso */});
+}
 function _initInstallBtn(){
+  _registerSW();
   const wrap=document.getElementById('install-btn-wrap');
   if(!wrap)return;
   const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
@@ -8607,7 +8612,7 @@ function _initInstallBtn(){
   });
 }
 function triggerInstall(){
-  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  // 1) prompt nativo disponível (Chrome, Brave, Edge, Android) — caminho ideal
   if(_installPrompt){
     _installPrompt.prompt();
     _installPrompt.userChoice.then(r=>{
@@ -8616,9 +8621,56 @@ function triggerInstall(){
       }
       _installPrompt=null;
     });
-  }else if(isIos){
-    document.getElementById('install-ios-sheet')?.classList.add('open');
+    return;
   }
+  // 2) sem prompt nativo — mostra guia manual de acordo com a plataforma
+  const ua=navigator.userAgent;
+  const isIos=/iphone|ipad|ipod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  const isAndroid=/android/i.test(ua);
+  const isFirefox=/firefox/i.test(ua);
+  let platform='desktop';
+  if(isIos)platform='ios';
+  else if(isAndroid)platform='android';
+  else if(isFirefox)platform='firefox';
+  _showInstallGuide(platform);
+}
+function _showInstallGuide(platform){
+  const guides={
+    ios:[
+      'toque no ícone <b>compartilhar</b> (quadrado com seta) na barra do Safari',
+      'role para baixo e toque em <b>"Adicionar à Tela de Início"</b>',
+      'toque em <b>Adicionar</b> no canto superior direito'
+    ],
+    android:[
+      'toque no menu <b>⋮</b> no canto superior direito',
+      'toque em <b>"Instalar app"</b> ou <b>"Adicionar à tela inicial"</b>',
+      'confirme tocando em <b>Instalar</b>'
+    ],
+    firefox:[
+      'toque no menu <b>⋮</b> ou <b>≡</b> do navegador',
+      'escolha <b>"Instalar"</b> ou <b>"Adicionar à tela inicial"</b>',
+      'confirme a instalação'
+    ],
+    desktop:[
+      'clique no ícone de <b>instalar</b> (monitor com seta) na barra de endereço',
+      'ou abra o menu <b>⋮</b> e escolha <b>"Instalar AVANCE"</b>',
+      'confirme clicando em <b>Instalar</b>'
+    ]
+  };
+  const titles={ios:'adicionar à tela inicial',android:'instalar no android',firefox:'instalar app',desktop:'instalar no computador'};
+  const steps=guides[platform]||guides.desktop;
+  document.getElementById('install-ios-title').textContent=titles[platform]||titles.desktop;
+  const inner=document.getElementById('install-ios-inner');
+  // remove passos antigos
+  inner.querySelectorAll('.install-step').forEach(el=>el.remove());
+  const closeBtn=document.getElementById('install-ios-close');
+  steps.forEach((txt,i)=>{
+    const div=document.createElement('div');
+    div.className='install-step';
+    div.innerHTML=`<div class="install-step-num">${i+1}</div><div class="install-step-text">${txt}</div>`;
+    inner.insertBefore(div,closeBtn);
+  });
+  document.getElementById('install-ios-sheet')?.classList.add('open');
 }
 function closeInstallIos(){
   document.getElementById('install-ios-sheet')?.classList.remove('open');
@@ -10402,24 +10454,12 @@ function _setFinPeriod(p){
     </button>
   </div>
 
-  <!-- instrução instalação iOS -->
+  <!-- instrução instalação (passos gerados dinamicamente por plataforma) -->
   <div id="install-ios-sheet">
     <div id="install-ios-bg" onclick="closeInstallIos()"></div>
     <div id="install-ios-inner">
       <div id="settings-handle"></div>
       <div id="install-ios-title">adicionar à tela inicial</div>
-      <div class="install-step">
-        <div class="install-step-num">1</div>
-        <div class="install-step-text">toque no ícone <b>compartilhar</b> na barra inferior do Safari</div>
-      </div>
-      <div class="install-step">
-        <div class="install-step-num">2</div>
-        <div class="install-step-text">role para baixo e toque em <b>"Adicionar à Tela de Início"</b></div>
-      </div>
-      <div class="install-step">
-        <div class="install-step-num">3</div>
-        <div class="install-step-text">toque em <b>Adicionar</b> no canto superior direito</div>
-      </div>
       <button id="install-ios-close" onclick="closeInstallIos()">entendi</button>
     </div>
   </div>
