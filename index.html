@@ -340,6 +340,9 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 }
 #planos-canvas-wrap.nav-blur{pointer-events:none;}
 #planos-canvas-wrap.nav-blur::after{opacity:1;}
+/* prime: cria a camada de composição do backdrop-filter de forma imperceptível (1% opacidade, sem transição)
+   evita o bug de o desfoque não aparecer no 1º uso da barra de navegação dentro do plano mental */
+#planos-canvas-wrap.nav-blur-prime::after{opacity:0.01;transition:none;}
 html.light-theme #planos-canvas-wrap::after{
   backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
   background:rgba(255,255,255,0.12);
@@ -1438,6 +1441,13 @@ html.light-theme .chk-s{
 .dv-week-lbl{font-family:var(--mono);font-size:8px;color:rgba(var(--ink),0.25);letter-spacing:0.05em;text-align:center;flex:1;}
 
 #dv-consist-lbl{font-family:var(--mono);font-size:9px;color:rgba(var(--ink),0.35);letter-spacing:0.1em;margin:12px 0 6px;}
+/* gráfico de produtividade */
+#dv-prod-block{margin-top:28px;}
+#dv-prod-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;}
+#dv-prod-lbl{font-family:var(--mono);font-size:9px;color:rgba(var(--ink),0.35);letter-spacing:0.1em;}
+#dv-prod-pct{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--accent-solid);}
+#dv-prod-wrap{position:relative;overflow:hidden;margin-top:35px;}
+#dv-prod-canvas{display:block;width:100%;}
 
 
 #dv-habits-list{display:flex;flex-direction:column;gap:12px;}
@@ -1958,6 +1968,58 @@ html.light-theme .chk-s{
 .settings-row-report{cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
 .settings-row-report .settings-row-lbl{color:rgba(var(--ink),0.5);}
 .settings-row-report:active{opacity:0.6;}
+
+/* ── SECTIONS SHEET ── */
+#sections-sheet{
+  position:fixed;inset:0;z-index:750;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+}
+#sections-sheet.open{pointer-events:all;opacity:1;}
+#sections-sheet-bg{position:absolute;inset:0;background:rgba(var(--paper),0.5);}
+#sections-inner{
+  position:absolute;bottom:0;
+  left:50%;transform:translateX(-50%) translateY(40px);
+  width:100%;max-width:480px;
+  background:rgba(var(--surface),0.98);
+  border-top:1px solid rgba(var(--ink),0.06);
+  border-radius:24px 24px 0 0;
+  padding:20px 24px calc(32px + var(--sb));
+  box-sizing:border-box;
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#sections-sheet.open #sections-inner{transform:translateX(-50%) translateY(0);}
+#sections-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.22em;
+  color:rgba(var(--ink),0.2);text-transform:uppercase;
+  margin-bottom:24px;
+}
+.sec-toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 0;border-bottom:1px solid rgba(var(--ink),0.05);
+}
+.sec-toggle-row:last-of-type{border-bottom:none;}
+.sec-toggle-lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:rgba(var(--ink),0.5);text-transform:uppercase;}
+.sec-toggle-lbl.disabled{color:rgba(var(--ink),0.2);}
+/* mini toggle igual ao de tema */
+.sec-tog{
+  width:36px;height:20px;border-radius:10px;
+  background:rgba(var(--ink),0.1);border:none;
+  position:relative;cursor:pointer;flex-shrink:0;
+  transition:background 0.2s;
+}
+.sec-tog.on{background:rgba(var(--accent),0.9);}
+.sec-tog::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--ink-solid);
+  transition:transform 0.2s cubic-bezier(0.34,1.2,0.64,1);
+}
+.sec-tog.on::after{transform:translateX(16px);}
+#sections-hint{
+  margin-top:18px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.08em;
+  color:rgba(var(--ink),0.18);text-align:center;line-height:1.6;
+}
 /* report form sheet */
 #report-sheet{
   position:fixed;inset:0;z-index:760;
@@ -2009,6 +2071,58 @@ html.light-theme .chk-s{
 #report-send-btn:active{opacity:0.8;}
 #report-send-btn:disabled{opacity:0.4;cursor:default;}
 #report-hint{
+  text-align:center;margin-top:10px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  color:rgba(var(--ink),0.25);text-transform:uppercase;
+}
+/* plan view sheet */
+#plan-sheet{
+  position:fixed;inset:0;z-index:760;
+  display:flex;align-items:flex-end;justify-content:center;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+}
+#plan-sheet.open{pointer-events:all;opacity:1;}
+#plan-sheet-bg{position:absolute;inset:0;background:rgba(var(--paper),0.5);}
+#plan-inner{
+  position:relative;z-index:1;width:100%;max-width:480px;
+  background:rgb(var(--surface));
+  border-top:1px solid rgba(var(--ink),0.07);
+  border-radius:20px 20px 0 0;
+  padding:14px 20px calc(28px + var(--sb));
+  transform:translateY(40px);
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#plan-sheet.open #plan-inner{transform:translateY(0);}
+#plan-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.2em;
+  color:rgba(var(--ink),0.3);text-transform:uppercase;text-align:center;margin-bottom:18px;
+}
+#plan-card{
+  background:rgba(var(--ink),0.03);border:1px solid rgba(var(--ink),0.08);
+  border-radius:16px;padding:16px 16px 6px;margin-bottom:14px;
+}
+#plan-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--sans);font-size:12px;font-weight:700;
+  color:#7a5800;background:linear-gradient(135deg,#fff3b0,#ffd700,#e6a800);
+  padding:5px 12px;border-radius:20px;border:1px solid #c8920a;margin-bottom:14px;
+}
+.plan-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid rgba(var(--ink),0.05);
+}
+.plan-row:last-child{border-bottom:none;}
+.plan-row-lbl{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:rgba(var(--ink),0.35);text-transform:uppercase;}
+.plan-row-val{font-family:var(--sans);font-size:13px;font-weight:600;color:rgba(var(--ink),0.85);}
+.plan-row-val.plan-active{color:#16a34a;}
+#plan-cancel-btn{
+  width:100%;padding:13px;border-radius:12px;
+  background:rgba(220,80,80,0.08);border:1px solid rgba(220,80,80,0.25);
+  font-family:var(--sans);font-size:13px;font-weight:600;color:rgba(220,80,80,0.95);
+  cursor:pointer;transition:background 0.15s;
+}
+#plan-cancel-btn:active{background:rgba(220,80,80,0.15);}
+#plan-hint{
   text-align:center;margin-top:10px;
   font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
   color:rgba(var(--ink),0.25);text-transform:uppercase;
@@ -3502,14 +3616,39 @@ html.light-theme .chk-s{
         <span class="settings-row-lbl">cor de destaque</span>
         <div id="accent-dots"></div>
       </div>
-      <div class="settings-row">
-        <span class="settings-row-lbl">versão</span>
-        <span class="settings-row-val">1.0</span>
+      <div class="settings-row settings-row-report" onclick="openPlanView()">
+        <span class="settings-row-lbl">plano</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="settings-row settings-row-report" onclick="openSectionsSheet()">
+        <span class="settings-row-lbl">seções do app</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="settings-row settings-row-report" onclick="openReportForm()">
         <span class="settings-row-lbl">reportar bug ou sugestão</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+      <div class="settings-row settings-row-report" onclick="openPlanView()">
+        <span class="settings-row-lbl">plano</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="settings-row">
+        <span class="settings-row-lbl">versão</span>
+        <span class="settings-row-val">1.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTIONS SHEET -->
+  <div id="sections-sheet">
+    <div id="sections-sheet-bg" onclick="closeSectionsSheet()"></div>
+    <div id="sections-inner">
+      <div id="settings-handle"></div>
+      <div id="sections-title">seções do app</div>
+      <div id="sections-toggle-list">
+        <!-- renderizado por JS -->
+      </div>
+      <div id="sections-hint">seções desativadas ficam ocultas na navegação</div>
     </div>
   </div>
 
@@ -3526,6 +3665,39 @@ html.light-theme .chk-s{
       <textarea id="report-text" placeholder="descreva o bug ou sua sugestão…" maxlength="2000"></textarea>
       <button id="report-send-btn" onclick="sendReport()">enviar</button>
       <div id="report-hint">enviado direto para a equipe</div>
+    </div>
+  </div>
+
+  <!-- PLAN VIEW SHEET -->
+  <div id="plan-sheet">
+    <div id="plan-sheet-bg" onclick="closePlanView()"></div>
+    <div id="plan-inner">
+      <div id="settings-handle"></div>
+      <div id="plan-title">seu plano</div>
+      <div id="plan-card">
+        <div id="plan-badge">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M5 7.5L12 2l7 5.5-2.5 9.5H7.5L5 7.5z" opacity=".92"/><path d="M7.5 17h9l1 3.5a.5.5 0 01-.5.5h-10a.5.5 0 01-.5-.5L7.5 17z"/></svg>
+          Premium
+        </div>
+        <div class="plan-row">
+          <span class="plan-row-lbl">status</span>
+          <span class="plan-row-val plan-active">ativo</span>
+        </div>
+        <div class="plan-row">
+          <span class="plan-row-lbl">assinou em</span>
+          <span class="plan-row-val" id="plan-since">—</span>
+        </div>
+        <div class="plan-row">
+          <span class="plan-row-lbl">próxima cobrança</span>
+          <span class="plan-row-val" id="plan-next">—</span>
+        </div>
+        <div class="plan-row">
+          <span class="plan-row-lbl">valor</span>
+          <span class="plan-row-val" id="plan-price">—</span>
+        </div>
+      </div>
+      <button id="plan-cancel-btn" onclick="_planCancelStub()">cancelar assinatura</button>
+      <div id="plan-hint">conceito · ainda não funcional</div>
     </div>
   </div>
 
@@ -3570,12 +3742,24 @@ html.light-theme .chk-s{
           <!-- consistência label -->
           <div id="dv-consist-lbl">CONSISTÊNCIA</div>
 
-          <!-- cabeçalho dias (números) -->
-
-          <!-- lista de hábitos + pílulas -->
+          <!-- área premium: lista detalhada da consistência -->
           <div id="dv-premium-wrap" style="position:relative;">
             <div id="dv-habits-list"></div>
             <div id="dv-premium-overlay" style="display:none;"></div>
+          </div>
+
+          <!-- gráfico de produtividade (livre) -->
+          <div id="dv-prod-block">
+            <div id="dv-prod-head">
+              <span id="dv-prod-lbl">PERCENTUAL DE PRODUTIVIDADE</span>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;">
+                <span id="dv-prod-pct">0%</span>
+                <span id="dv-prod-week" style="font-family:var(--mono);font-size:8px;letter-spacing:0.08em;color:rgba(var(--ink),0.3);"></span>
+              </div>
+            </div>
+            <div id="dv-prod-wrap">
+              <canvas id="dv-prod-canvas"></canvas>
+            </div>
           </div>
         </div>
 
@@ -4199,8 +4383,8 @@ function setTab(name,dir){
 
 /* XP */
 function addXP(n,el){
-  S.xp+=n;updateXPBar();
-  if(el)popXP(n,el);
+  S.xp=Math.max(0,(S.xp||0)+n);updateXPBar();
+  if(el&&n>0)popXP(n,el);
   save();snapshotHistory();
 }
 function updateXPBar(){
@@ -4306,18 +4490,14 @@ function renderHabits(){
   // botão de adicionar reflete o limite do plano gratuito
   const _addBtn=document.getElementById('hab-add-btn');
   if(_addBtn){
-    if(!(S.habits||[]).length){
-      _addBtn.style.display='none';
+    _addBtn.style.display='';
+    const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+    if(!isPremium&&(S.habits||[]).length>=5){
+      _addBtn.classList.add('locked');
+      _addBtn.innerHTML='🔒 limite de 5 hábitos · premium';
     } else {
-      _addBtn.style.display='';
-      const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
-      if(!isPremium&&(S.habits||[]).length>=5){
-        _addBtn.classList.add('locked');
-        _addBtn.innerHTML='🔒 limite de 5 hábitos · premium';
-      } else {
-        _addBtn.classList.remove('locked');
-        _addBtn.innerHTML='+ adicionar hábito';
-      }
+      _addBtn.classList.remove('locked');
+      _addBtn.innerHTML='+ adicionar hábito';
     }
   }
   const el=document.getElementById('habits-list');
@@ -4327,7 +4507,6 @@ function renderHabits(){
       ? '<div class="empty">Nenhum hábito com essa tag</div>'
       : `<div class="empty-state">
       <div class="empty-state-desc">crie hábitos e acompanhe<br>sua consistência diária</div>
-      <button class="empty-state-cta" onclick="openModal('habit',null)">+ criar primeiro hábito</button>
     </div>`;
     return;
   }
@@ -4670,8 +4849,9 @@ function toggleHabit(id,row){
     chk.style.borderColor='rgba(248,113,113,0.8)';
     showToast('✗ registrado');
   } else if(cur>=target){
-    // untoggle
+    // untoggle — remove o XP concedido hoje (evita farm de XP)
     delete h.done[today];
+    if(h.xpLog&&h.xpLog[today]){ addXP(-h.xpLog[today]); delete h.xpLog[today]; }
     chk.classList.remove('done');
     chk.style.background='var(--bg)';chk.style.borderColor=dot;
   } else {
@@ -4681,6 +4861,8 @@ function toggleHabit(id,row){
       chk.classList.add('done');
       chk.style.background=dot;chk.style.borderColor='transparent';
       const _hxp=_xpHabit(h.streak||0);
+      if(!h.xpLog)h.xpLog={};
+      h.xpLog[today]=_hxp; // registra o XP concedido neste dia
       addXP(_hxp,chk);showToast('+'+_hxp+' XP'+(h.streak>=3?' 🔥':''));
     } else {
       chk.style.background=dot+'55';chk.style.borderColor=dot;
@@ -4721,19 +4903,15 @@ function renderTasks(){
   // quick-add reflete o limite do plano gratuito
   const _qa=document.getElementById('task-quick-add');
   if(_qa){
-    if(!(S.tasks||[]).length){
-      _qa.style.display='none';
+    _qa.style.display='';
+    const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
+    const _qaLbl=_qa.querySelector('.qa-label');
+    if(!isPremium&&(S.tasks||[]).length>=5){
+      _qa.classList.add('locked');
+      if(_qaLbl)_qaLbl.innerHTML='🔒 limite de 5 tarefas · premium';
     } else {
-      _qa.style.display='';
-      const isPremium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
-      const _qaLbl=_qa.querySelector('.qa-label');
-      if(!isPremium&&(S.tasks||[]).length>=5){
-        _qa.classList.add('locked');
-        if(_qaLbl)_qaLbl.innerHTML='🔒 limite de 5 tarefas · premium';
-      } else {
-        _qa.classList.remove('locked');
-        if(_qaLbl)_qaLbl.textContent='Adicionar tarefa…';
-      }
+      _qa.classList.remove('locked');
+      if(_qaLbl)_qaLbl.textContent='Adicionar tarefa…';
     }
   }
   const el=document.getElementById('tasks-list');
@@ -4754,7 +4932,6 @@ function renderTasks(){
       ? '<div class="empty" style="padding-left:34px;">Nenhuma tarefa com essa tag</div>'
       : `<div class="empty-state">
       <div class="empty-state-desc">organize o que precisa fazer<br>e acompanhe seu progresso</div>
-      <button class="empty-state-cta" onclick="openModal('task',null)">+ criar primeira tarefa</button>
     </div>`;
     return;
   }
@@ -4855,13 +5032,18 @@ function toggleTask(id,row){
     nowDone=t.done;
   }
   const chk=row.querySelector('.chk-c'),nm=row.querySelector('.item-name');
+  const xpKey=(t.repeat&&t.repeat!=='once')?todayKey:'_once';
   if(nowDone){
     chk.classList.add('done');
     chk.style.background=dot;chk.style.borderColor='transparent';
     if(nm){nm.classList.add('done');}
     const _txp=_xpTask(t.priority||'normal');
+    if(!t.xpLog)t.xpLog={};
+    t.xpLog[xpKey]=_txp; // registra o XP concedido
     addXP(_txp,chk);showToast('+'+_txp+' XP');
   }else{
+    // desmarcar — remove o XP concedido (evita farm)
+    if(t.xpLog&&t.xpLog[xpKey]){ addXP(-t.xpLog[xpKey]); delete t.xpLog[xpKey]; }
     chk.classList.remove('done');
     chk.style.background='var(--bg)';chk.style.borderColor=dot;
     if(nm){nm.classList.remove('done');}
@@ -6255,6 +6437,8 @@ function renderDashboard(){
   const block=document.getElementById('dv-graph-block');
   // gráfico de linha mensal (blindado: erro no gráfico não pode impedir a lista de atualizar)
   try{ drawDvChart(dayData,daysInMonth); }catch(_e){}
+  // gráfico de produtividade combinada (hábitos + tarefas + estudos)
+  try{ _renderProductivity(daysInMonth); }catch(_e){}
 
 
   // label de seção abaixo do gráfico
@@ -6369,6 +6553,189 @@ function renderDashboard(){
     }
   }
 }
+
+let _dvProdRaf=null;
+// produtividade diária combinada: média entre hábitos, tarefas e estudos concluídos no dia
+function _renderProductivity(daysInMonth){
+  const todayMid=new Date(); todayMid.setHours(0,0,0,0);
+
+  // calcula pct semanal para um mês dado
+  function monthWeeks(year,month){
+    const days=new Date(year,month+1,0).getDate();
+    const daily=[];
+    for(let d=1;d<=days;d++){
+      const dt=new Date(year,month,d);
+      const key=dt.toDateString();
+      const isoKey=dt.toISOString().split('T')[0];
+      const dow=dt.getDay();
+      const parts=[];
+      const dayH=(S.habits||[]).filter(hb=>!hb.days||hb.days.includes(dow));
+      if(dayH.length){const done=dayH.filter(hb=>hb.done&&hb.done[key]).length;parts.push(done/dayH.length);}
+      const tasks=(S.tasks||[]);
+      if(tasks.length){const doneT=tasks.filter(t=>(t.doneByDate&&t.doneByDate[key])||(t.done&&(t.doneDate===key||t.doneDate===isoKey))).length;parts.push(Math.min(doneT/tasks.length,1));}
+      const estItems=(S.estudos&&S.estudos.items)||[];
+      const dayEst=estItems.filter(it=>it.date===isoKey||it.date===key);
+      if(dayEst.length){parts.push(dayEst.filter(it=>it.done).length/dayEst.length);}
+      daily.push({pct:parts.length?parts.reduce((a,b)=>a+b,0)/parts.length:0, dt});
+    }
+    // agrupa em semanas
+    const weeks=[]; let w=[];
+    for(let i=0;i<daily.length;i++){
+      w.push(daily[i].pct);
+      if(daily[i].dt.getDay()===0||i===daily.length-1){weeks.push(w);w=[];}
+    }
+    return weeks.map(wk=>{const v=wk.filter(x=>x>0);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;});
+  }
+
+  // mês atual e anterior
+  let curYear=dvCurrentYear, curMonth=dvCurrentMonth;
+  let prevMonth=curMonth-1, prevYear=curYear;
+  if(prevMonth<0){prevMonth=11;prevYear--;}
+
+  const curWeeks=monthWeeks(curYear,curMonth);
+  const prevWeeks=monthWeeks(prevYear,prevMonth);
+
+  // percentual médio do mês atual
+  const pastVals=curWeeks.filter((_,i)=>{
+    const wkStart=new Date(curYear,curMonth,i*7+1);
+    return wkStart<=todayMid;
+  });
+  const avg=pastVals.length?Math.round(pastVals.reduce((a,b)=>a+b,0)/pastVals.length*100):0;
+  const pctEl=document.getElementById('dv-prod-pct');
+  if(pctEl)pctEl.textContent=avg+'%';
+  // semana atual do mês
+  const weekEl=document.getElementById('dv-prod-week');
+  if(weekEl){
+    const today=new Date();
+    const isCurrentMonth=today.getFullYear()===curYear&&today.getMonth()===curMonth;
+    if(isCurrentMonth){
+      const weekNum=Math.ceil(today.getDate()/7);
+      weekEl.textContent='semana '+weekNum;
+    } else { weekEl.textContent=''; }
+  }
+
+  const monthName=d=>new Date(d.year,d.month,1).toLocaleDateString('pt-BR',{month:'short'});
+  _drawThinBars(prevWeeks,curWeeks,
+    monthName({year:prevYear,month:prevMonth}),
+    monthName({year:curYear,month:curMonth}));
+}
+
+function _drawThinBars(prevWeeks,curWeeks,prevLabel,curLabel){
+  const cv=document.getElementById('dv-prod-canvas');
+  if(!cv)return;
+  cancelAnimationFrame(_dvProdRaf);
+
+  const doDraw=()=>{
+    const dpr=window.devicePixelRatio||1;
+    const W=cv.offsetWidth||cv.parentElement?.offsetWidth||320;
+    const H=130;
+    cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+'px';
+    const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+
+    const padX=10, padTop=34, padBot=18;
+    const drawH=H-padTop-padBot;
+    const groupGap=32;
+
+    const totalBarsW=W-2*padX-groupGap;
+    const halfW=totalBarsW/2;
+    const prevN=prevWeeks.length||1;
+    const curN=curWeeks.length||1;
+    const prevSlot=halfW/prevN;
+    const curSlot=halfW/curN;
+    const barW=Math.max(Math.min(prevSlot,curSlot)*0.52, 6);
+
+    const PREV_COLOR='rgba(180,180,200,0.45)';
+    const CUR_BULL='rgba(74,222,128,0.85)';
+    const CUR_BEAR='rgba(248,113,113,0.75)';
+    const CUR_ZERO='rgba(120,120,140,0.3)';
+
+    const yp=p=>padTop+drawH*(1-Math.max(0,Math.min(1,p)));
+    const dur=650; const start=performance.now();
+    const prevAvg=prevWeeks.length?prevWeeks.reduce((a,b)=>a+b,0)/prevWeeks.length:0;
+
+    // helper: barra com topo arredondado
+    const roundedBar=(ctx,x,y,w,h)=>{
+      const r=Math.min(w/2,3);
+      h=Math.max(h,r*2);
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);
+      ctx.lineTo(x+w-r,y);
+      ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+      ctx.lineTo(x+w,y+h);
+      ctx.lineTo(x,y+h);
+      ctx.lineTo(x,y+r);
+      ctx.quadraticCurveTo(x,y,x+r,y);
+      ctx.closePath();
+    };
+
+    const inkRGB=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'255,255,255';
+
+    const prevGroupCx=padX+halfW/2;
+    const curGroupCx=padX+halfW+groupGap+halfW/2;
+
+    function frame(now){
+      const t=Math.min((now-start)/dur,1);
+      const ease=1-Math.pow(1-t,3);
+      ctx.clearRect(0,0,W,H);
+
+      // rótulos centralizados acima de cada grupo
+      ctx.textAlign='center';
+      ctx.font=`600 9px monospace`;
+      ctx.letterSpacing='0.06em';
+      ctx.fillStyle=`rgba(${inkRGB},0.3)`;
+      ctx.fillText('MÊS ANTERIOR', prevGroupCx, 13);
+      ctx.fillStyle=`rgba(${inkRGB},0.6)`;
+      ctx.fillText('MÊS ATUAL', curGroupCx, 13);
+
+      // linha 50%
+      ctx.save();
+      ctx.setLineDash([2,4]);
+      ctx.beginPath();
+      ctx.moveTo(padX,yp(0.5)); ctx.lineTo(W-padX,yp(0.5));
+      ctx.strokeStyle='rgba(128,128,128,0.1)'; ctx.lineWidth=1; ctx.stroke();
+      ctx.restore();
+
+      // barras mês anterior
+      prevWeeks.forEach((val,i)=>{
+        const cx=padX+prevSlot*i+prevSlot/2;
+        const h=drawH*val*ease;
+        const x=cx-barW/2;
+        const y=padTop+drawH-h;
+        ctx.fillStyle=PREV_COLOR;
+        roundedBar(ctx,x,y,barW,h);
+        ctx.fill();
+        ctx.font='7px monospace';
+        ctx.fillStyle='rgba(180,180,200,0.25)';
+        ctx.textAlign='center';
+        ctx.fillText('S'+(i+1), cx, H-4);
+      });
+
+      // barras mês atual
+      const xOff=padX+halfW+groupGap;
+      curWeeks.forEach((val,i)=>{
+        const cx=xOff+curSlot*i+curSlot/2;
+        const h=drawH*val*ease;
+        const x=cx-barW/2;
+        const y=padTop+drawH-h;
+        const color=val===0?CUR_ZERO:val>=prevAvg?CUR_BULL:CUR_BEAR;
+        ctx.fillStyle=color;
+        roundedBar(ctx,x,y,barW,h);
+        ctx.fill();
+        ctx.font='7px monospace';
+        ctx.fillStyle='rgba(255,255,255,0.25)';
+        ctx.textAlign='center';
+        ctx.fillText('S'+(i+1), cx, H-4);
+      });
+
+      if(t<1)_dvProdRaf=requestAnimationFrame(frame);
+    }
+    _dvProdRaf=requestAnimationFrame(frame);
+  };
+
+  if(cv.offsetWidth>0){doDraw();}
+  else{requestAnimationFrame(doDraw);}
+}
+
 
 let _dvChartRaf=null;
 function drawDvChart(dayData,n){
@@ -7364,6 +7731,18 @@ function _navPillInit(){
   _navPillUpdate();
 }
 
+function _navPillRebuild(){
+  // reconstrói as bolinhas com base no TAB_ORDER atual
+  const pill=document.getElementById('nav-pill');
+  if(!pill) return;
+  const activeTabs=TAB_ORDER.map(id=>NAV_PILL_TABS.find(t=>t.id===id)).filter(Boolean);
+  pill.innerHTML=activeTabs.map((t,i)=>`
+    <div class="nav-pill-item" data-idx="${i}" data-id="${t.id}">
+      <div class="nav-dot"></div>
+    </div>`).join('');
+  _navPillUpdate();
+}
+
 function _navPillUpdate(){
   const items=document.querySelectorAll('.nav-pill-item');
   items.forEach(item=>{
@@ -7374,9 +7753,7 @@ function _navPillUpdate(){
 
 function _navPillShow(){
   document.getElementById('nav-pill-wrap')?.classList.add('visible');
-  const pill=document.getElementById('nav-pill');
-  if(pill && !pill.children.length) _navPillInit();
-  else _navPillUpdate();
+  _navPillRebuild();
 }
 function _navPillHide(){
   const wrap=document.getElementById('nav-pill-wrap');
@@ -7413,8 +7790,9 @@ function _navPillHide(){
     });
     // troca a seção em tempo real conforme o dedo passa pelas bolinhas
     if(idx>=0){
-      const id=NAV_PILL_TABS[idx].id;
-      if(id!==curTab) setTab(id);
+      const _pillItems=[...pill.querySelectorAll('.nav-pill-item')];
+      const id=_pillItems[idx]?.dataset.id||NAV_PILL_TABS[idx]?.id;
+      if(id && id!==curTab) setTab(id);
       // atualiza nome no centro da tela em tempo real
       const sn=document.getElementById('h-section-name');
       if(sn&&dragging){
@@ -7495,7 +7873,7 @@ function _navPillHide(){
       // tap simples (sem mover): navega para a bolinha tocada
       if(dragging && currentHover<0 && e.changedTouches.length){
         const idx=getHoveredIdx(e.changedTouches[0].clientX);
-        if(idx>=0 && NAV_PILL_TABS[idx]) setTab(NAV_PILL_TABS[idx].id);
+        if(idx>=0){const _its=[...pill.querySelectorAll('.nav-pill-item')];const _tid=_its[idx]?.dataset.id;if(_tid)setTab(_tid);}
       }
     }catch(_){}
     endDrag();
@@ -8233,6 +8611,7 @@ Object.assign(window,{
   openProfile,closeProfile,doLogout,
   openAvatarPicker,closeAvatarPicker,_setAvatar,_handleAvatarUpload,
   openReportForm,closeReportForm,_setReportType,sendReport,
+  openPlanView,closePlanView,_planCancelStub,
   openSettings,closeSettings,
   toggleChipPanel,_updateChip,toggleSection,toggleTaskFilterPanel,_setTaskTagFilter,selectPriority,
   selectHabitStyle,toggleHabitFilterPanel,_setHabitTagFilter,_closeAllFilters,_positionPanel,
@@ -8244,7 +8623,8 @@ Object.assign(window,{
   _trCloseSheet, _trToggleMode, _trToggleSet, _trConclude,
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
   _toggleHabitStats, _flamesvg, _renderHabBottomChart, _calcStreak,
-  _navPillInit,_navPillShow,_navPillHide,_navPillUpdate,_qaToggle,_qaTimer,_qaNotes,_estTimerClose,_estNotesClose,_estTimerToggle,_estTimerReset,_musicToggle,_musicNext,_musicPrev,_estTimerEditSub,_estTimerSubBlur,_estGoalSelect,_estGoalClear,_estGoalConfirm,_estGoalInput,_estPickerOpen,_estPickerClose,_estPickerConfirm,_estPickerClear,
+  openSectionsSheet,closeSectionsSheet,_renderSectionsSheet,_secToggleTap,
+  _navPillInit,_navPillShow,_navPillHide,_navPillUpdate,_navPillRebuild,_qaToggle,_qaTimer,_qaNotes,_estTimerClose,_estNotesClose,_estTimerToggle,_estTimerReset,_musicToggle,_musicNext,_musicPrev,_estTimerEditSub,_estTimerSubBlur,_estGoalSelect,_estGoalClear,_estGoalConfirm,_estGoalInput,_estPickerOpen,_estPickerClose,_estPickerConfirm,_estPickerClear,
   _estNoteNew,_estNoteBack,_estNoteDone,_estNoteOpen,_estNoteInput,_estNoteKeydown,_estNotesDel,
   renderEstudos,_estToggleAdd,_estOpenItem,_estCloseSheet,_estSave,_estToggleDone,_estDel,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
@@ -8536,6 +8916,25 @@ function closeAvatarPicker(){
   document.getElementById('avatar-picker').classList.remove('open');
 }
 
+/* ── PLANO (conceito) ── */
+function openPlanView(){
+  // datas de exemplo (conceito — virá da Cakto depois)
+  const fmt=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const since=new Date(); since.setMonth(since.getMonth()-1);
+  const next=new Date(); next.setMonth(next.getMonth()+0); next.setDate(since.getDate());
+  if(next<new Date())next.setMonth(next.getMonth()+1);
+  const sinceEl=document.getElementById('plan-since'); if(sinceEl)sinceEl.textContent=fmt(since);
+  const nextEl=document.getElementById('plan-next'); if(nextEl)nextEl.textContent=fmt(next);
+  const priceEl=document.getElementById('plan-price'); if(priceEl)priceEl.textContent='R$ 0,00 / mês';
+  document.getElementById('plan-sheet').classList.add('open');
+}
+function closePlanView(){
+  document.getElementById('plan-sheet').classList.remove('open');
+}
+function _planCancelStub(){
+  if(typeof showToast==='function')showToast('Cancelamento ainda não disponível','warn');
+}
+
 /* ── REPORT BUG / SUGESTÃO ── */
 const REPORT_ENDPOINT='https://formspree.io/f/xeebjybb';
 let _reportType='bug';
@@ -8738,10 +9137,11 @@ const SECTION_LABELS={dashboard:'Dashboard',habitos:'Hábitos',tarefas:'Tarefas'
 function applyPrefs(){
   if(!S.prefs)return;
   const all=['dashboard','habitos','tarefas','financas','treino','estudos','planos'];
-  const active=all.filter(t=>S.prefs.sections[t]!==false);
-  if(!active.includes('dashboard'))active.unshift('dashboard');
+  const active=all.filter(t=>t==='dashboard'||S.prefs.sections[t]!==false);
   TAB_ORDER.length=0;active.forEach(t=>TAB_ORDER.push(t));
-  if(typeof curTab!=='undefined'&&!TAB_ORDER.includes(curTab))setTab('dashboard');
+  // rebuild nav pill com abas ativas
+  _navPillRebuild();
+  if(typeof curTab!=='undefined'&&!TAB_ORDER.includes(curTab))setTab(TAB_ORDER[0]);
 }
 
 function toggleSection(id,on){
@@ -8750,6 +9150,47 @@ function toggleSection(id,on){
   S.prefs.sections[id]=on;
   save();
   applyPrefs();
+  _renderSectionsSheet();
+}
+
+/* ── SECTIONS SHEET ── */
+const _SECTIONS_ALL=[
+  {id:'habitos',   label:'Hábitos'},
+  {id:'tarefas',   label:'Tarefas'},
+  {id:'financas',  label:'Finanças'},
+  {id:'treino',    label:'Treino'},
+  {id:'estudos',   label:'Estudos'},
+  {id:'planos',    label:'Planos'},
+];
+
+function _renderSectionsSheet(){
+  const list=document.getElementById('sections-toggle-list');
+  if(!list)return;
+  const prefs=(S.prefs&&S.prefs.sections)||{};
+  // conta quantas estão ativas
+  const activeCount=_SECTIONS_ALL.filter(s=>prefs[s.id]!==false).length;
+  list.innerHTML=_SECTIONS_ALL.map(s=>{
+    const isOn=prefs[s.id]!==false;
+    // não permite desativar a última seção ativa
+    const isLast=activeCount===1&&isOn;
+    return `<div class="sec-toggle-row">
+      <span class="sec-toggle-lbl${isOn?'':' disabled'}">${s.label}</span>
+      <button class="sec-tog${isOn?' on':''}" onclick="_secToggleTap('${s.id}',${isOn},${isLast})" aria-label="toggle ${s.label}"></button>
+    </div>`;
+  }).join('');
+}
+
+function _secToggleTap(id,currentOn,isLast){
+  if(isLast){showToast('Deixe ao menos uma seção ativa','warn');return;}
+  toggleSection(id,!currentOn);
+}
+
+function openSectionsSheet(){
+  _renderSectionsSheet();
+  document.getElementById('sections-sheet').classList.add('open');
+}
+function closeSectionsSheet(){
+  document.getElementById('sections-sheet').classList.remove('open');
 }
 
 
@@ -9130,18 +9571,40 @@ function _setFinPeriod(p){
       if(!h.done)h.done={};
       const target=h.style==='streak'?(h.streakTarget||1):1;
       const done=(h.done[today]||0)>=target;
-      if(done){ delete h.done[today]; }
-      else { h.done[today]=target; const xp=_xpHabit(h.streak||0); if(typeof addXP==='function')addXP(xp); }
+      if(done){
+        delete h.done[today];
+        if(h.xpLog&&h.xpLog[today]){ if(typeof addXP==='function')addXP(-h.xpLog[today]); delete h.xpLog[today]; }
+      } else {
+        h.done[today]=target;
+        const xp=_xpHabit(h.streak||0);
+        if(!h.xpLog)h.xpLog={}; h.xpLog[today]=xp;
+        if(typeof addXP==='function')addXP(xp);
+      }
       if(typeof _calcStreak==='function') h.streak=_calcStreak(h);
     } else {
       const t=(S.tasks||[]).find(x=>String(x.id)===String(refId)); if(!t) return;
-      if(t.repeat&&t.repeat!=='once'){
+      const recurring=t.repeat&&t.repeat!=='once';
+      const xpKey=recurring?today:'_once';
+      if(recurring){
         if(!t.doneByDate)t.doneByDate={};
-        if(t.doneByDate[today]){delete t.doneByDate[today];}
-        else{t.doneByDate[today]=true; const xp=_xpTask(t.priority||'normal'); if(typeof addXP==='function')addXP(xp);}
+        if(t.doneByDate[today]){
+          delete t.doneByDate[today];
+          if(t.xpLog&&t.xpLog[xpKey]){ if(typeof addXP==='function')addXP(-t.xpLog[xpKey]); delete t.xpLog[xpKey]; }
+        } else {
+          t.doneByDate[today]=true;
+          const xp=_xpTask(t.priority||'normal');
+          if(!t.xpLog)t.xpLog={}; t.xpLog[xpKey]=xp;
+          if(typeof addXP==='function')addXP(xp);
+        }
       } else {
         t.done=!t.done; t.doneDate=t.done?today:null;
-        if(t.done){const xp=_xpTask(t.priority||'normal'); if(typeof addXP==='function')addXP(xp);}
+        if(t.done){
+          const xp=_xpTask(t.priority||'normal');
+          if(!t.xpLog)t.xpLog={}; t.xpLog[xpKey]=xp;
+          if(typeof addXP==='function')addXP(xp);
+        } else if(t.xpLog&&t.xpLog[xpKey]){
+          if(typeof addXP==='function')addXP(-t.xpLog[xpKey]); delete t.xpLog[xpKey];
+        }
       }
     }
     if(typeof save==='function')save();
@@ -9629,6 +10092,18 @@ function _setFinPeriod(p){
 
   function planosEnter(){
     const sec=document.getElementById('sec-planos');
+    // pré-aquece a camada do backdrop-filter uma única vez (corrige desfoque ausente no 1º uso)
+    const _pw=document.getElementById('planos-canvas-wrap');
+    if(_pw && !window._navBlurPrimed){
+      window._navBlurPrimed=true;
+      requestAnimationFrame(()=>{
+        _pw.classList.add('nav-blur-prime');
+        void _pw.offsetHeight;
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          _pw.classList.remove('nav-blur-prime');
+        }));
+      });
+    }
     const premium=(typeof isAdmin!=='undefined'&&isAdmin)||(typeof isSubscribed!=='undefined'&&isSubscribed);
     if(sec)sec.classList.toggle('locked',!premium);
     if(!premium){_stopLoop();return;} // bloqueado: não inicializa o canvas
