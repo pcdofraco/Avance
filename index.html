@@ -1666,10 +1666,80 @@ html.light-theme .chk-s{
 }
 #btn-profile:active{color:rgba(var(--ink),0.75);}
 #btn-notif:active{color:rgba(var(--ink),0.75)!important;}
-/* placeholder no header para reservar espaço do sininho */
+/* placeholder no header para reservar espaço do sininho + botão instalar */
 #notif-placeholder{
-  width:36px;height:36px;
+  display:flex;align-items:center;gap:8px;
   flex-shrink:0;
+}
+/* ── INSTALL BUTTON ── */
+#install-btn-wrap{
+  position:fixed;
+  top:calc(var(--st) + clamp(14px,3.5vw,24px));
+  right:calc(clamp(16px,5vw,48px) + 44px); /* à esquerda do sininho */
+  height:36px;
+  display:flex;align-items:center;
+  z-index:600;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.25s;
+}
+#install-btn-wrap.visible{opacity:1;pointer-events:all;}
+#install-btn-wrap.visible:not(.dash-visible){opacity:0;pointer-events:none;}
+#install-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:0 12px;height:32px;
+  border-radius:16px;border:none;cursor:pointer;
+  background:rgba(var(--ink),0.08);
+  color:rgba(var(--ink),0.6);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  transition:background 0.18s,color 0.18s;
+  white-space:nowrap;
+}
+#install-btn:active{background:rgba(var(--ink),0.15);}
+#install-btn svg{flex-shrink:0;opacity:0.5;}
+
+/* sheet de instrução iOS */
+#install-ios-sheet{
+  position:fixed;inset:0;z-index:750;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+}
+#install-ios-sheet.open{pointer-events:all;opacity:1;}
+#install-ios-bg{position:absolute;inset:0;background:rgba(var(--paper),0.5);}
+#install-ios-inner{
+  position:absolute;bottom:0;
+  left:50%;transform:translateX(-50%) translateY(40px);
+  width:100%;max-width:480px;
+  background:rgba(var(--surface),0.98);
+  border-top:1px solid rgba(var(--ink),0.06);
+  border-radius:24px 24px 0 0;
+  padding:24px 28px calc(36px + var(--sb));
+  box-sizing:border-box;
+  transition:transform 0.28s cubic-bezier(0.34,1.1,0.64,1);
+}
+#install-ios-sheet.open #install-ios-inner{transform:translateX(-50%) translateY(0);}
+#install-ios-title{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(var(--ink),0.35);margin-bottom:20px;
+}
+.install-step{
+  display:flex;align-items:flex-start;gap:14px;
+  margin-bottom:18px;
+}
+.install-step-num{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:rgba(var(--accent),0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;color:rgba(var(--accent),1);
+}
+.install-step-text{
+  font-family:var(--sans);font-size:13px;line-height:1.55;
+  color:rgba(var(--ink),0.55);
+}
+.install-step-text b{color:rgba(var(--ink),0.8);font-weight:600;}
+#install-ios-close{
+  margin-top:6px;width:100%;padding:12px;border-radius:12px;border:none;cursor:pointer;
+  background:rgba(var(--ink),0.06);
+  font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(var(--ink),0.4);
 }
 /* bolinha fixa — não compete com layout */
 #notif-wrap{
@@ -3507,8 +3577,11 @@ html.light-theme .chk-s{
       <div class="h-app-name">AVANCE</div>
       <div class="h-app-sub">seu sistema de evolução</div>
     </div>
-    <!-- placeholder reserva espaço do sininho no header -->
-    <div id="notif-placeholder"></div>
+    <!-- placeholder reserva espaço (instalar + sininho) no header -->
+    <div id="notif-placeholder">
+      <div style="width:80px;height:32px;"></div><!-- espaço botão instalar -->
+      <div style="width:36px;height:36px;"></div><!-- espaço sininho -->
+    </div>
   </div>
 
   <!-- PROFILE SHEET -->
@@ -4308,6 +4381,9 @@ function setTab(name,dir){
   const nw=document.getElementById('notif-wrap');
   if(nw){isDash?nw.classList.add('visible'):nw.classList.remove('visible');}
   if(!isDash)closeNotifPanel();
+  // botão instalar: só na dashboard (se disponível)
+  const ibw=document.getElementById('install-btn-wrap');
+  if(ibw){isDash?ibw.classList.add('dash-visible'):ibw.classList.remove('dash-visible');}
   // nome de seção: só gerenciado pela pill drag (não aqui)
   document.querySelectorAll('.section').forEach(s=>{s.classList.remove('active','anim-up','anim-left','anim-right');});
   const sec=document.getElementById('sec-'+name);
@@ -8509,6 +8585,45 @@ function _estSave(){
 
 
 
+/* ── INSTALL PWA ── */
+let _installPrompt=null;
+function _initInstallBtn(){
+  const wrap=document.getElementById('install-btn-wrap');
+  if(!wrap)return;
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+  // se já está instalado, não mostra
+  if(isStandalone)return;
+  // mostra sempre (funciona como guia em qualquer plataforma)
+  wrap.classList.add('visible');
+  // Android/Chrome/Edge: captura prompt nativo
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    _installPrompt=e;
+  });
+  // após instalação, esconde
+  window.addEventListener('appinstalled',()=>{
+    wrap.classList.remove('visible');
+    _installPrompt=null;
+  });
+}
+function triggerInstall(){
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(_installPrompt){
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(r=>{
+      if(r.outcome==='accepted'){
+        document.getElementById('install-btn-wrap')?.classList.remove('visible');
+      }
+      _installPrompt=null;
+    });
+  }else if(isIos){
+    document.getElementById('install-ios-sheet')?.classList.add('open');
+  }
+}
+function closeInstallIos(){
+  document.getElementById('install-ios-sheet')?.classList.remove('open');
+}
+
 function toggleNotifPanel(e){
   if(e)e.stopPropagation();
   const wrap=document.getElementById('notif-wrap');
@@ -8624,6 +8739,7 @@ Object.assign(window,{
   _trAddExercise, _trDelExercise, _trDeleteFicha, _trAutoSave,
   _toggleHabitStats, _flamesvg, _renderHabBottomChart, _calcStreak,
   openSectionsSheet,closeSectionsSheet,_renderSectionsSheet,_secToggleTap,
+  triggerInstall,closeInstallIos,
   _navPillInit,_navPillShow,_navPillHide,_navPillUpdate,_navPillRebuild,_qaToggle,_qaTimer,_qaNotes,_estTimerClose,_estNotesClose,_estTimerToggle,_estTimerReset,_musicToggle,_musicNext,_musicPrev,_estTimerEditSub,_estTimerSubBlur,_estGoalSelect,_estGoalClear,_estGoalConfirm,_estGoalInput,_estPickerOpen,_estPickerClose,_estPickerConfirm,_estPickerClear,
   _estNoteNew,_estNoteBack,_estNoteDone,_estNoteOpen,_estNoteInput,_estNoteKeydown,_estNotesDel,
   renderEstudos,_estToggleAdd,_estOpenItem,_estCloseSheet,_estSave,_estToggleDone,_estDel,
@@ -8743,6 +8859,9 @@ function bootApp(){
       // sininho: visível na dashboard (tab inicial)
       const _nwBoot=document.getElementById('notif-wrap');
       if(_nwBoot)_nwBoot.classList.add('visible');
+      // botão instalar PWA
+      _initInstallBtn();
+      document.getElementById('install-btn-wrap')?.classList.add('dash-visible');
       // monitorar conexão
       function _updateOfflineBanner(){
         const b=document.getElementById('offline-banner');
@@ -10274,6 +10393,36 @@ function _setFinPeriod(p){
     </div>
   </div>
 
+
+  <!-- botão instalar PWA -->
+  <div id="install-btn-wrap">
+    <button id="install-btn" onclick="triggerInstall()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      instalar app
+    </button>
+  </div>
+
+  <!-- instrução instalação iOS -->
+  <div id="install-ios-sheet">
+    <div id="install-ios-bg" onclick="closeInstallIos()"></div>
+    <div id="install-ios-inner">
+      <div id="settings-handle"></div>
+      <div id="install-ios-title">adicionar à tela inicial</div>
+      <div class="install-step">
+        <div class="install-step-num">1</div>
+        <div class="install-step-text">toque no ícone <b>compartilhar</b> na barra inferior do Safari</div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">2</div>
+        <div class="install-step-text">role para baixo e toque em <b>"Adicionar à Tela de Início"</b></div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">3</div>
+        <div class="install-step-text">toque em <b>Adicionar</b> no canto superior direito</div>
+      </div>
+      <button id="install-ios-close" onclick="closeInstallIos()">entendi</button>
+    </div>
+  </div>
 
   <!-- sininho fixo — fora do fluxo do layout -->
   <div id="notif-wrap" onclick="toggleNotifPanel(event)">
