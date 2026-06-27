@@ -9500,7 +9500,14 @@ async function fsLoad(uid){
     const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('fsLoad timeout')),10000));
     const snap=await Promise.race([getDoc(fsDoc(db,'users',uid)),timeout]);
     if(snap.exists()){
-      S=Object.assign(_emptyState(),snap.data());
+      // filtrar campos não permitidos pelas regras do Firestore
+      const _ALLOWED=['habits','tasks','transactions','investments','finGoals','planos',
+        'xp','streak','available','savings','lastDate','history','userName','avatar',
+        'avatarImg','estudos','treino','termsAccepted','prefs'];
+      const _raw=snap.data();
+      const _clean={};
+      _ALLOWED.forEach(k=>{ if(k in _raw) _clean[k]=_raw[k]; });
+      S=Object.assign(_emptyState(),_clean);
     }
     // conta nova sem doc: mantém estado limpo (criado no primeiro save)
     load();
