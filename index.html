@@ -8532,7 +8532,7 @@ function openModal(type,editId){
       ${!isIn?`<input type="hidden" id="m-cat" value="">`:''}
       <input type="hidden" id="m-fin-date" value="${new Date().toISOString().split('T')[0]}">
       <span class="m-save-hint">enter ou toque fora para salvar</span>`;
-    document.getElementById('m-fin-save-btn').onclick=function(){saveFinance(this.dataset.t);};
+    // m-fin-save-btn não existe no modal genérico — salvar é feito via overlayClose/_modalSaveAndClose
     // update date chip label live
     const finDateEl=document.getElementById('m-fin-date');
     if(finDateEl){
@@ -8617,6 +8617,8 @@ function _modalSaveAndClose(){
     'task':       ()=>saveTask(),
     'in':         ()=>saveFinance('in'),
     'out':        ()=>saveFinance('out'),
+    'fin-in':     ()=>saveFinance('in'),
+    'fin-out':    ()=>saveFinance('out'),
     'estMateria': ()=>saveEstMat(),
     'estAtiv':    ()=>saveEstAtiv(),
   };
