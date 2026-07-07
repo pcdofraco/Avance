@@ -1813,6 +1813,21 @@ html.light-theme .modal{
     0 0 0 0.5px rgba(0,0,0,0.05) inset,
     0 1px 0 rgba(255,255,255,0.9) inset;
 }
+/* ── caixas de criação em modo vidro (quando "caixas de vidro" está ativado) ── */
+html:not(.glass-off) .modal,
+html:not(.glass-off) #tr-sheet,
+html:not(.glass-off) #cardio-sheet{
+  background:linear-gradient(180deg,rgba(var(--surface),0.72) 0%,rgba(var(--surface),0.62) 100%);
+  backdrop-filter:blur(28px) saturate(1.4);
+  -webkit-backdrop-filter:blur(28px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.09);
+}
+html.light-theme:not(.glass-off) .modal,
+html.light-theme:not(.glass-off) #tr-sheet,
+html.light-theme:not(.glass-off) #cardio-sheet{
+  background:linear-gradient(180deg,rgba(255,255,255,0.72) 0%,rgba(255,255,255,0.6) 100%);
+  border:1px solid rgba(13,13,13,0.08);
+}
 @keyframes modalIn{
   from{opacity:0;transform:scale(0.94) translateY(8px);}
   to{opacity:1;transform:scale(1) translateY(0);}
@@ -3036,79 +3051,50 @@ html.light-theme .prem-gold-icon{
 }
 
 /* ── HELP BUTTON (?) ── */
-#help-btn{
-  position:fixed;
-  top:calc(var(--st) + 14px);
-  right:58px;
-  width:28px;height:28px;
-  border-radius:50%;
-  border:1.5px solid rgba(var(--ink),0.15);
-  background:rgba(var(--surface),0.85);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  color:rgba(var(--ink),0.45);
-  font-size:13px;
-  font-family:var(--sans);
-  font-weight:600;
-  line-height:1;
-  cursor:pointer;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:490;
-  transition:opacity 0.2s,transform 0.15s;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;
+/* ── HELP SHEET (ajuda consolidada, abre via configurações) ── */
+#help-sheet-overlay{
+  display:none;position:fixed;inset:0;z-index:920;
 }
-#help-btn:active{transform:scale(0.88);}
-#help-btn.visible{display:flex;}
-
-/* ── HELP MODAL ── */
-#help-overlay{
-  display:none;position:fixed;inset:0;z-index:820;
-  background:rgba(0,0,0,0.45);
-  align-items:flex-end;
-  justify-content:center;
+#help-sheet-overlay.open{display:block;}
+#help-sheet-bg{
+  position:absolute;inset:0;background:rgba(0,0,0,0.45);
+  opacity:0;transition:opacity 0.3s;
 }
-#help-overlay.open{display:flex;}
-#help-sheet{
-  width:100%;max-width:480px;
+#help-sheet-overlay.open #help-sheet-bg{opacity:1;}
+#help-inner{
+  position:absolute;left:0;right:0;bottom:0;
+  width:100%;max-width:480px;margin:0 auto;
   background:var(--bg);
   border-radius:20px 20px 0 0;
-  padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px));
+  padding:14px 24px calc(24px + env(safe-area-inset-bottom,0px));
   box-sizing:border-box;
   transform:translateY(100%);
-  transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
-  max-height:80vh;
-  overflow-y:auto;
-  scrollbar-width:none;
+  transition:transform 0.32s cubic-bezier(0.32,0.72,0,1);
+  max-height:82vh;overflow-y:auto;scrollbar-width:none;
   box-shadow:
     0 -2px 6px rgba(0,0,0,0.04),
     0 -8px 24px rgba(0,0,0,0.08),
-    0 -24px 60px rgba(0,0,0,0.1),
-    0 0 0 0.5px rgba(var(--ink),0.04) inset,
-    0 1px 0 rgba(255,255,255,0.08) inset;
+    0 -24px 60px rgba(0,0,0,0.1);
 }
-#help-overlay.open #help-sheet{transform:translateY(0);}
-#help-sheet-hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:20px;
-}
-#help-sheet-title{
+#help-inner::-webkit-scrollbar{display:none;}
+#help-sheet-overlay.open #help-inner{transform:translateY(0);}
+#help-sheet-title-main{
   font-family:var(--mono);font-size:11px;letter-spacing:0.18em;
   text-transform:uppercase;color:var(--t2);
+  text-align:center;margin-bottom:20px;
 }
-#help-sheet-close{
-  width:28px;height:28px;border-radius:50%;border:none;
-  background:rgba(var(--ink),0.07);color:rgba(var(--ink),0.5);
-  font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  -webkit-tap-highlight-color:transparent;
+.help-block{margin-bottom:22px;}
+.help-block:last-child{margin-bottom:4px;}
+.help-block-title{
+  font-size:15px;font-weight:700;color:var(--t1);
+  margin-bottom:8px;padding-bottom:7px;
+  border-bottom:1px solid rgba(var(--ink),0.06);
 }
-#help-sheet-body{color:var(--t2);font-size:14px;line-height:1.65;}
+#help-sheet-body{color:var(--t2);font-size:13.5px;line-height:1.6;}
 #help-sheet-body strong{color:var(--t1);font-weight:600;}
-#help-sheet-body ul{margin:10px 0 0 0;padding-left:18px;}
-#help-sheet-body li{margin-bottom:6px;}
-#help-sheet-body p{margin:0 0 10px;}
+#help-sheet-body ul{margin:8px 0 0 0;padding-left:18px;}
+#help-sheet-body li{margin-bottom:5px;}
+#help-sheet-body p{margin:0 0 8px;}
 
 /* ── TREINO LAYOUT COM GRÁFICO ── */
 #sec-treino.active{display:flex!important;flex-direction:column;}
@@ -5458,10 +5444,25 @@ html.glass-off .tr-stat-section::before,html.glass-off .tr-stat-section::after{d
         <span class="settings-row-lbl">suporte</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+      <div class="settings-row settings-row-report" onclick="helpOpen()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="settings-icon" style="opacity:0.55;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span class="settings-row-lbl">ajuda</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
       <div class="settings-row">
         <span class="settings-row-lbl">versão</span>
         <span class="settings-row-val">1.0</span>
       </div>
+    </div>
+  </div>
+
+  <!-- HELP SHEET (ajuda consolidada de todas as seções) -->
+  <div id="help-sheet-overlay">
+    <div id="help-sheet-bg" onclick="helpClose()"></div>
+    <div id="help-inner">
+      <div id="settings-handle"></div>
+      <div id="help-sheet-title-main">ajuda</div>
+      <div id="help-sheet-body"></div>
     </div>
   </div>
 
@@ -6180,18 +6181,6 @@ html.glass-off .tr-stat-section::before,html.glass-off .tr-stat-section::after{d
   <div id="nav-pill"></div>
 </div>
 
-<!-- HELP: botão "?" que explica a seção atual (menos dashboard) -->
-<button id="help-btn" onclick="helpOpen()" aria-label="como funciona esta seção">?</button>
-<div id="help-overlay" onclick="helpOutside(event)">
-  <div id="help-sheet">
-    <div id="help-sheet-hdr">
-      <div id="help-sheet-title">como funciona</div>
-      <button id="help-sheet-close" onclick="helpClose()">×</button>
-    </div>
-    <div id="help-sheet-body"></div>
-  </div>
-</div>
-
 
 <!-- TREINO QUICK ACTIONS BUBBLE -->
 <div id="tr-qa-bubble">
@@ -6580,7 +6569,6 @@ function setTab(name,dir){
   }
   else if(name==='dashboard'){renderDashboard();}
   else{if(window._spiralStop)window._spiralStop();}
-  _helpUpdateVisibility();
   updateFab();
 }
 
@@ -6789,6 +6777,8 @@ function _drumSnap(rawOffset){
   let startY=0,lastY=0,vel=0,lastT=0;
 
   wrap.addEventListener('touchstart',e=>{
+    // se o toque começou numa bolinha de dia, não inicia arraste — deixa o clique passar
+    if(e.target.closest('.drum-day-dot')) return;
     e.preventDefault();e.stopPropagation();
     startY=lastY=e.touches[0].clientY;
     lastT=Date.now();vel=0;
@@ -6826,6 +6816,8 @@ function _drumSnap(rawOffset){
 
   // Mouse
   wrap.addEventListener('mousedown',e=>{
+    // se clicou numa bolinha de dia, não inicia arraste — deixa o clique passar
+    if(e.target.closest('.drum-day-dot')) return;
     startY=lastY=e.clientY;lastT=Date.now();vel=0;
     _drum.dragging=true;
     const track=document.getElementById('m-drum-track');
@@ -7272,33 +7264,31 @@ const _HELP_CONTENT = {
     </ul>`,
 
   financas: `
-    <p><strong>Finanças</strong> registra entradas, saídas e acompanha seu saldo.</p>
+    <p><strong>Finanças</strong> registra entradas, saídas e contas a pagar.</p>
     <ul>
       <li>Toque no <strong>+</strong> flutuante para adicionar uma transação.</li>
-      <li>Escolha o período (semana / mês / ano) para filtrar os dados exibidos.</li>
-      <li>Os cards mostram saldo disponível, total de entradas e saídas.</li>
+      <li>Toque no botão de <strong>moeda</strong> para alternar entre real, dólar, euro, libra e bitcoin — cada moeda tem seu próprio saldo.</li>
+      <li>Escolha o período (semana / mês / ano / tudo) para filtrar os dados.</li>
+      <li>Na aba <strong>contas</strong>, cadastre contas a pagar e marque como pagas — o valor sai do saldo automaticamente.</li>
       <li>Deslize uma transação para excluir.</li>
-      <li>Acesse <strong>metas</strong> para definir objetivos de poupança.</li>
     </ul>`,
 
   treino: `
-    <p><strong>Treino</strong> registra seus exercícios e cardio por dia da semana.</p>
+    <p><strong>Treino</strong> organiza fichas, cardio e estatísticas por dia da semana.</p>
     <ul>
       <li>Selecione o dia da semana na barra superior.</li>
-      <li>Toque no <strong>+</strong> para adicionar um exercício ou sessão de cardio.</li>
-      <li>Marque séries como concluídas durante o treino.</li>
-      <li>O gráfico na base mostra seus treinos concluídos nos últimos dias.</li>
-      <li>O donut à direita indica a frequência de cardio na semana.</li>
+      <li>Crie fichas com exercícios e séries. Ao treinar, <strong>segure o botão</strong> no final para concluir.</li>
+      <li>Registre sessões de <strong>cardio</strong> com duração e distância.</li>
+      <li>Veja sua evolução em <strong>estatísticas</strong>, com o gráfico de treinos e o membro mais trabalhado.</li>
     </ul>`,
 
   estudos: `
-    <p><strong>Estudos</strong> cronometra sessões e organiza anotações por matéria.</p>
+    <p><strong>Estudos</strong> organiza matérias, atividades, anotações e sessões cronometradas.</p>
     <ul>
-      <li>Toque em <strong>+ adicionar</strong> para criar uma matéria de estudo.</li>
-      <li>Dentro da matéria, inicie o <strong>timer</strong> para cronometrar a sessão.</li>
-      <li>Use a aba <strong>anotações</strong> para registrar resumos e ideias.</li>
-      <li>O mapa de calor mostra sua dedicação diária no último período.</li>
-      <li>Defina uma meta diária de minutos para manter o ritmo.</li>
+      <li>Toque em <strong>+ adicionar</strong> para criar uma matéria ou atividade, em cards coloridos.</li>
+      <li>Marque atividades como <strong>feito</strong> conforme avança.</li>
+      <li>Use o <strong>cronômetro</strong> para registrar o tempo de estudo.</li>
+      <li>Guarde resumos e ideias nas <strong>anotações</strong> por matéria.</li>
     </ul>`,
 
   planos: `
@@ -7312,25 +7302,26 @@ const _HELP_CONTENT = {
     </ul>`,
 };
 
+const _HELP_TITLES = {
+  habitos:'Hábitos', tarefas:'Tarefas', financas:'Finanças',
+  treino:'Treino', estudos:'Estudos', planos:'Plano Mental'
+};
 function helpOpen() {
   const body = document.getElementById('help-sheet-body');
   if (!body) return;
-  const txt = _HELP_CONTENT[curTab] || '';
-  if (!txt) return;
-  body.innerHTML = txt;
-  document.getElementById('help-overlay')?.classList.add('open');
+  // monta a ajuda de todas as seções em um só lugar
+  const order = ['habitos','tarefas','financas','treino','estudos','planos'];
+  body.innerHTML = order.map(k=>{
+    const txt = _HELP_CONTENT[k];
+    if(!txt) return '';
+    return `<div class="help-block"><div class="help-block-title">${_HELP_TITLES[k]||k}</div>${txt}</div>`;
+  }).join('');
+  document.getElementById('help-sheet-overlay')?.classList.add('open');
+  // fecha o menu de configurações por baixo
+  document.getElementById('settings-sheet')?.classList.remove('open');
 }
 function helpClose() {
-  document.getElementById('help-overlay')?.classList.remove('open');
-}
-function helpOutside(e) {
-  if (e.target === document.getElementById('help-overlay')) helpClose();
-}
-function _helpUpdateVisibility() {
-  const btn = document.getElementById('help-btn');
-  if (!btn) return;
-  const show = curTab !== 'dashboard' && !!_HELP_CONTENT[curTab];
-  show ? btn.classList.add('visible') : btn.classList.remove('visible');
+  document.getElementById('help-sheet-overlay')?.classList.remove('open');
 }
 
 
@@ -14673,7 +14664,7 @@ Object.assign(window,{
   _estNoteNew,_estNoteBack,_estNoteDone,_estNoteOpen,_estNoteInput,_estNoteKeydown,_estNotesDel,
   renderEstudos,_estToggleAdd,_estOpenItem,_estCloseSheet,_estSave,_estToggleDone,_estDel,_estToggleAtiv,_estDelAtiv,_estDelMateria,closeEstMat,closeEstAtiv,
   initNotifications:()=>{},scheduleTaskNotifications:()=>{},
-  helpOpen,helpClose,helpOutside,daysOverlayOpen,daysOverlayClose,daysOverlayConfirm,daysOverlayBackdrop,
+  helpOpen,helpClose,daysOverlayOpen,daysOverlayClose,daysOverlayConfirm,daysOverlayBackdrop,
   drumPickerOpen,drumPickerClose,drumPickerBackdropClick,_drumDayToggle,tagFloatOpen,tagFloatClose,tagFloatBackdropClick,dateDrumOpen,dateDrumClose,dateDrumConfirm,dateDrumBackdropClick,openInstall,closeInstall,installOutside,selectInstallPlat,openEstMat,saveEstMat,_emPickIcon,_emPickColor,_emOpenIconDrum,_emOpenColorDrum,_emOpenGoalDrum,openEstAtiv,saveEstAtiv,_eaPickMat,_eaDateChange,_eaPickPrio,_eaPickStatus,_eaPickRepeat,_eaOpenMatDrum,_eaOpenDateDrum,_eaOpenPrioDrum,_eaOpenStatusDrum,_eaOpenTempoDrum,_eaOpenRepeatDrum,
 
 });
