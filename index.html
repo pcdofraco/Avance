@@ -8991,6 +8991,7 @@ function renderFinance(animate){
   _renderTransList();
   if(_finView==='charts')_renderFinChart();
   if(_finView==='contas')_renderContas();
+  _renderPinnedGoalCard(); // atualiza a caixa principal (saldo / meta / contas a pagar)
 }
 /* ── VISTAS DE FINANÇAS (transações / gráficos / contas) ── */
 let _finView='trans';
@@ -9281,7 +9282,7 @@ function saveConta(){
     if(mEditId){
       const c=S.contas.find(x=>x.id===mEditId);
       if(c){ c.name=name; c.cur=cur; c.modo=modo; }
-      save();closeModal();_renderContas();return;
+      save();closeModal();_renderContas();_renderPinnedGoalCard();return;
     }
     if(!_isPremiumUser() && S.contas.length>=5){ closeModal(); _premUpgradeOpen(); return; }
     const parcelas=[];
@@ -9293,7 +9294,7 @@ function saveConta(){
     }
     const nova={ id:Date.now(), name, amount, due, modo, cur, tipo:'fatura', parcelas };
     S.contas.push(nova);
-    save();closeModal();_renderContas();
+    save();closeModal();_renderContas();_renderPinnedGoalCard();
     return;
   }
 
@@ -9332,7 +9333,7 @@ function saveConta(){
       S.contas.splice(0, S.contas.length-_CONTA_CAP);
     }
   }
-  save();closeModal();_renderContas();
+  save();closeModal();_renderContas();_renderPinnedGoalCard();
 }
 
 /* paga/despaga uma parcela específica de uma fatura */
@@ -9361,7 +9362,7 @@ function _parcelaToggle(contaId, parcelaN){
     });
     p._txId=txId; p.paga=true;
   }
-  save();_renderContas();
+  save();_renderContas();_renderPinnedGoalCard();
   if(typeof renderFinance==='function')renderFinance(true);
 }
 function deleteConta(id){
@@ -9374,7 +9375,7 @@ function deleteConta(id){
     }else if(c._txId){ _contaReverterSaida(c); }
   }
   S.contas=S.contas.filter(x=>x.id!==id);
-  save();_renderContas();
+  save();_renderContas();_renderPinnedGoalCard();
   if(typeof renderFinance==='function')renderFinance(true);
 }
 /* gera uma saída automática vinculada à conta paga */
@@ -9413,7 +9414,7 @@ function _toggleContaStatus(id){
     _contaGerarSaida(c);
     c.status='paga';
   }
-  save();_renderContas();
+  save();_renderContas();_renderPinnedGoalCard();
   if(typeof renderFinance==='function')renderFinance(true);
 }
 function _renderContas(){
