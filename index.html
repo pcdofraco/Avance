@@ -13456,7 +13456,8 @@ async function fsLoad(uid){
     const snap=await Promise.race([getDoc(fsDoc(db,'users',uid)),timeout]);
     if(snap.exists()){
       // filtrar campos não permitidos pelas regras do Firestore
-      const _ALLOWED=['habits','tasks','transactions','investments','finGoals','planos',
+      const _ALLOWED=['habits','tasks','transactions','investments','finGoals','pinnedGoal',
+        'contas','finCurrency','planos',
         'xp','streak','available','savings','lastDate','history','userName','avatar',
         'avatarImg','estudos','treino','termsAccepted','prefs'];
       const _raw=snap.data();
